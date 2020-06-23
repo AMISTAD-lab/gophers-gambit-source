@@ -1,3 +1,3 @@
 # AMISTAD-exp3
 
-All of the code for our very very cool project
+All the code for the third part of our very very cool project
