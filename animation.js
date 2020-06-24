@@ -11,7 +11,6 @@ var gridContainer = document.getElementById("gridContainer");
 var gopher = document.createElement("img");
 gopher.src = "testImages/adversaryidle/adversaryidle1.PNG";
 gopher.id = "gopher";
-//var gridElements = []; // array of div elements
 
 // other vars
 var fps = 1; // one frame per second
@@ -20,9 +19,7 @@ var totalFrames = 100; // change this later! The total NUMBER of frame
 
 // inputs that will be set using getInput()
 var terrainArray = []
-var lastGopherCell = [0, 0]; // row and column of last gopher cell.
 
-//init();
 // call init once document has loaded.
 $(document).ready(function () {
 	init();
@@ -85,7 +82,6 @@ function animate(){
 		return;
 	}
 
-	console.log("inside animate, frameNum is " + frameNum + " totalFrames is " + totalFrames);
 	draw();
 
 
@@ -94,23 +90,19 @@ function animate(){
 
 /** draws one frame */
 function draw(){
-	console.log("inside draw");
 	// change position later, this one is for testing.
 	redrawGopher([frameNum % terrainArray.length +1, frameNum % terrainArray[0].length + 1]);
 }
 
 /** moves a gopher from one cell to another */
 function redrawGopher(newGopherCell){
-	// if new cell is different than the old
-	if (newGopherCell != lastGopherCell)
+	if (isValidGridPos(newGopherCell))
 	{
-		// remove gopher from previous cell if the previous cell exists
-		console.log("get nth is " + String(getNth(newGopherCell)))
-		if (isValidGridPos(lastGopherCell)){
-			$("div.gridDiv:nth-of-type(" + String(getNth(lastGopherCell)) +")").removeChild(gopher);
-		}
-		// add to new cell.
 		$("div.gridDiv:nth-of-type(" + String(getNth(newGopherCell)) +")").prepend(gopher); // prepend so gopher is on top
+
+	}
+	else{
+		console.log("ERROR: NOT A VALID GRID POSITION");
 	}
 }
 
