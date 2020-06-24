@@ -74,7 +74,7 @@ function setUpGrid()
 /** The animation. Calls draw.*/
 function animate(){
 	timer = setTimeout(function(){
-		requestAnimationFrame(draw);  
+		requestAnimationFrame(animate);  
 	}, 1000/fps);// repaint 7 times a second
 
 	// only go up to a certain number of steps
@@ -95,7 +95,8 @@ function animate(){
 /** draws one frame */
 function draw(){
 	console.log("inside draw");
-	redrawGopher([1, frameNum % 2 + 1]);
+	// change position later, this one is for testing.
+	redrawGopher([frameNum % terrainArray.length +1, frameNum % terrainArray[0].length + 1]);
 }
 
 /** moves a gopher from one cell to another */
@@ -114,8 +115,9 @@ function redrawGopher(newGopherCell){
 }
 
 function getInput(){
-	terrainArray = [["testImages/environment/environment.PNG", "testImages/environment/environment.PNG"],
-				["testImages/environment/environment.PNG", "testImages/environment/environment.PNG"]];
+	terrainArray = [["testImages/environment/environment.PNG", "testImages/environment/environment.PNG", "testImages/environment/environment.PNG"],
+				["testImages/environment/environment.PNG", "testImages/environment/environment.PNG", "testImages/environment/environment.PNG"],
+				["testImages/environment/environment.PNG", "testImages/environment/environment.PNG", "testImages/environment/environment.PNG"]];
 	/*[["testImages/environment/environment.PNG", "testImages/heroattack/heroattack1.PNG"],
 				["testImages/adversaryidle/adversaryidle1.PNG", "testImages/adversaryattack/adversaryattack1.PNG"]];*/
 	/*[["testImages/environment/environment.PNG", "testImages/environment/environment.PNG"],
@@ -139,5 +141,5 @@ function isValidGridPos(gridPos){
 
 /** calculates the number of the gridPos (in order of how they are added to the grid container */
 function getNth(gridPos){
- 	return gridPos[0] * gridPos[1] + gridPos[1]; // row times column plus column.
+ 	return (gridPos[0] - 1) * terrainArray[0].length + gridPos[1]; // row * total num columns + col
 }
