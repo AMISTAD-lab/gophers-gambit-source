@@ -1,0 +1,55 @@
+/** animation.css
+Stylesheet for grid layout!
+Created on June 23, 2020 by Cynthia Hom
+*/
+
+*{ /** By default, take up entirety of container*/
+	padding: 0;
+	margin: 0;
+	height: 100%;
+	width: 100%;
+}
+
+html, body{
+	/*height: 100%;*/
+	background-color: red;
+}
+
+#gridContainer{
+	display: grid;
+	grid-gap: 1px; /* show grid lines */
+	/*height: 100%;*/
+	/*position: absolute;*/
+	/*top: 0;*/
+	/*left: 0;*/
+	/*grid-gap: 10px;
+	grid-auto-rows: minmax(100px, auto);*/
+}
+
+
+
+
+
+
+
+
+
+
+
+
+/* make something cover the whole screen 
+img
+{
+  	background-repeat: none;
+  	width: 100%;
+  	position: absolute;
+  	top: 0;
+  	left: 0;
+}*/
+
+
+/*html, body{
+	height: 100%;
+	margin: 0;
+	padding: 0;
+}*/
