@@ -25,5 +25,12 @@ class Wire(Cell):
             if(lowerDestCell.cellType == 2 or 3 and lowerDestCell.rotationType == 2 or 3):
                 c.toggleCell(lowerDestCell.x, lowerDestCell.y, True)
     
-    ######## Cindy changed:
-    def updateWire()
+    ######## Cindy's notes (feel free to delete all comments as soon as you've read them)
+    ### the method that would update the Wire
+
+    def launchSignal(self):
+        """This method is triggered by isActive() from the gopher class"""
+        ### call the transfer current function that is above?
+        ## I would like to add an member variable called signal
+    
+    
