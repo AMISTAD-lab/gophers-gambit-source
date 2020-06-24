@@ -1,11 +1,12 @@
+from classCell import *
+from typeCell import *
+from classBoard import *
 
-functionalTraps = [] #list of handmade traps
-
-class Trap:
-    def __init__(self, length, width, functional):
-        self.length = length
-        self.width = width
+class Trap(Board):
+    def __init__(self, rowLength, colLength, functional):
+        self.func = functional
+        super().__init__(rowLength, colLength)
         if functional:
-            self.trapBoard #= choose trap randomly from functionalTraps
+            self.board = super().realTrap(rowLength, colLength)
         else:
-            self.trapBoard #= call create random trap method
+            self.board = super().randomTrap(rowLength, colLength)

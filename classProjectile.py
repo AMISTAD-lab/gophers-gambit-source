@@ -1,7 +1,18 @@
-# instead of animating something new or creating functionality for a projectile cell
-# just change the visual of the cell for each "frame" to reflect
-# a path that it is traveling.
+from classProjectile import *
 
-# for instance, maybe a cell could reflect a explosion for the 'projectile'
-# In the drawings the arrow and food cells aren't too far apart, so just displaying
-# an explosion graphic could show the projectile 'shooting' at the gopher
+class Projectile:
+
+    def __init__(self, direction, speed):
+# later once we figure out the attributes of projectile
+        self.direction = direction
+        self.speed = 40 #40 what? miles? im not sure
+
+    def launchProjectile(self, gopher, direction, Arrow):
+        """this method launches the projectile in the given direction"""
+        if gopher.inRoom(): # Can I just say if self.present: instead
+            direction = Arrow.angleType
+    
+    def hitGopher(self, gopher):
+        """determines if the gopher has been hit""" 
+
+    
