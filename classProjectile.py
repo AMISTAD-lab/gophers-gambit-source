@@ -12,7 +12,9 @@ class Projectile:
         if gopher.inRoom(): # Can I just say if self.present: instead
             direction = Arrow.angleType
     
+    ######## Cindy changed:
     def hitGopher(self, gopher):
         """determines if the gopher has been hit""" 
 
+    update Projectile():
     

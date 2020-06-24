@@ -25,4 +25,5 @@ class Wire(Cell):
             if(lowerDestCell.cellType == 2 or 3 and lowerDestCell.rotationType == 2 or 3):
                 c.toggleCell(lowerDestCell.x, lowerDestCell.y, True)
     
-        # should know when we touch the arrow?
+    ######## Cindy changed:
+    def updateWire()

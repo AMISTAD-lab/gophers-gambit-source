@@ -12,4 +12,5 @@ class Arrow(Cell):
         """this tells us if there is a signal from the arrow"""
         if
 
-    # 
+    def updateArrow():
+        """this method updates the arrow everytime that

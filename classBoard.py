@@ -16,6 +16,7 @@ class Board(metaclass = ABCMeta):
         self.board = self.emptyBoard(rowLength, colLength)
 
     def __repr__(self):
+        """string representation of Board"""
         string = ""
         for y in range(self.colLength):
             for x in range(self.rowLength):
@@ -64,7 +65,6 @@ class Board(metaclass = ABCMeta):
                 cell = self.board[newColLength-1-y][x]
                 newBoard.board[x][y] = cell
         return newBoard
-
 
     def emptyBoard(self, rowLength, colLength):
         """generates a board full of dirt for a default terrain"""
