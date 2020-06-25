@@ -1,12 +1,30 @@
 import abc
 from abc import ABC, abstractmethod, ABCMeta
 from typeCell import *
+from typeAngle import *
+from typeThick import *
+from typeRotation import *
 from classCell import *
 import numpy as np
 import math as m
 
 functionalTraps = [] #list of handmade traps
 trapPieces = [CellType.wire, CellType.arrow, CellType.floor]
+rotationOptions = {
+    CellType.wire : [RotationType.up, RotationType.left, RotationType.right, RotationType.down],
+    CellType.arrow : [RotationType.up, RotationType.left, RotationType.right, RotationType.down],
+    CellType.floor : [RotationType.na],
+}
+thickOptions = {
+    CellType.wire : [ThickType.skinny, ThickType.normal, ThickType.wide],
+    CellType.arrow : [ThickType.skinny, ThickType.normal, ThickType.wide],
+    CellType.floor : [ThickType.na],
+}
+angleOptions = {
+    CellType.wire : [AngleType.straight, AngleType.lright], #excluding rright bc they're same for wires
+    CellType.arrow : [AngleType.lacute, AngleType.racute, AngleType.lright, AngleType.rright, AngleType.lobtuse, AngleType.robtuse],
+    CellType.floor : [AngleType.na],
+}
 
 class Board(metaclass = ABCMeta):
 
@@ -63,6 +81,7 @@ class Board(metaclass = ABCMeta):
         for x in range(newRowLength):
             for y in range(newColLength):
                 cell = self.board[newColLength-1-y][x]
+                #cell.rotateCell90(), we need to change their rotation types to match!!
                 newBoard.board[x][y] = cell
         return newBoard
 
@@ -72,7 +91,7 @@ class Board(metaclass = ABCMeta):
         for x in range(rowLength):
             row = []
             for y in range(colLength):
-                row.append(Cell(x,y, CellType.dirt))
+                row.append(Cell(x,y, CellType.dirt, self))
             board.append(row)
         return board
 
@@ -99,11 +118,14 @@ class Board(metaclass = ABCMeta):
                     piece = CellType.floor
                 else:
                     piece = np.random.choice(trapPieces, size=1)[0]
-                row.append(Cell(x, y, piece))
+                    rotation = np.random.choice(rotationOptions[piece], size=1)[0]
+                    angle = np.random.choice(angleOptions[piece], size=1)[0]
+                    thick = np.random.choice(thickOptions[piece], size=1)[0]
+                row.append(Cell(x, y, piece, self, angleType=angle, rotationType=rotation, thickType=thick))
             board.append(row)
         #overwrite food and door placement
-        board[center_x][bottom_y] = Cell(center_x, bottom_y, CellType.door)
-        board[center_x][center_y] = Cell(center_x, center_y, CellType.food)
+        board[center_x][bottom_y] = Cell(center_x, bottom_y, CellType.door, self)
+        board[center_x][center_y] = Cell(center_x, center_y, CellType.food, self)
         return board
 
     

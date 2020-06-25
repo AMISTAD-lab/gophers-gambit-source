@@ -1,7 +1,11 @@
 import enum
 
 class AngleType(enum.Enum):
-    acute = 0
-    right = 1
-    obtuse = 2
-    na = 3
+    lacute = 0
+    racute = 1
+    lright = 2
+    rright = 3
+    lobtuse = 4
+    robtuse = 5
+    straight = 6
+    na = 0.5

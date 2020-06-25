@@ -4,4 +4,4 @@ class ThickType(enum.Enum):
     skinny = 0
     normal = 1
     wide = 2
-    na = 3
+    na = 0.5
