@@ -1,8 +1,8 @@
-/* 
+/**
 animation.js
 Created on June 23, 2020
 js file for the third experiment's animation
-problem: gopher not on top of other image!!
+Todo: test rigorously!
 */
 
 
@@ -12,13 +12,19 @@ var gopher = document.createElement("img");
 gopher.src = "testImages/adversaryidle/adversaryidle1.PNG";
 gopher.id = "gopher";
 
+// inputs that will be set using getInput()
+var terrainList = []
+var trapList = [] /// for testing purposes
+
 // other vars
 var fps = 1; // one frame per second
-var frameNum = 0; // frame to start at
-var totalFrames = 100; // change this later! The total NUMBER of frame
+var frameNum = 0; // frame counter
+var totalFrames = 10; // change this later! The total NUMBER of frame
 
-// inputs that will be set using getInput()
-var terrainArray = []
+var currentGridList = []; // which grid to display at the current moment
+var trapNum = 0;	// which trap/random walk animations to play
+var trapFrameNum = 0; // which step in trap animation
+
 
 // call init once document has loaded.
 $(document).ready(function () {
@@ -29,22 +35,40 @@ $(document).ready(function () {
 function init() 
 {
 	getInput(); // will be written to the file.
-	setUpGrid();
+	//updateGrid(terrainList);
+	currentGridList = terrainList; // show the terrain array first
 	animate();
+	//updateGrid(trapList);
+}
+
+/** Removes any existing grid and sets up a new one */
+function updateGrid(newGridList)
+{
+	// remove existing grid by deleleting all gridElements.
+	//var child = gridContainer.lastElementChild;
+	/*while (child){
+		gridContainer.removeChild(child);
+		child = gridContainer.lastElementChild;
+	}*/
+	console.log("inside updateGrid");
+	gridContainer.innerHTML = "";
+
+	// set up new grid
+	setUpGrid(newGridList);
 }
 
 /** populate grid with grid elements. Grid has same dimension as terrain array */
-function setUpGrid()
+function setUpGrid(gridListIn)
 {	//console.log("setting up grid");
 	// set up number of columns in grid. 
-	gridContainer.style.gridTemplateColumns = "repeat(" + String(terrainArray[0].length) + ", 1fr)";
+	gridContainer.style.gridTemplateColumns = "repeat(" + String(gridListIn[0].length) + ", 1fr)";
 
 	// set up elements: loop through terrain, adding div element
-	for (let row = 0; row < terrainArray.length; row++)
+	for (let row = 0; row < gridListIn.length; row++)
 	{
 		//var rowList = []; // append an empty list for this row.
 
-		for (let col = 0; col < terrainArray[0].length; col++)
+		for (let col = 0; col < gridListIn[0].length; col++)
 		{
 			// create div element, set its position.
 			var div = document.createElement("div");
@@ -57,7 +81,7 @@ function setUpGrid()
 			// NOTE: if setting up terrain ONCE and then just updating specific cells 
 				// (i.e where gopher is, then keep this here. Otherwise, set up images each frame.)
 			image = document.createElement("img");
-			image.src = terrainArray[row][col];
+			image.src = gridListIn[row][col];
 			image.classList.add(".terrainImage");
 			div.appendChild(image);
 
@@ -72,26 +96,74 @@ function setUpGrid()
 function animate(){
 	timer = setTimeout(function(){
 		requestAnimationFrame(animate);  
-	}, 1000/fps);// repaint 7 times a second
+	}, 1000/fps);// repaint 1 time a second
 
 	// only go up to a certain number of steps
-	if (frameNum >= totalFrames)
+	if (trapNum >= trapList.length)
 	{
-		console.log("clearing timeout");
+		console.log("ANIMATION FINISHED");
 		clearTimeout(timer);
 		return;
 	}
+	console.log("inside animate, trapNum is " + trapNum + " and trapFrameNum is " + trapFrameNum)
 
 	draw();
-
-
-	frameNum++;	// step through (1 to 10)
+	updateVars();
 }
 
 /** draws one frame */
 function draw(){
-	// change position later, this one is for testing.
-	redrawGopher([frameNum % terrainArray.length +1, frameNum % terrainArray[0].length + 1]);
+	// if it's a terrain, just show the terrain grid if its the first step, and then update gopher position
+	if (currentGridList == terrainList)
+	{
+		if (trapFrameNum == 0)
+		{
+			updateGrid(currentGridList[trapNum][trapFrameNum]);
+		}
+		redrawGopher([2, 2]);//[frameNum % currentGridList[trapNum][trapFrameNum].length + 1, frameNum % currentGridList[trapNum][trapFrameNum].length + 1]) // replace with actual gopher position later
+	}
+
+	// if it's a trap, then show the trap grid if this is the first time we are showing the trap. Otherwise,
+		// just update the active states of the cell.
+	else if (currentGridList == trapList)
+	{
+		if (trapFrameNum == 0)
+		{
+			updateGrid(currentGridList[trapNum][trapFrameNum]);
+		}
+		// regardless, update active states and draw the gopher
+		updateActiveStates(trapNum, trapFrameNum);
+		redrawGopher([2, 2]);//[frameNum % currentGridList[trapNum][trapFrameNum].length + 1, frameNum % currentGridList[trapNum][trapFrameNum].length + 1]);
+	}
+}
+
+function updateVars(){
+	trapFrameNum++;
+	// if trapFrameNum is greater than max for that trap frame, then increment trapNum, change grid type, etc.
+	if (trapFrameNum >= currentGridList[trapNum].length)
+	{
+		if (currentGridList == terrainList){
+			currentGridList = trapList;
+		}
+		else if (currentGridList == trapList){
+			currentGridList = terrainList;
+			trapNum++;
+		}
+		else{
+			console.log("ERROR: invalid currentGridList!");
+		}
+		// reset trapFrameNum
+		trapFrameNum = 0;
+	}
+	frameNum++;	// step through NOTE: might be able to just take this out? 
+}
+
+function updateActiveStates(trapNum, trapFrameNum)
+{
+	grid = currentGridList[trapNum][trapFrameNum];
+	updateGrid(grid); //for testing only!
+	// ______________loop through, and give appropriate img element the correct src.
+	console.log("updating active states!");
 }
 
 /** moves a gopher from one cell to another */
@@ -106,26 +178,24 @@ function redrawGopher(newGopherCell){
 	}
 }
 
-function getInput(){
-	terrainArray = [["testImages/environment/environment.PNG", "testImages/environment/environment.PNG", "testImages/environment/environment.PNG"],
-				["testImages/environment/environment.PNG", "testImages/environment/environment.PNG", "testImages/environment/environment.PNG"],
-				["testImages/environment/environment.PNG", "testImages/environment/environment.PNG", "testImages/environment/environment.PNG"]];
-	/*[["testImages/environment/environment.PNG", "testImages/heroattack/heroattack1.PNG"],
-				["testImages/adversaryidle/adversaryidle1.PNG", "testImages/adversaryattack/adversaryattack1.PNG"]];*/
-	/*[["testImages/environment/environment.PNG", "testImages/environment/environment.PNG"],
-				["testImages/environment/environment.PNG", "testImages/environment/environment.PNG"]];*/
-	/*[["testImages/environment/environment.PNG", "testImages/heroattack/heroattack1.PNG"],
-				["testImages/adversaryidle/adversaryidle1.PNG", "testImages/adversaryattack/adversaryattack1.PNG"]];*/
-}
 
-/** Helper methods */
+/** --------------- Helper methods ----------*/
+
+/** returns a 2d list corresponding to the currently displayed grid. */
+function getCurrentlyDisplayedGrid(){
+	if (currentGridList == terrainList){
+		return currentGridList[trapNum][trapFrameNum]; // Just for testing! Remove later!
+	}
+	return currentGridList[trapNum][trapFrameNum]; // Just for testing! remove later!
+}
 
 /** determines if the inputted list is a valid grid position. 
 inputted list: [row, col] */
 function isValidGridPos(gridPos){
+	currentlyDisplayedGrid = getCurrentlyDisplayedGrid();
 	if (gridPos[0] <= 0 || gridPos[0] <= 0){ // row/column lines start at 1
 		return false;
-	} else if (gridPos[0] > terrainArray.length || gridPos[1] > terrainArray[0].length){ // and end at length
+	} else if (gridPos[0] > currentlyDisplayedGrid.length || gridPos[1] > currentlyDisplayedGrid[0].length){ // and end at length
 		return false;
 	}
 	return true;
@@ -133,5 +203,48 @@ function isValidGridPos(gridPos){
 
 /** calculates the number of the gridPos (in order of how they are added to the grid container */
 function getNth(gridPos){
- 	return (gridPos[0] - 1) * terrainArray[0].length + gridPos[1]; // row * total num columns + col
+ 	return (gridPos[0] - 1) * currentlyDisplayedGrid[0].length + gridPos[1]; // row * total num columns + col
+}
+
+
+/** -------this method will in reality be written to the file using python---------- */
+function getInput(){
+	terrainList = [[[["testImages/environment/environment.PNG", "testImages/environment/environment.PNG", "testImages/environment/environment.PNG",  "testImages/environment/environment.PNG"],
+				["testImages/environment/environment.PNG", "testImages/environment/environment.PNG", "testImages/environment/environment.PNG",  "testImages/environment/environment.PNG"],
+				["testImages/environment/environment.PNG", "testImages/environment/environment.PNG", "testImages/environment/environment.PNG",  "testImages/environment/environment.PNG"],
+				["testImages/environment/environment.PNG", "testImages/environment/environment.PNG", "testImages/environment/environment.PNG",  "testImages/environment/environment.PNG"]]],
+				[[["testImages/adversaryidle/adversaryidle1.PNG", "testImages/environment/environment.PNG", "testImages/environment/environment.PNG",  "testImages/environment/environment.PNG"],
+				["testImages/environment/environment.PNG", "testImages/environment/environment.PNG", "testImages/environment/environment.PNG",  "testImages/environment/environment.PNG"],
+				["testImages/environment/environment.PNG", "testImages/environment/environment.PNG", "testImages/environment/environment.PNG",  "testImages/environment/environment.PNG"],
+				["testImages/adversarymad/adversarymad1.PNG", "testImages/environment/environment.PNG", "testImages/environment/environment.PNG",  "testImages/environment/environment.PNG"]]]];
+	trapList = [[[["testImages/adversarymad/adversarymad1.PNG", "testImages/environment/environment.PNG", "testImages/environment/environment.PNG"],
+				["testImages/environment/environment.PNG", "testImages/environment/environment.PNG", "testImages/environment/environment.PNG"],
+				["testImages/environment/environment.PNG", "testImages/environment/environment.PNG", "testImages/environment/environment.PNG"]],
+				[["testImages/adversarymad/adversarymad2.PNG", "testImages/environment/environment.PNG", "testImages/environment/environment.PNG"],
+				["testImages/environment/environment.PNG", "testImages/environment/environment.PNG", "testImages/environment/environment.PNG"],
+				["testImages/environment/environment.PNG", "testImages/environment/environment.PNG", "testImages/environment/environment.PNG"]],
+				[["testImages/adversarymad/adversarymad3.PNG", "testImages/environment/environment.PNG", "testImages/environment/environment.PNG"],
+				["testImages/environment/environment.PNG", "testImages/environment/environment.PNG", "testImages/environment/environment.PNG"],
+				["testImages/environment/environment.PNG", "testImages/environment/environment.PNG", "testImages/environment/environment.PNG"]],
+				[["testImages/adversarymad/adversarymad4.PNG", "testImages/environment/environment.PNG", "testImages/environment/environment.PNG"],
+				["testImages/environment/environment.PNG", "testImages/environment/environment.PNG", "testImages/environment/environment.PNG"],
+				["testImages/environment/environment.PNG", "testImages/environment/environment.PNG", "testImages/environment/environment.PNG"]],
+				[["testImages/adversarymad/adversarymad5.PNG", "testImages/environment/environment.PNG", "testImages/environment/environment.PNG"],
+				["testImages/environment/environment.PNG", "testImages/environment/environment.PNG", "testImages/environment/environment.PNG"],
+				["testImages/environment/environment.PNG", "testImages/environment/environment.PNG", "testImages/environment/environment.PNG"]],
+				[["testImages/adversarymad/adversarymad6.PNG", "testImages/environment/environment.PNG", "testImages/environment/environment.PNG"],
+				["testImages/environment/environment.PNG", "testImages/environment/environment.PNG", "testImages/environment/environment.PNG"],
+				["testImages/environment/environment.PNG", "testImages/environment/environment.PNG", "testImages/environment/environment.PNG"]],
+				[["testImages/adversarymad/adversarymad7.PNG", "testImages/environment/environment.PNG", "testImages/environment/environment.PNG"],
+				["testImages/environment/environment.PNG", "testImages/environment/environment.PNG", "testImages/environment/environment.PNG"],
+				["testImages/environment/environment.PNG", "testImages/environment/environment.PNG", "testImages/environment/environment.PNG"]]],
+				[[["testImages/adversaryattack/adversaryattack7.PNG", "testImages/environment/environment.PNG", "testImages/environment/environment.PNG"],
+				["testImages/environment/environment.PNG", "testImages/environment/environment.PNG", "testImages/environment/environment.PNG"],
+				["testImages/environment/environment.PNG", "testImages/adversaryattack/adversaryattack7.PNG", "testImages/environment/environment.PNG"]]]];
+	/*[["testImages/environment/environment.PNG", "testImages/heroattack/heroattack1.PNG"],
+				["testImages/adversaryidle/adversaryidle1.PNG", "testImages/adversaryattack/adversaryattack1.PNG"]];*/
+	/*[["testImages/environment/environment.PNG", "testImages/environment/environment.PNG"],
+				["testImages/environment/environment.PNG", "testImages/environment/environment.PNG"]];*/
+	/*[["testImages/environment/environment.PNG", "testImages/heroattack/heroattack1.PNG"],
+				["testImages/adversaryidle/adversaryidle1.PNG", "testImages/adversaryattack/adversaryattack1.PNG"]];*/
 }
