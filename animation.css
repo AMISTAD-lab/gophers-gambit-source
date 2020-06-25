@@ -1,5 +1,5 @@
 /** animation.css
-Stylesheet for grid layout!
+Stylesheet for third experiment's animation.
 Created on June 23, 2020 by Cynthia Hom
 */
 
@@ -31,7 +31,7 @@ html, body{
 	display: flex; /* makes z-index work */
 	justify-content: center;
 	align-items: center;
-	border: 5px solid black;
+	border: 2px solid black;
 	position: relative;
 	/*border-radius: 3px;*/
 }

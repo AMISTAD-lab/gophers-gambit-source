@@ -1,8 +1,12 @@
 /**
 animation.js
-Created on June 23, 2020
+Created on June 23, 2020 by Cynthia Hom
 js file for the third experiment's animation
 Todo: test rigorously!
+test/implement methods to interpret code (don't use them yet, just make them)
+test getinput
+after amani is done drawing images: implement images.
+rotate images.
 */
 
 
@@ -21,7 +25,7 @@ var fps = 1; // one frame per second
 var frameNum = 0; // frame counter
 var totalFrames = 10; // change this later! The total NUMBER of frame
 
-var currentGridList = []; // which grid to display at the current moment
+var currentList = []; // which grid to display at the current moment
 var trapNum = 0;	// which trap/random walk animations to play
 var trapFrameNum = 0; // which step in trap animation
 
@@ -35,21 +39,14 @@ $(document).ready(function () {
 function init() 
 {
 	getInput(); // will be written to the file.
-	//updateGrid(terrainList);
-	currentGridList = terrainList; // show the terrain array first
+	currentList = terrainList; // show the terrain array first
 	animate();
-	//updateGrid(trapList);
 }
 
 /** Removes any existing grid and sets up a new one */
 function updateGrid(newGridList)
 {
 	// remove existing grid by deleleting all gridElements.
-	//var child = gridContainer.lastElementChild;
-	/*while (child){
-		gridContainer.removeChild(child);
-		child = gridContainer.lastElementChild;
-	}*/
 	console.log("inside updateGrid");
 	gridContainer.innerHTML = "";
 
@@ -59,7 +56,7 @@ function updateGrid(newGridList)
 
 /** populate grid with grid elements. Grid has same dimension as terrain array */
 function setUpGrid(gridListIn)
-{	//console.log("setting up grid");
+{
 	// set up number of columns in grid. 
 	gridContainer.style.gridTemplateColumns = "repeat(" + String(gridListIn[0].length) + ", 1fr)";
 
@@ -114,43 +111,44 @@ function animate(){
 /** draws one frame */
 function draw(){
 	// if it's a terrain, just show the terrain grid if its the first step, and then update gopher position
-	if (currentGridList == terrainList)
+	if (currentList == terrainList)
 	{
 		if (trapFrameNum == 0)
 		{
-			updateGrid(currentGridList[trapNum][trapFrameNum]);
+			updateGrid(getCurrentlyDisplayedGrid());
 		}
-		redrawGopher([2, 2]);//[frameNum % currentGridList[trapNum][trapFrameNum].length + 1, frameNum % currentGridList[trapNum][trapFrameNum].length + 1]) // replace with actual gopher position later
+		redrawGopher([2, 2]);//[frameNum % currentList[trapNum][trapFrameNum].length + 1, frameNum % currentList[trapNum][trapFrameNum].length + 1]) // replace with actual gopher position later
 	}
 
 	// if it's a trap, then show the trap grid if this is the first time we are showing the trap. Otherwise,
 		// just update the active states of the cell.
-	else if (currentGridList == trapList)
+	else if (currentList == trapList)
 	{
 		if (trapFrameNum == 0)
 		{
-			updateGrid(currentGridList[trapNum][trapFrameNum]);
+			updateGrid(getCurrentlyDisplayedGrid());
 		}
 		// regardless, update active states and draw the gopher
-		updateActiveStates(trapNum, trapFrameNum);
-		redrawGopher([2, 2]);//[frameNum % currentGridList[trapNum][trapFrameNum].length + 1, frameNum % currentGridList[trapNum][trapFrameNum].length + 1]);
+		updateGrid(getCurrentlyDisplayedGrid());// REMOVE later, only for testing! 
+		//updateActiveStates(trapNum, trapFrameNum); 
+		redrawGopher([2, 2]);//[frameNum % currentList[trapNum][trapFrameNum].length + 1, frameNum % currentList[trapNum][trapFrameNum].length + 1]);
 	}
 }
 
 function updateVars(){
 	trapFrameNum++;
 	// if trapFrameNum is greater than max for that trap frame, then increment trapNum, change grid type, etc.
-	if (trapFrameNum >= currentGridList[trapNum].length)
+	if (trapFrameNum >= currentList[trapNum].length)
 	{
-		if (currentGridList == terrainList){
-			currentGridList = trapList;
+		if (currentList == terrainList){
+			currentList = trapList;
 		}
-		else if (currentGridList == trapList){
-			currentGridList = terrainList;
+		else if (currentList == trapList){
+			currentList = terrainList;
 			trapNum++;
 		}
 		else{
-			console.log("ERROR: invalid currentGridList!");
+			console.log("ERROR: invalid currentList!");
 		}
 		// reset trapFrameNum
 		trapFrameNum = 0;
@@ -158,12 +156,38 @@ function updateVars(){
 	frameNum++;	// step through NOTE: might be able to just take this out? 
 }
 
+/** Updates whether or not cells are active or not for the trap part of the animation. */
 function updateActiveStates(trapNum, trapFrameNum)
 {
-	grid = currentGridList[trapNum][trapFrameNum];
-	updateGrid(grid); //for testing only!
-	// ______________loop through, and give appropriate img element the correct src.
-	console.log("updating active states!");
+	//console.log("trap num is " + trapNum + " trapFrameNum is " + trapFrameNum);
+	// make sure this is only being called for traps
+	if (currentList != trapList){
+		console.log("ERROR: Calling updateActiveStates when trapBoard is not showing");
+	}
+	else{
+		activeStateArr = currentList[trapNum][trapFrameNum];
+		// loop through, and give appropriate img element the correct src.
+		for (let row = 0; row < activeStateArr.length; row++){
+			for (let col = 0; col < activeStateArr[0].length; col++){
+				cell = [row + 1, col + 1];
+				//console.log("is the cell a valid grid poistion? " + isValidGridPos(cell));
+				//console.log("looking for div " + "div.gridDiv:nth-of-type(" + String(getNth(cell)) +")");
+				//console.log("div is " + $("div.gridDiv:nth-of-type(" + String(getNth(cell)) +")"));
+				image = $("img.terrainImage:nth-of-type(" + String(getNth(cell)) +")");
+
+				//var image = $("div.gridDiv:nth-of-type(" + String(getNth(cell)) +")").lastChild;
+				//console.log("image is " + image);
+				if (image == undefined){
+					console.log("ERROR: image is undefined!");
+					return;
+				}
+				oldSrc = getCurrentlyDisplayedGrid()[row][col]; // change later to actually have the value!!!
+				image.src = oldSrc.substring(0, oldSrc.length - 1) + String(activeStateArr[row][col]);  // create new src
+				//image.src = image.src.substring(0, image.src.length - 1) + String(activeStateArr[row][col]);  // create new src
+			}
+		}
+	}
+	//console.log("updating active states!");
 }
 
 /** moves a gopher from one cell to another */
@@ -183,14 +207,15 @@ function redrawGopher(newGopherCell){
 
 /** returns a 2d list corresponding to the currently displayed grid. */
 function getCurrentlyDisplayedGrid(){
-	if (currentGridList == terrainList){
-		return currentGridList[trapNum][trapFrameNum]; // Just for testing! Remove later!
+	if (currentList == terrainList){
+		return currentList[trapNum][0]; // Just for testing! Remove later! // If a terrain, then don't even use [0].
 	}
-	return currentGridList[trapNum][trapFrameNum]; // Just for testing! remove later!
+	return currentList[trapNum][0]; // If its a trap, the current grid is the first index
 }
 
 /** determines if the inputted list is a valid grid position. 
-inputted list: [row, col] */
+Inputs:
+	gridPos: [row, col] */
 function isValidGridPos(gridPos){
 	currentlyDisplayedGrid = getCurrentlyDisplayedGrid();
 	if (gridPos[0] <= 0 || gridPos[0] <= 0){ // row/column lines start at 1
@@ -201,16 +226,17 @@ function isValidGridPos(gridPos){
 	return true;
 }
 
-/** calculates the number of the gridPos (in order of how they are added to the grid container */
+/** calculates the number of the gridPos (in order of how they are added to the grid container 
+Inputs:
+	gridPos: [row, col] */
 function getNth(gridPos){
- 	return (gridPos[0] - 1) * currentlyDisplayedGrid[0].length + gridPos[1]; // row * total num columns + col
+ 	return (gridPos[0] - 1) * getCurrentlyDisplayedGrid()[0].length + gridPos[1]; // row * total num columns + col
 }
 
 
 /** -------this method will in reality be written to the file using python---------- */
 function getInput(){
 	terrainList = [[[["testImages/environment/environment.PNG", "testImages/environment/environment.PNG", "testImages/environment/environment.PNG",  "testImages/environment/environment.PNG"],
-				["testImages/environment/environment.PNG", "testImages/environment/environment.PNG", "testImages/environment/environment.PNG",  "testImages/environment/environment.PNG"],
 				["testImages/environment/environment.PNG", "testImages/environment/environment.PNG", "testImages/environment/environment.PNG",  "testImages/environment/environment.PNG"],
 				["testImages/environment/environment.PNG", "testImages/environment/environment.PNG", "testImages/environment/environment.PNG",  "testImages/environment/environment.PNG"]]],
 				[[["testImages/adversaryidle/adversaryidle1.PNG", "testImages/environment/environment.PNG", "testImages/environment/environment.PNG",  "testImages/environment/environment.PNG"],
