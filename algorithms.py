@@ -152,8 +152,9 @@ def addTrapToTerrain(terrain, start_x, start_y, trapboard):
         raise Exception("This board does not fit")
 
 ## still need to check in the case that the connected wire cells are the same thicktype
-def checkBrokenTrap(trap, wire):
+def checkBrokenTrap(trap):
     """
+    USE IN ALL GOPHER ENTER FUNCS
     Helper function for gopherProbEnter.
     Covers the base cases for a broken trap--traps that pose no danger to the gopher.
     Returns a probability of 0.9?? since the gopher will not be hurt by entering
@@ -167,6 +168,7 @@ def checkBrokenTrap(trap, wire):
     arrowThickTypes = [0,0,0]
     # [skinny, normal, wide]
 
+    # Collect the cells' info
     for cell in allCells: # flattens board into 1d  array
         if cell.cellType == CellType.wire:
             wireCells.append(cell)
@@ -174,11 +176,10 @@ def checkBrokenTrap(trap, wire):
             arrowCells.append(cell)
             arrowLoc.append(cell)
         elif cell.cellType == CellType.door:
-            doorLocation.append(cell)
+            doorLoc.append(cell)
 
     for cell in wireCells:
         wireThickTypes[cell.thickType.value] += 1
-
     for cell in arrowCells:
         arrowThickTypes[cell.thickType.value] += 1
 
@@ -186,29 +187,31 @@ def checkBrokenTrap(trap, wire):
     ## !!Need to check if correct thicktypes are connected and return high probability if they are
 
     only = lambda ind, typelist: sum([typelist[i] > 0 for i in range(len(typelist)) if i != ind])==0
-
+    
     # Case: when all arrows/wires are of uniform thickness
-    if wireCells.len() and arrowCells.len() == 0:
-        if arrowCells.len() == 0:
+    if len(wireCells) and len(arrowCells) == 0:
+        if len(arrowCells) == 0:
             print("No danger and highest probability")
             return 0.9
-        else:
-            if door.Loc : #connected to gate, placed filler
+        else: #if more than one arrow, you gotta check that the arrow is next to the door 
+            if doorLoc : #connected to gate, placed filler
                 if arrowThickTypes == 0: #not zero!!
                     return 0.7 # or a probability that reflects the 
             else:
                 return 0.9 # or 1?
     
-    
-
 def gopherProbEnter1(trap):
     """
     This returns the probability that the gopher will enter for working traps.
     Working traps are traps that are able to hurt the gopher
     """
+
+    ## import the pre-existing lists without making the
+    ## longest func in the world? 
+
+    checkBrokenTrap(trap)
     ## WORKING TRAP CASES
     ## Case: only arrows with no wires, but arrows are connected to the gate so they still fire
-
     if (wireThickTypes[2] and arrowThickTypes[2] > 0) and all(i is 0 for i in wireThickTypes[:2]) and all(j is 0 for j in arrowThickTypes[:2]):
         print("All wide thickness. very thicc. Highest danger and low probability of entering")
         return 0.1
