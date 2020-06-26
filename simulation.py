@@ -1,42 +1,51 @@
-from classTrap import *
-from classWire import *
-from typeRotation import *
-from typeThick import *
-from typeAngle import *
-#from classDoor import *
 from classGopher import *
 
+import algorithms as alg
+import math as m
+
+gopher = None
+
+def simulateTrap(trap, intention, maxSteps=20):
+    center_x = m.ceil(trap.rowLength / 2) - 1
+    global gopher
+    gopher = Gopher(center_x, trap.colLength, trap, intention)
+    step = 0
+    initialboard = trap.saveCells()
+    initialboard.append(["4xxx"]*trap.rowLength) #add dirt beneath trap
+    activeCells = []
+    gopherStuff = []
+    while gopher.alive and not gopher.left and step < maxSteps:
+        gopherInfo, state = updateSimulation(trap, step)
+        activeCells.append(state)
+        gopherStuff.append(gopherInfo)
+        step += 1
+    inSimulation = False
+    return [initialboard, activeCells, gopherStuff, gopher.alive]
+
+def updateSimulation(trap, step):
+    global gopher
+    gopher.updateCell()
+    for cell in alg.flatten(trap.board):
+        cell.updateCell(step)
+    state = trap.saveState()
+    state.append([0]*trap.rowLength) #add inactive dirt beneath trap
+    gopherInfo = (gopher.x, gopher.y, gopher.rotationType.value, gopher.state())
+    return gopherInfo, state
 
 
-#since each trap simulation is independent of the previous (no health measure, just killed or not, no hunger measure)
-   # - if we decide to add them, they can be input parameters for the simulation/gopher
-#we can run them all back to back
-#and say lifespan is the sum of steps in each trap until the next death
-trap = Trap(3,3, False)
-
-trap.board = [
-    [Wire(0,1, trap, angleType=AngleType.straight, rotationType=RotationType.up, thickType=ThickType.normal, active=False),
-    Wire(0,1, trap, angleType=AngleType.straight, rotationType=RotationType.up, thickType=ThickType.normal, active=False),
-    Wire(0,2, trap, angleType=AngleType.lright, rotationType=RotationType.down, thickType=ThickType.normal, active=False)],
-    
-    [Wire(1,0, trap, angleType=AngleType.straight, rotationType=RotationType.right, thickType=ThickType.normal, active=False),
-    Wire(1,1, trap, angleType=AngleType.straight, rotationType=RotationType.down, thickType=ThickType.normal, active=False),
-    Wire(1,2, trap, angleType=AngleType.straight, rotationType=RotationType.left, thickType=ThickType.normal, active=False)],
-
-    [Wire(2,0, trap, angleType=AngleType.lright, rotationType=RotationType.up, thickType=ThickType.normal, active=False),
-    Wire(2,1, trap, angleType=AngleType.straight, rotationType=RotationType.down, thickType=ThickType.normal, active=False),
-    Wire(2,2, trap, angleType=AngleType.lright, rotationType=RotationType.right, thickType=ThickType.normal, active=False)]
-    ]
-
-
-flatten = lambda l: [item for sublist in l for item in sublist]
-
-for i in range(10):
-    print("UPDATING\n\n\n")
-    for cell in flatten(trap.board):
-        cell.updateCell(i)
-    print(trap)
-
-
-def updateSimulation():
-    print("hi")
+def viewRun(initialboard, activeCells, gopherCells):
+    rowLength = len(initialboard[0])
+    colLength = len(initialboard)
+    active = lambda x,y,step: "A" if activeCells[step][y][x] == 1 else "I"
+    for step in range(len(activeCells)):
+        displayBoard = []
+        for y in range(colLength):
+            row = []
+            for x in range(rowLength):
+                if gopherCells[step][:2] == (x,y):
+                    row.append("GPR" + str(gopherCells[step][2]) + str(gopherCells[step][3]))
+                else:
+                    row.append(initialboard[y][x] + active(x,y,step))
+            displayBoard.append(row)
+        print("STEP", step)
+        print(alg.formatMatrix(displayBoard))

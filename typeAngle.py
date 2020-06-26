@@ -8,4 +8,4 @@ class AngleType(enum.Enum):
     lobtuse = 4
     robtuse = 5
     straight = 6
-    na = 0.5
+    na = "x"

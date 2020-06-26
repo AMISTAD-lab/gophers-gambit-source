@@ -1,39 +1,73 @@
+from typeCell import *
+from classFloor import *
+from typeRotation import *
+import algorithms as alg
+import numpy as np
+
 class Gopher:
-    def __init__(self, start_x, start_y):
-        #self.present = False
+    def __init__(self, start_x, start_y, ownerBoard, intention, rotationType=RotationType.up):
+        self.intention = intention
+        self.ownerBoard = ownerBoard
+        self.rotationType = rotationType
         self.alive = True
-        self.x = start_x  #the original position should be the gopher cell
+        self.hit = False
+        self.x = start_x
         self.y = start_y
         self.entering = False
         self.leaving = False
+        self.left = False
         self.eatingTimer = 0
-        self.health = 3
+
+    def state(self):
+        if not self.alive:
+            state = 0
+        elif self.hit:
+            state = 2
+        else:
+            state = 1
+        return state
 
     def updateCell(self):
+        if self.hit:
+            self.hit = False
+
         if self.entering:
+            self.rotationType = RotationType.up
             self.enter()
         elif self.leaving:
+            self.rotationType = RotationType.down
             self.leave()
         elif self.eatingTimer > 0:
             self.eat()
         else:
-            print("i am deciding")
             #at beginning of trap, so figure out whether to enter or not (done in algs)
+            if self.intention:
+                probEnter = alg.gopherProbEnter2(self.ownerBoard) #currently using the cohesion one
+            else:
+                probEnter = 1 #arbitrarily chosen rn
+            if np.random.binomial(1, probEnter) == 1:
+                self.entering = True
+                self.leaving = False
+            else:
+                self.entering = False
+                self.leaving = False
+                self.left = True
 
     def enter(self):
-        print("i am entering")
-        #move forward
-        #if at food, start timer
-            #entering = False
-            #leaving = False
+        self.y -= 1
+        if self.ownerBoard.board[self.y][self.x].cellType == CellType.food:
+            self.eatingTimer = 3 #set this randomly
+            self.entering = False
+            self.leaving = False
     
     def leave(self):
-        print("i am leaving")
-        #exit
-        #if exiting door
-            #entering = False
-            #leaving = False
-            #simulation of trap over
+        self.y += 1
+        self.eatingTimer = 0
+        if self.ownerBoard.board[self.y-1][self.x].cellType == CellType.door:
+            #if just passed door (exited trap)
+            self.entering = False
+            self.leaving = False
+            self.left = True
 
     def eat(self):
         self.eatingTimer -= 1
@@ -47,42 +81,14 @@ class Gopher:
         self.leaving = True
         self.entering = False
 
-    def hitByProjectile(self, projectile):
+    def hitByProjectile(self, projectile, timeStep):
         """called when hit by a projectile"""
-        #figure out whether the hit was fatal and act accordingly (done in algs)
-        #need to include probability
-        newHealth = self.health - projectile.strength
-        self.health = newHealth
-        if self.health != 0:
+        if np.random.binomial(1, projectile.strength) == 1:
+            self.alive = False
+        else:
+            self.hit = True
             self.leaving = True
             self.entering = False
-        else:
-            self.alive = False
-    
-
-    # we'll make this the door's job
-    ## This method should continually run until 
-    #def isActive(self):
-    #    """returns true when the gopher has entered the room"""
-    #    while present == false:
-    #        if gopher.position == doorCell: #unsure how to refer to the position of the doorcell here
-    #            Wire.launchSignal()  ## launch the signal at this point
-    #            present == True
-    #            return True
-
-    ### maybe delete this function because it is too similar to isActive?
-    ### but its a simpler version of isActive cause it just returns the status of present
-    #def inRoom(self):
-    #    """Boolean Method: returns whether gopher is in room"""
-    #    return self.present
-
-    #def isAlive():
-    #    """continually checks on whether gopher is alive"""
-    #    while alive == false:
-    #        if gopher.position and projectile.position == foodCell # !!! These are not yet valid names!!
-    #            alive = False
-    #            return alive
-       
-
+            
 
 

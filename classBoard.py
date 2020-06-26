@@ -1,29 +1,42 @@
 import abc
 from abc import ABC, abstractmethod, ABCMeta
+
 from typeCell import *
 from typeAngle import *
 from typeThick import *
 from typeRotation import *
+
 from classCell import *
+from classDoor import *
+from classFloor import *
+from classFood import *
+from classDirt import *
+from classWire import *
+from classArrow import *
+
 import numpy as np
 import math as m
+import algorithms as alg
 
-functionalTraps = [] #list of handmade traps
-trapPieces = [CellType.wire, CellType.arrow, CellType.floor]
+import designedTraps as dt
+
+
+functionalTraps = [dt.test1] #list of handmade traps
+trapPieces = [Wire, Arrow, Floor]
 rotationOptions = {
-    CellType.wire : [RotationType.up, RotationType.left, RotationType.right, RotationType.down],
-    CellType.arrow : [RotationType.up, RotationType.left, RotationType.right, RotationType.down],
-    CellType.floor : [RotationType.na],
+    Wire : [RotationType.up, RotationType.left, RotationType.right, RotationType.down],
+    Arrow : [RotationType.up, RotationType.left, RotationType.right, RotationType.down],
+    Floor : [RotationType.na],
 }
 thickOptions = {
-    CellType.wire : [ThickType.skinny, ThickType.normal, ThickType.wide],
-    CellType.arrow : [ThickType.skinny, ThickType.normal, ThickType.wide],
-    CellType.floor : [ThickType.na],
+    Wire : [ThickType.skinny, ThickType.normal, ThickType.wide],
+    Arrow : [ThickType.skinny, ThickType.normal, ThickType.wide],
+    Floor : [ThickType.na],
 }
 angleOptions = {
-    CellType.wire : [AngleType.straight, AngleType.lright], #excluding rright bc they're same for wires
-    CellType.arrow : [AngleType.lacute, AngleType.racute, AngleType.lright, AngleType.rright, AngleType.lobtuse, AngleType.robtuse],
-    CellType.floor : [AngleType.na],
+    Wire : [AngleType.straight, AngleType.lright], #excluding rright bc they're same for wires
+    Arrow : [AngleType.lacute, AngleType.racute, AngleType.lright, AngleType.rright, AngleType.lobtuse, AngleType.robtuse],
+    Floor : [AngleType.na],
 }
 
 class Board(metaclass = ABCMeta):
@@ -35,72 +48,44 @@ class Board(metaclass = ABCMeta):
 
     def __repr__(self):
         """string representation of Board"""
-        string = ""
+        return alg.formatMatrix(self.board)
+
+    def saveState(self):
+        activecells = self.emptyBoard(self.rowLength, self.colLength)
         for y in range(self.colLength):
             for x in range(self.rowLength):
-                string += str(self.board[x][y]) + "\t"
-            string += "\n\n\n"
-        return string
+                activecells[y][x] = int(self.board[y][x].active == True)
+        return activecells
 
-    def addBoard(self, start_x, start_y, miniboard):
-        """adds a 'miniboard' to self's board with the top left corner at the indicated position"""
-        if start_x + miniboard.rowLength < self.rowLength:
-            if start_y + miniboard.colLength < self.colLength:
-                for x in range(miniboard.rowLength):
-                    for y in range(miniboard.colLength):
-                        self.board[start_x + x][start_y + y] = miniboard.board[x][y]
-                return
-        raise Exception("This board does not fit")
-
-    def right(self):
-        """faces the entrance of a trap to the left, given an initially downward facing trap"""
-        board = self
-        for i in range(1):
-            board = board.rotateBoard90()
-        return board
-    
-    def up(self):
-        """faces the entrance of a trap to the left, given an initially downward facing trap"""
-        board = self
-        for i in range(2):
-            board = board.rotateBoard90()
-        return board
-
-    def left(self):
-        """faces the entrance of a trap to the left, given an initially downward facing trap"""
-        board = self
-        for i in range(3):
-            board = board.rotateBoard90()
-        return board
-
-    def rotateBoard90(self):
-        """returns a board rotated 90 degrees counter clockwise"""
-        newRowLength = self.colLength
-        newColLength = self.rowLength
-        newBoard = Board(newRowLength, newColLength)
-        for x in range(newRowLength):
-            for y in range(newColLength):
-                cell = self.board[newColLength-1-y][x]
-                #cell.rotateCell90(), we need to change their rotation types to match!!
-                newBoard.board[x][y] = cell
-        return newBoard
+    def saveCells(self):
+        allcells = self.emptyBoard(self.rowLength, self.colLength)
+        for y in range(self.colLength):
+            for x in range(self.rowLength):
+                allcells[y][x] = self.board[y][x].getBaseInfo()
+        return allcells
 
     def emptyBoard(self, rowLength, colLength):
         """generates a board full of dirt for a default terrain"""
         board = []
-        for x in range(rowLength):
+        for y in range(colLength):
             row = []
-            for y in range(colLength):
-                row.append(Cell(x,y, CellType.dirt, self))
+            for x in range(rowLength):
+                row.append(Dirt(x,y, self))
             board.append(row)
         return board
 
     def realTrap(self, rowLength, colLength):
         """chooses a trap from the real selection, filtered to right dimensions"""
-        dimCheck = lambda trap: trap.rowLength == rowLength and trap.colLength == colLength
-        filteredTraps = filter(dimCheck, functionalTraps)
-        board = np.random.choice(filteredTraps, size=1)[0]
+        dimCheck = lambda board: len(board[0]) == rowLength and len(board) == colLength
+        filteredTraps = list(filter(dimCheck, functionalTraps))
+        if len(filteredTraps) == 0:
+            raise Exception("No traps met that specification")
+        trapIndices = list(range(len(filteredTraps)))
+        choice = np.random.choice(trapIndices, size=1)[0]
+        board = filteredTraps[choice]
         #will want something to prevent repeated selection of a trap probably
+        for cell in alg.flatten(board):
+            cell.ownerBoard = self
         return board
 
     def randomTrap(self, rowLength, colLength):
@@ -110,22 +95,22 @@ class Board(metaclass = ABCMeta):
         bottom_y = colLength - 1
         center_x = m.ceil(rowLength / 2) - 1
         center_y = m.ceil(colLength / 2) - 1
-        for x in range(rowLength):
+        for y in range(colLength):
             row = []
-            for y in range(colLength):
+            for x in range(rowLength):
                 if x == center_x and y > center_y:
                     #allow path to food
-                    piece = CellType.floor
+                    piece = Floor
                 else:
                     piece = np.random.choice(trapPieces, size=1)[0]
                     rotation = np.random.choice(rotationOptions[piece], size=1)[0]
                     angle = np.random.choice(angleOptions[piece], size=1)[0]
                     thick = np.random.choice(thickOptions[piece], size=1)[0]
-                row.append(Cell(x, y, piece, self, angleType=angle, rotationType=rotation, thickType=thick))
+                row.append(piece(x, y, self, angleType=angle, rotationType=rotation, thickType=thick))
             board.append(row)
         #overwrite food and door placement
-        board[center_x][bottom_y] = Cell(center_x, bottom_y, CellType.door, self)
-        board[center_x][center_y] = Cell(center_x, center_y, CellType.food, self)
+        board[bottom_y][center_x] = Door(center_x, bottom_y, self)
+        board[center_y][center_x] = Food(center_x, center_y, self)
         return board
 
     

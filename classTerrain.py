@@ -7,28 +7,28 @@ class Terrain(Board):
 		self.trapList = trapList
 		self.existingTraps = []
 		super().__init__(rowLength, colLength)
-		self.board = super().emptyBoard(rowLength, colLength)
-		self.addTraps(trapList)
+		self.board = super().emptyBoard(rowLength, colLength) #make dirt
+		self.board = super().saveCells() #get info version of dirt
+		self.addTraps(trapList) #add info version of traps to board
 
 	def addTraps(self, trapList):
-		"""[[(xmin, xmax), (ymin, ymax)], ...]"""
+		"""trapList = [(trapboard, start_x, start_y)...]"""
 		for trapTuple in trapList:
 			if noOverlaps(trapTuple, self.existingTraps):
-				trap, start_x, start_y, rotationType = trapTuple
-				#rotate trap (WRITE A METHOD that takes in the type and calls left, right, up from the board class)
-				super().addBoard(start_x, start_y, trap)
-				self.existingTraps.append([(start_x, start_x + trap.rowLength - 1), (start_y, start_y + trap.colLength - 1)])
+				trapboard, start_x, start_y = trapTuple
+				self.board = alg.addTrapToTerrain(self.board, start_x, start_y, trapboard)
+				self.existingTraps.append([(start_x, start_x + len(trapboard[0]) - 1), (start_y, start_y + len(trapboard) - 1)])
 			else:
-				print("A trap could not be added because of overlap")		
+				raise Exception("A trap could not be added because of overlap")		
 
 def overlap(trapTuple, otherTrapBounds):
-	trap, start_x, start_y, rotationType = trapTuple
+	trapboard, start_x, start_y = trapTuple
 	(x_min, x_max), (y_min, y_max) = otherTrapBounds
-	#rotate and check (DONT FORGET, need to make sure rotated version fits, not original)
-
+	rowLength = len(trapboard[0])
+	colLength = len(trapboard)
     #coordinates of top-right corner of this rectangle
-	rowEnd = start_x + trap.rowLength
-	colEnd = start_y + trap.colLength
+	rowEnd = start_x + rowLength
+	colEnd = start_y + colLength
 		
 	xOverlap = False
 	yOverlap = False

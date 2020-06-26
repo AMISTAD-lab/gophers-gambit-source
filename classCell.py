@@ -22,8 +22,15 @@ class Cell(metaclass = ABCMeta):
     def __repr__(self):
         return str(self.cellType.name) + " " +str(self.active)
 
-    def updateCell(self):
-        raise Exception("This method was not overridden as it should've been")
+    def getBaseInfo(self):
+        cellStr = str(self.cellType.value)
+        cellStr += str(self.angleType.value)
+        cellStr += str(self.thickType.value)
+        cellStr += str(self.rotationType.value)
+        return cellStr
+
+    def updateCell(self, step):
+        ...
 
     
     def activateCell(self, timeStep, inputEndpointIn):
@@ -50,13 +57,13 @@ class Cell(metaclass = ABCMeta):
         Inputs:
             endpoint: the endpoint we are using as the direction"""
         if endpoint == 0 and self.y > 0:
-            return self.ownerBoard.board[self.x][self.y - 1]
+            return self.ownerBoard.board[self.y - 1][self.x]
         elif endpoint == 2 and self.x < self.ownerBoard.rowLength - 1:
-            return self.ownerBoard.board[self.x + 1][self.y]
+            return self.ownerBoard.board[self.y][self.x + 1]
         elif endpoint == 4 and self.y < self.ownerBoard.colLength - 1:
-            return self.ownerBoard.board[self.x][self.y + 1]
+            return self.ownerBoard.board[self.y + 1][self.x]
         elif endpoint == 6 and self.x > 0:
-            return self.ownerBoard.board[self.x - 1][self.y]
+            return self.ownerBoard.board[self.y][self.x - 1]
         else:
             return None
     

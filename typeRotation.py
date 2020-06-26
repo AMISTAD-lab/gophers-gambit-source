@@ -6,4 +6,4 @@ class RotationType(enum.Enum):
     right = 2
     down = 4
     left = 6
-    na = 0.5
+    na = "x"

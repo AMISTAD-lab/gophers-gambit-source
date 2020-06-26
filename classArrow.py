@@ -7,9 +7,9 @@ import algorithms as alg
 
 ## this class constructs arrow like cells
 class Arrow(Cell):
-    def __init__(self, x, y, angleType, rotationType, thickType, active):
+    def __init__(self, x, y, ownerBoard, angleType, rotationType, thickType, active=False):
         endpoints = [(rotationType.value + 4) % 8]
-        super.__init(x, y, CellType.arrow, angleType, rotationType, thickType, endpoints, active)
+        super().__init__(x, y, CellType.arrow, ownerBoard=ownerBoard, angleType=angleType, rotationType=rotationType, thickType=thickType, endpoints=endpoints, active=active)
   
 
     def updateCell(self, timeStep):
@@ -19,15 +19,8 @@ class Arrow(Cell):
             self.launchProjectile(timeStep)
             self.active = False
 
-    def launchProjectile(self):
+    def launchProjectile(self, timeStep):
         #figure out direction
         direction = alg.findDir(self.rotationType, self.angleType)
         #launch projectile
-        Projectile(self.x, self.y, direction, self.thickType, self.ownerBoard)
-    
- #this is handled by the previous cell turning on or not turning on this cell
-   # def signalReady(self, Wire):
-    #    """this tells us if there is a signal from the arrow"""
-    #    while gopher.present == true: ###while the gopher has entered the room/the signal has launched and is crawling upu the wire
-    #        if Arrow.position == Signal.position:
-    #            return true
+        Projectile(self.x, self.y, direction, self.thickType, self.ownerBoard, timeStep)
