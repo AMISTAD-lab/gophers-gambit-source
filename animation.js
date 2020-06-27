@@ -1,19 +1,18 @@
-/**
-animation.js
+
+/**template.js
 Created on June 23, 2020 by Cynthia Hom
 js file for the third experiment's animation
-Todo: test rigorously!
-test/implement methods to interpret code (don't use them yet, just make them)
-test getinput
-after amani is done drawing images: implement images.
-rotate images.
+
+Todo: 
+Implement image rotation!!!!!! And test it!! yay
+Test active states because for some reason they never seem to be active yet?
 */
 
 
 // get elements from the html
 var gridContainer = document.getElementById("gridContainer");
 var gopher = document.createElement("img");
-gopher.src = "testImages/adversaryidle/adversaryidle1.PNG";
+//gopher.src = "testImages/adversaryidle/adversaryidle1.PNG";
 gopher.id = "gopher";
 
 // inputs that will be set using getInput()
@@ -22,13 +21,10 @@ var trapList = [] /// for testing purposes
 
 // other vars
 var fps = 1; // one frame per second
-var frameNum = 0; // frame counter
-var totalFrames = 10; // change this later! The total NUMBER of frame
 
 var currentList = []; // which grid to display at the current moment
 var trapNum = 0;	// which trap/random walk animations to play
 var trapFrameNum = 0; // which step in trap animation
-
 
 // call init once document has loaded.
 $(document).ready(function () {
@@ -38,25 +34,23 @@ $(document).ready(function () {
 /** Called when file is run */
 function init() 
 {
-	getInput(); // will be written to the file.
-	currentList = terrainList; // show the terrain array first
+	//console.log(getImageName("211", 1));
+	//let tupleList = [(1, 4, 0, 1), (1, 3, 0, 1)];
+	//console.log("myTupleList is " + tupleList);
+	getInput(); // get input that is written to the file.
+	currentList = trapList; // CHANGE THIS LATER!
+//	currentList = terrainList; // show the terrain first
 	animate();
 }
 
-/** Removes any existing grid and sets up a new one */
-function updateGrid(newGridList)
-{
+/** Removes any existing grid and sets up a new one. 
+Inputs:
+	gridListIn: the new 2-d array to display */
+function updateGrid(gridListIn)
+{	
 	// remove existing grid by deleleting all gridElements.
-	console.log("inside updateGrid");
 	gridContainer.innerHTML = "";
 
-	// set up new grid
-	setUpGrid(newGridList);
-}
-
-/** populate grid with grid elements. Grid has same dimension as terrain array */
-function setUpGrid(gridListIn)
-{
 	// set up number of columns in grid. 
 	gridContainer.style.gridTemplateColumns = "repeat(" + String(gridListIn[0].length) + ", 1fr)";
 
@@ -78,8 +72,8 @@ function setUpGrid(gridListIn)
 			// NOTE: if setting up terrain ONCE and then just updating specific cells 
 				// (i.e where gopher is, then keep this here. Otherwise, set up images each frame.)
 			image = document.createElement("img");
-			image.src = gridListIn[row][col];
-			image.classList.add(".terrainImage");
+			image.src = getImageName(gridListIn[row][col], 0); // initialize board to not active.
+			image.classList.add(".boardImage");
 			div.appendChild(image);
 
 			// add to grid Container
@@ -96,13 +90,12 @@ function animate(){
 	}, 1000/fps);// repaint 1 time a second
 
 	// only go up to a certain number of steps
-	if (trapNum >= trapList.length)
+	if (trapNum >= trapList.length) // will end after last trap has been run
 	{
 		console.log("ANIMATION FINISHED");
 		clearTimeout(timer);
 		return;
 	}
-	console.log("inside animate, trapNum is " + trapNum + " and trapFrameNum is " + trapFrameNum)
 
 	draw();
 	updateVars();
@@ -110,92 +103,96 @@ function animate(){
 
 /** draws one frame */
 function draw(){
-	// if it's a terrain, just show the terrain grid if its the first step, and then update gopher position
-	if (currentList == terrainList)
-	{
-		if (trapFrameNum == 0)
-		{
-			updateGrid(getCurrentlyDisplayedGrid());
-		}
-		redrawGopher([2, 2]);//[frameNum % currentList[trapNum][trapFrameNum].length + 1, frameNum % currentList[trapNum][trapFrameNum].length + 1]) // replace with actual gopher position later
+	// if at the first step of this part, update the grid to reflect the surroundings
+	if (trapFrameNum == 0){
+		updateGrid(getCurrentlyDisplayedGrid());
 	}
 
-	// if it's a trap, then show the trap grid if this is the first time we are showing the trap. Otherwise,
-		// just update the active states of the cell.
-	else if (currentList == trapList)
-	{
-		if (trapFrameNum == 0)
-		{
-			updateGrid(getCurrentlyDisplayedGrid());
-		}
-		// regardless, update active states and draw the gopher
-		updateGrid(getCurrentlyDisplayedGrid());// REMOVE later, only for testing! 
-		//updateActiveStates(trapNum, trapFrameNum); 
-		redrawGopher([2, 2]);//[frameNum % currentList[trapNum][trapFrameNum].length + 1, frameNum % currentList[trapNum][trapFrameNum].length + 1]);
+	// if it's a trap, also update the active/not active state.
+	if (currentList == trapList){
+		updateActiveStates(); 
 	}
+
+	// regardless, updateGopher's state
+	updateGopher();
 }
 
 function updateVars(){
 	trapFrameNum++;
 	// if trapFrameNum is greater than max for that trap frame, then increment trapNum, change grid type, etc.
-	if (trapFrameNum >= currentList[trapNum].length)
+	if (trapFrameNum >= getCurrentGopherList().length) 
 	{
+		console.log("switching to a new trap");
+		// switch between modes
 		if (currentList == terrainList){
 			currentList = trapList;
+			console.log("UH OH");
 		}
 		else if (currentList == trapList){
-			currentList = terrainList;
-			trapNum++;
+//			currentList = terrainList;
+			console.log("FINISHED TRAP #" + trapNum);
+			trapNum++;	// if done with a trap, move on to next trap.
 		}
 		else{
-			console.log("ERROR: invalid currentList!");
+			console.log("ERROR: currentList is not a terrainList or trapList");
 		}
 		// reset trapFrameNum
 		trapFrameNum = 0;
 	}
-	frameNum++;	// step through NOTE: might be able to just take this out? 
 }
 
+
 /** Updates whether or not cells are active or not for the trap part of the animation. */
-function updateActiveStates(trapNum, trapFrameNum)
+function updateActiveStates()
 {
-	//console.log("trap num is " + trapNum + " trapFrameNum is " + trapFrameNum);
 	// make sure this is only being called for traps
 	if (currentList != trapList){
 		console.log("ERROR: Calling updateActiveStates when trapBoard is not showing");
+		return;
 	}
-	else{
-		activeStateArr = currentList[trapNum][trapFrameNum];
-		// loop through, and give appropriate img element the correct src.
-		for (let row = 0; row < activeStateArr.length; row++){
-			for (let col = 0; col < activeStateArr[0].length; col++){
-				cell = [row + 1, col + 1];
-				//console.log("is the cell a valid grid poistion? " + isValidGridPos(cell));
-				//console.log("looking for div " + "div.gridDiv:nth-of-type(" + String(getNth(cell)) +")");
-				//console.log("div is " + $("div.gridDiv:nth-of-type(" + String(getNth(cell)) +")"));
-				image = $("img.terrainImage:nth-of-type(" + String(getNth(cell)) +")");
-
-				//var image = $("div.gridDiv:nth-of-type(" + String(getNth(cell)) +")").lastChild;
-				//console.log("image is " + image);
-				if (image == undefined){
-					console.log("ERROR: image is undefined!");
-					return;
-				}
-				oldSrc = getCurrentlyDisplayedGrid()[row][col]; // change later to actually have the value!!!
-				image.src = oldSrc.substring(0, oldSrc.length - 1) + String(activeStateArr[row][col]);  // create new src
-				//image.src = image.src.substring(0, image.src.length - 1) + String(activeStateArr[row][col]);  // create new src
+	
+	activeStateList = trapList[trapNum][1][trapFrameNum];
+	// loop through, and give appropriate img element the correct src.
+	for (let row = 0; row < activeStateList.length; row++){
+		for (let col = 0; col < activeStateList[0].length; col++){
+			cell = [row + 1, col + 1];
+			if (!isValidGridPos(cell)){
+				console.log("ERROR: Not a valid grid position");
+				return;
 			}
+
+			let image = $("img.boardImage:nth-of-type(" + String(getNth(cell)) +")");
+			// make sure image exists first
+			if (image == undefined){
+				console.log("ERROR: image is undefined!");
+				return;
+			}
+
+			isActiveNum = activeStateList[row][col]; 
+			image.src = getImageName(getCurrentlyDisplayedGrid()[row][col], isActiveNum);  // set image src
 		}
 	}
-	//console.log("updating active states!");
 }
 
-/** moves a gopher from one cell to another */
-function redrawGopher(newGopherCell){
-	if (isValidGridPos(newGopherCell))
-	{
-		$("div.gridDiv:nth-of-type(" + String(getNth(newGopherCell)) +")").prepend(gopher); // prepend so gopher is on top
+/** Moves the gopher and updates its image */
+function updateGopher(){
+	console.log("trapFrameNum is " + trapFrameNum);
+	console.log("currentGopherList is " + getCurrentGopherList());
+	let gopherTuple = getCurrentGopherList()[trapFrameNum];
+	gopher.src = getGopherImageName(gopherTuple); // update gopher image
+	moveGopher(gopherTuple);
+}
 
+/** move the gopher to a given cell */
+function moveGopher(gopherTuple){
+	let cell = [gopherTuple[1] + 1, gopherTuple[0] + 1]; // row first then col
+	// check if the grid position is valid first!
+	console.log(String(gopherTuple));
+	console.log(String(getNth(cell)));
+	console.log(String(cell));
+	if (isValidGridPos(cell))
+	{
+		$("div.gridDiv:nth-of-type(" + String(getNth(cell)) +")").prepend(gopher); // prepend so gopher is on top
 	}
 	else{
 		console.log("ERROR: NOT A VALID GRID POSITION");
@@ -205,12 +202,75 @@ function redrawGopher(newGopherCell){
 
 /** --------------- Helper methods ----------*/
 
+/** Returns the gopher Image name depending on its tuple. */
+function getGopherImageName(gopherTuple){
+	let stateNum = gopherTuple[3];
+	let states = ["dead", "alive", "hit"];
+	return "gopher/gopher" + states[stateNum] + ".png";
+}
+
+/** returns a cell name given a cell code. Cell code is the contents of the array that is passed in 
+NOTE does not take into account rotation! ALSO is NOT used for gophers!
+cellType + angleType+ thickType + isActive. 
+*/
+function getImageName(cellCode, isActiveNum){
+	let cellType = getCellType(cellCode.charAt(0));
+	let thickType = getThickType(cellCode.charAt(2));
+	return cellType + thickType + "/" + cellType + getAngleType(cellCode.charAt(1)) + 
+		thickType + getIsActive(isActiveNum) + ".png";
+}
+
+/** Interpret the char corresponding to cell type */
+function getCellType(cellTypeIn){
+	let cellTypes = ["gopher", "door", "wire", "arrow", "dirt", "food", "floor"];
+	return cellTypes[parseInt(cellTypeIn)];
+}
+
+/** Interpret the char corresponding to angle type */
+function getAngleType(angleTypeIn){
+	if (angleTypeIn == 'x'){
+		return "";
+	}
+	let angleTypes = ["lacute", "racute", "lright", "rright", "lobtuse", "robtuse", "straight"];
+	return angleTypes [parseInt(angleTypeIn)];
+}
+
+/** Interpret the char corresponding to thick type */
+function getThickType(thickTypeIn){
+	if (thickTypeIn == 'x'){
+		return "";
+	}
+	let thickTypes = ["skinny", "normal", "wide"]
+	return thickTypes[parseInt(thickTypeIn)];
+}
+
+/** Return "true" if input is 1, "false" otherwise */
+function getIsActive(isActiveNumIn){
+	if(isActiveNumIn == 1){
+		return "active";
+	}
+	return "inactive";
+}
+
 /** returns a 2d list corresponding to the currently displayed grid. */
 function getCurrentlyDisplayedGrid(){
 	if (currentList == terrainList){
-		return currentList[trapNum][0]; // Just for testing! Remove later! // If a terrain, then don't even use [0].
+		return currentList[0]; // terrain stays same before and after gopher goes into traps
 	}
-	return currentList[trapNum][0]; // If its a trap, the current grid is the first index
+	return currentList[trapNum][0]; // the grid corresponding to the current trap.
+}
+
+/** returns a 2d list consisting of gopher tuples for 
+	this given part of the animation. */
+function getCurrentGopherList(){
+	if (currentList == terrainList){
+		return currentList[1][trapNum]; // overall gopher list is second element, must access this particular gopherList
+	}else if (currentList == trapList){
+		//console.log.log("returning " + currentList[trapNum][2]);
+		return currentList[trapNum][2]; // third element in each tuple is gopherList
+	}else{
+		console.log("ERROR: currentList is not a terrainList or trapList");
+	}
 }
 
 /** determines if the inputted list is a valid grid position. 
@@ -231,46 +291,7 @@ Inputs:
 	gridPos: [row, col] */
 function getNth(gridPos){
  	return (gridPos[0] - 1) * getCurrentlyDisplayedGrid()[0].length + gridPos[1]; // row * total num columns + col
-}
-
-
-/** -------this method will in reality be written to the file using python---------- */
-function getInput(){
-	terrainList = [[[["testImages/environment/environment.PNG", "testImages/environment/environment.PNG", "testImages/environment/environment.PNG",  "testImages/environment/environment.PNG"],
-				["testImages/environment/environment.PNG", "testImages/environment/environment.PNG", "testImages/environment/environment.PNG",  "testImages/environment/environment.PNG"],
-				["testImages/environment/environment.PNG", "testImages/environment/environment.PNG", "testImages/environment/environment.PNG",  "testImages/environment/environment.PNG"]]],
-				[[["testImages/adversaryidle/adversaryidle1.PNG", "testImages/environment/environment.PNG", "testImages/environment/environment.PNG",  "testImages/environment/environment.PNG"],
-				["testImages/environment/environment.PNG", "testImages/environment/environment.PNG", "testImages/environment/environment.PNG",  "testImages/environment/environment.PNG"],
-				["testImages/environment/environment.PNG", "testImages/environment/environment.PNG", "testImages/environment/environment.PNG",  "testImages/environment/environment.PNG"],
-				["testImages/adversarymad/adversarymad1.PNG", "testImages/environment/environment.PNG", "testImages/environment/environment.PNG",  "testImages/environment/environment.PNG"]]]];
-	trapList = [[[["testImages/adversarymad/adversarymad1.PNG", "testImages/environment/environment.PNG", "testImages/environment/environment.PNG"],
-				["testImages/environment/environment.PNG", "testImages/environment/environment.PNG", "testImages/environment/environment.PNG"],
-				["testImages/environment/environment.PNG", "testImages/environment/environment.PNG", "testImages/environment/environment.PNG"]],
-				[["testImages/adversarymad/adversarymad2.PNG", "testImages/environment/environment.PNG", "testImages/environment/environment.PNG"],
-				["testImages/environment/environment.PNG", "testImages/environment/environment.PNG", "testImages/environment/environment.PNG"],
-				["testImages/environment/environment.PNG", "testImages/environment/environment.PNG", "testImages/environment/environment.PNG"]],
-				[["testImages/adversarymad/adversarymad3.PNG", "testImages/environment/environment.PNG", "testImages/environment/environment.PNG"],
-				["testImages/environment/environment.PNG", "testImages/environment/environment.PNG", "testImages/environment/environment.PNG"],
-				["testImages/environment/environment.PNG", "testImages/environment/environment.PNG", "testImages/environment/environment.PNG"]],
-				[["testImages/adversarymad/adversarymad4.PNG", "testImages/environment/environment.PNG", "testImages/environment/environment.PNG"],
-				["testImages/environment/environment.PNG", "testImages/environment/environment.PNG", "testImages/environment/environment.PNG"],
-				["testImages/environment/environment.PNG", "testImages/environment/environment.PNG", "testImages/environment/environment.PNG"]],
-				[["testImages/adversarymad/adversarymad5.PNG", "testImages/environment/environment.PNG", "testImages/environment/environment.PNG"],
-				["testImages/environment/environment.PNG", "testImages/environment/environment.PNG", "testImages/environment/environment.PNG"],
-				["testImages/environment/environment.PNG", "testImages/environment/environment.PNG", "testImages/environment/environment.PNG"]],
-				[["testImages/adversarymad/adversarymad6.PNG", "testImages/environment/environment.PNG", "testImages/environment/environment.PNG"],
-				["testImages/environment/environment.PNG", "testImages/environment/environment.PNG", "testImages/environment/environment.PNG"],
-				["testImages/environment/environment.PNG", "testImages/environment/environment.PNG", "testImages/environment/environment.PNG"]],
-				[["testImages/adversarymad/adversarymad7.PNG", "testImages/environment/environment.PNG", "testImages/environment/environment.PNG"],
-				["testImages/environment/environment.PNG", "testImages/environment/environment.PNG", "testImages/environment/environment.PNG"],
-				["testImages/environment/environment.PNG", "testImages/environment/environment.PNG", "testImages/environment/environment.PNG"]]],
-				[[["testImages/adversaryattack/adversaryattack7.PNG", "testImages/environment/environment.PNG", "testImages/environment/environment.PNG"],
-				["testImages/environment/environment.PNG", "testImages/environment/environment.PNG", "testImages/environment/environment.PNG"],
-				["testImages/environment/environment.PNG", "testImages/adversaryattack/adversaryattack7.PNG", "testImages/environment/environment.PNG"]]]];
-	/*[["testImages/environment/environment.PNG", "testImages/heroattack/heroattack1.PNG"],
-				["testImages/adversaryidle/adversaryidle1.PNG", "testImages/adversaryattack/adversaryattack1.PNG"]];*/
-	/*[["testImages/environment/environment.PNG", "testImages/environment/environment.PNG"],
-				["testImages/environment/environment.PNG", "testImages/environment/environment.PNG"]];*/
-	/*[["testImages/environment/environment.PNG", "testImages/heroattack/heroattack1.PNG"],
-				["testImages/adversaryidle/adversaryidle1.PNG", "testImages/adversaryattack/adversaryattack1.PNG"]];*/
+}function getInput(){
+trapList = [[[['6xxx', '2224', '2216'], ['6xxx', '5xxx', '6xxx'], ['6xxx', '6xxx', '2624'], ['6xxx', '1xx0', '3014'], ['4xxx', '4xxx', '4xxx']], [[[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]], [[1, 4, 0, 1], [1, 3, 0, 1], [1, 2, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 2, 4, 1], [1, 3, 4, 1], [1, 4, 4, 1]]], [[['3210', '2610', '2616'], ['2220', '5xxx', '6xxx'], ['2200', '6xxx', '2200'], ['6xxx', '1xx0', '3020'], ['4xxx', '4xxx', '4xxx']], [[[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]], [[1, 4, 0, 1], [1, 3, 0, 1], [1, 2, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 2, 4, 1], [1, 3, 4, 1], [1, 4, 4, 1]]], [[['3006', '3020', '2216'], ['3304', '5xxx', '2206'], ['3512', '6xxx', '3514'], ['3310', '1xx0', '2224'], ['4xxx', '4xxx', '4xxx']], [[[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]], [[1, 4, 0, 1], [1, 3, 0, 1], [1, 2, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 2, 4, 1], [1, 3, 4, 1], [1, 4, 4, 1]]], [[['6xxx', '2624', '6xxx'], ['6xxx', '5xxx', '3202'], ['3312', '6xxx', '6xxx'], ['6xxx', '1xx0', '2200'], ['4xxx', '4xxx', '4xxx']], [[[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 1], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 1], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]], [[1, 4, 0, 1], [1, 3, 0, 1], [1, 2, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 2, 4, 1], [1, 3, 4, 1], [1, 4, 4, 1]]], [[['6xxx', '2212', '6xxx'], ['6xxx', '5xxx', '3300'], ['2202', '6xxx', '3406'], ['6xxx', '1xx0', '2226'], ['4xxx', '4xxx', '4xxx']], [[[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]], [[1, 4, 0, 1], [1, 3, 0, 1], [1, 2, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 2, 4, 1], [1, 3, 4, 1], [1, 4, 4, 1]]], [[['6xxx', '6xxx', '2210'], ['2606', '5xxx', '6xxx'], ['2212', '6xxx', '3006'], ['6xxx', '1xx0', '2612'], ['4xxx', '4xxx', '4xxx']], [[[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 1], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 1], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]], [[1, 4, 0, 1], [1, 3, 0, 1], [1, 2, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 2, 4, 1], [1, 3, 4, 1], [1, 4, 4, 1]]], [[['3226', '6xxx', '6xxx'], ['6xxx', '5xxx', '6xxx'], ['2602', '6xxx', '2206'], ['3426', '1xx0', '2216'], ['4xxx', '4xxx', '4xxx']], [[[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [1, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [1, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]], [[1, 4, 0, 1], [1, 3, 0, 1], [1, 2, 0, 1], [1, 3, 4, 1], [1, 4, 4, 1]]], [[['6xxx', '6xxx', '6xxx'], ['3210', '5xxx', '3110'], ['6xxx', '6xxx', '3002'], ['3024', '1xx0', '6xxx'], ['4xxx', '4xxx', '4xxx']], [[[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]], [[1, 4, 0, 1], [1, 3, 0, 1], [1, 2, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 2, 4, 1], [1, 3, 4, 1], [1, 4, 4, 1]]], [[['3226', '3402', '6xxx'], ['3306', '5xxx', '6xxx'], ['3316', '6xxx', '6xxx'], ['3526', '1xx0', '6xxx'], ['4xxx', '4xxx', '4xxx']], [[[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [1, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [1, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]], [[1, 4, 0, 1], [1, 3, 0, 1], [1, 2, 0, 1], [1, 3, 4, 1], [1, 4, 4, 1]]], [[['3500', '6xxx', '2212'], ['2622', '5xxx', '3006'], ['3420', '6xxx', '3506'], ['6xxx', '1xx0', '6xxx'], ['4xxx', '4xxx', '4xxx']], [[[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]], [[1, 4, 0, 1], [1, 3, 0, 1], [1, 2, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 2, 4, 1], [1, 3, 4, 1], [1, 4, 4, 1]]], [[['3422', '3012', '3120'], ['6xxx', '5xxx', '2622'], ['3410', '6xxx', '3120'], ['2614', '1xx0', '3526'], ['4xxx', '4xxx', '4xxx']], [[[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]], [[1, 4, 0, 1], [1, 3, 0, 1], [1, 2, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 2, 4, 1], [1, 3, 4, 1], [1, 4, 4, 1]]], [[['6xxx', '3004', '2602'], ['6xxx', '5xxx', '2616'], ['2222', '6xxx', '2614'], ['3216', '1xx0', '6xxx'], ['4xxx', '4xxx', '4xxx']], [[[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [1, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [1, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]], [[1, 4, 0, 1], [1, 3, 0, 1], [1, 2, 0, 1], [1, 3, 4, 1], [1, 4, 4, 1]]], [[['6xxx', '6xxx', '2626'], ['3212', '5xxx', '3312'], ['6xxx', '6xxx', '2216'], ['2604', '1xx0', '6xxx'], ['4xxx', '4xxx', '4xxx']], [[[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]], [[1, 4, 0, 1], [1, 3, 0, 1], [1, 2, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 2, 4, 1], [1, 3, 4, 1], [1, 4, 4, 1]]], [[['3020', '3204', '6xxx'], ['3302', '5xxx', '6xxx'], ['6xxx', '6xxx', '3226'], ['2224', '1xx0', '3516'], ['4xxx', '4xxx', '4xxx']], [[[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [1, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [1, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]], [[1, 4, 0, 1], [1, 3, 0, 1], [1, 2, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 2, 4, 1], [1, 3, 4, 1], [1, 4, 4, 1]]], [[['3020', '2200', '6xxx'], ['3400', '5xxx', '2220'], ['2226', '6xxx', '3424'], ['2606', '1xx0', '3016'], ['4xxx', '4xxx', '4xxx']], [[[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [1, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [1, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]], [[1, 4, 0, 1], [1, 3, 0, 1], [1, 2, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 2, 4, 1], [1, 3, 4, 1], [1, 4, 4, 1]]], [[['2202', '2222', '2626'], ['2622', '5xxx', '2626'], ['2204', '6xxx', '6xxx'], ['3212', '1xx0', '6xxx'], ['4xxx', '4xxx', '4xxx']], [[[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]], [[1, 4, 0, 1], [1, 3, 0, 1], [1, 2, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 2, 4, 1], [1, 3, 4, 1], [1, 4, 4, 1]]], [[['3500', '3202', '6xxx'], ['3224', '5xxx', '2612'], ['2606', '6xxx', '3124'], ['3110', '1xx0', '6xxx'], ['4xxx', '4xxx', '4xxx']], [[[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]], [[1, 4, 0, 1], [1, 3, 0, 1], [1, 2, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 2, 4, 1], [1, 3, 4, 1], [1, 4, 4, 1]]], [[['2222', '2222', '3202'], ['6xxx', '5xxx', '6xxx'], ['6xxx', '6xxx', '2200'], ['6xxx', '1xx0', '3020'], ['4xxx', '4xxx', '4xxx']], [[[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]], [[1, 4, 0, 1], [1, 3, 0, 1], [1, 2, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 2, 4, 1], [1, 3, 4, 1], [1, 4, 4, 1]]], [[['2612', '6xxx', '3020'], ['2224', '5xxx', '6xxx'], ['2602', '6xxx', '2224'], ['2606', '1xx0', '3016'], ['4xxx', '4xxx', '4xxx']], [[[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [1, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [1, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]], [[1, 4, 0, 1], [1, 3, 0, 1], [1, 2, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 2, 4, 1], [1, 3, 4, 1], [1, 4, 4, 1]]], [[['2204', '3320', '6xxx'], ['3002', '5xxx', '3214'], ['6xxx', '6xxx', '6xxx'], ['3412', '1xx0', '6xxx'], ['4xxx', '4xxx', '4xxx']], [[[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]], [[1, 4, 0, 1], [1, 3, 0, 1], [1, 2, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 2, 4, 1], [1, 3, 4, 1], [1, 4, 4, 1]]], [[['2220', '3026', '2224'], ['3312', '5xxx', '3302'], ['6xxx', '6xxx', '6xxx'], ['2226', '1xx0', '2600'], ['4xxx', '4xxx', '4xxx']], [[[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [1, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [1, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]], [[1, 4, 0, 1], [1, 3, 0, 1], [1, 2, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 2, 4, 1], [1, 3, 4, 1], [1, 4, 4, 1]]], [[['6xxx', '2622', '6xxx'], ['3502', '5xxx', '6xxx'], ['3002', '6xxx', '6xxx'], ['3020', '1xx0', '2626'], ['4xxx', '4xxx', '4xxx']], [[[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 1], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 1], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]], [[1, 4, 0, 1], [1, 3, 0, 1], [1, 2, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 2, 4, 1], [1, 3, 4, 1], [1, 4, 4, 1]]], [[['2600', '6xxx', '6xxx'], ['3024', '5xxx', '6xxx'], ['3416', '6xxx', '6xxx'], ['3022', '1xx0', '3420'], ['4xxx', '4xxx', '4xxx']], [[[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]], [[1, 4, 0, 1], [1, 3, 0, 1], [1, 2, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 2, 4, 1], [1, 3, 4, 1], [1, 4, 4, 1]]], [[['2222', '6xxx', '3020'], ['2606', '5xxx', '6xxx'], ['3222', '6xxx', '6xxx'], ['2214', '1xx0', '3014'], ['4xxx', '4xxx', '4xxx']], [[[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [1, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [1, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]], [[1, 4, 0, 1], [1, 3, 0, 1], [1, 2, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 2, 4, 1], [1, 3, 4, 1], [1, 4, 4, 1]]], [[['2612', '3106', '3102'], ['3316', '5xxx', '6xxx'], ['6xxx', '6xxx', '2216'], ['2220', '1xx0', '2604'], ['4xxx', '4xxx', '4xxx']], [[[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]], [[1, 4, 0, 1], [1, 3, 0, 1], [1, 2, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 2, 4, 1], [1, 3, 4, 1], [1, 4, 4, 1]]], [[['2212', '2214', '6xxx'], ['2222', '5xxx', '6xxx'], ['3324', '6xxx', '6xxx'], ['6xxx', '1xx0', '6xxx'], ['4xxx', '4xxx', '4xxx']], [[[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]], [[1, 4, 0, 1], [1, 3, 0, 1], [1, 2, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 2, 4, 1], [1, 3, 4, 1], [1, 4, 4, 1]]], [[['3206', '6xxx', '3112'], ['2622', '5xxx', '2200'], ['6xxx', '6xxx', '3300'], ['3516', '1xx0', '2204'], ['4xxx', '4xxx', '4xxx']], [[[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [1, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [1, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]], [[1, 4, 0, 1], [1, 3, 0, 1], [1, 2, 0, 1], [1, 3, 4, 1], [1, 4, 4, 1]]], [[['6xxx', '3310', '2622'], ['2202', '5xxx', '2220'], ['3414', '6xxx', '3322'], ['3210', '1xx0', '3300'], ['4xxx', '4xxx', '4xxx']], [[[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]], [[1, 4, 0, 1], [1, 3, 0, 1], [1, 2, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 2, 4, 1], [1, 3, 4, 1], [1, 4, 4, 1]]], [[['3324', '3112', '6xxx'], ['3214', '5xxx', '3210'], ['6xxx', '6xxx', '2212'], ['2606', '1xx0', '6xxx'], ['4xxx', '4xxx', '4xxx']], [[[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [1, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [1, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]], [[1, 4, 0, 1], [1, 3, 0, 1], [1, 2, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 2, 4, 1], [1, 3, 4, 1], [1, 4, 4, 1]]], [[['3412', '6xxx', '2622'], ['3026', '5xxx', '3226'], ['6xxx', '6xxx', '3026'], ['6xxx', '1xx0', '2226'], ['4xxx', '4xxx', '4xxx']], [[[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]], [[1, 4, 0, 1], [1, 3, 0, 1], [1, 2, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 2, 4, 1], [1, 3, 4, 1], [1, 4, 4, 1]]], [[['2226', '3420', '2610'], ['2626', '5xxx', '6xxx'], ['6xxx', '6xxx', '3102'], ['3500', '1xx0', '6xxx'], ['4xxx', '4xxx', '4xxx']], [[[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]], [[1, 4, 0, 1], [1, 3, 0, 1], [1, 2, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 2, 4, 1], [1, 3, 4, 1], [1, 4, 4, 1]]], [[['6xxx', '2614', '2204'], ['2616', '5xxx', '3206'], ['3022', '6xxx', '2210'], ['6xxx', '1xx0', '3202'], ['4xxx', '4xxx', '4xxx']], [[[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 1], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 1], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]], [[1, 4, 0, 1], [1, 3, 0, 1], [1, 2, 0, 1], [1, 3, 4, 1], [1, 4, 4, 1]]], [[['2200', '3000', '2204'], ['2614', '5xxx', '3122'], ['2216', '6xxx', '2220'], ['2610', '1xx0', '2222'], ['4xxx', '4xxx', '4xxx']], [[[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 1], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 1], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 1], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 1], [0, 0, 0], [0, 0, 0]]], [[1, 4, 0, 1], [1, 3, 0, 1], [1, 2, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 2, 4, 1], [1, 3, 4, 1], [1, 4, 4, 1]]], [[['2216', '3426', '2220'], ['6xxx', '5xxx', '2620'], ['6xxx', '6xxx', '2202'], ['6xxx', '1xx0', '6xxx'], ['4xxx', '4xxx', '4xxx']], [[[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]], [[1, 4, 0, 1], [1, 3, 0, 1], [1, 2, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 2, 4, 1], [1, 3, 4, 1], [1, 4, 4, 1]]], [[['2600', '2604', '3100'], ['6xxx', '5xxx', '3204'], ['2612', '6xxx', '6xxx'], ['6xxx', '1xx0', '2606'], ['4xxx', '4xxx', '4xxx']], [[[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 1], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 1], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]], [[1, 4, 0, 1], [1, 3, 0, 1], [1, 2, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 2, 4, 1], [1, 3, 4, 1], [1, 4, 4, 1]]], [[['2600', '2600', '3404'], ['3200', '5xxx', '3310'], ['2224', '6xxx', '6xxx'], ['2222', '1xx0', '6xxx'], ['4xxx', '4xxx', '4xxx']], [[[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]], [[1, 4, 0, 1], [1, 3, 0, 1], [1, 2, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 2, 4, 1], [1, 3, 4, 1], [1, 4, 4, 1]]], [[['3022', '6xxx', '6xxx'], ['2600', '5xxx', '6xxx'], ['6xxx', '6xxx', '6xxx'], ['3500', '1xx0', '6xxx'], ['4xxx', '4xxx', '4xxx']], [[[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]], [[1, 4, 0, 1], [1, 3, 0, 1], [1, 2, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 2, 4, 1], [1, 3, 4, 1], [1, 4, 4, 1]]], [[['2624', '6xxx', '6xxx'], ['2610', '5xxx', '2216'], ['3220', '6xxx', '3404'], ['6xxx', '1xx0', '6xxx'], ['4xxx', '4xxx', '4xxx']], [[[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]], [[1, 4, 0, 1], [1, 3, 0, 1], [1, 2, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 2, 4, 1], [1, 3, 4, 1], [1, 4, 4, 1]]], [[['3400', '6xxx', '2604'], ['2616', '5xxx', '6xxx'], ['3506', '6xxx', '2206'], ['6xxx', '1xx0', '2612'], ['4xxx', '4xxx', '4xxx']], [[[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 1], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 1], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]], [[1, 4, 0, 1], [1, 3, 0, 1], [1, 2, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 2, 4, 1], [1, 3, 4, 1], [1, 4, 4, 1]]], [[['2214', '3222', '3416'], ['6xxx', '5xxx', '2624'], ['2612', '6xxx', '6xxx'], ['3212', '1xx0', '2612'], ['4xxx', '4xxx', '4xxx']], [[[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 1], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 1], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]], [[1, 4, 0, 1], [1, 3, 0, 1], [1, 2, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 2, 4, 1], [1, 3, 4, 1], [1, 4, 4, 1]]], [[['2204', '6xxx', '6xxx'], ['3522', '5xxx', '3112'], ['3004', '6xxx', '3210'], ['6xxx', '1xx0', '2202'], ['4xxx', '4xxx', '4xxx']], [[[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 1], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 1], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]], [[1, 4, 0, 1], [1, 3, 0, 1], [1, 2, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 2, 4, 1], [1, 3, 4, 1], [1, 4, 4, 1]]], [[['3416', '3114', '2624'], ['2602', '5xxx', '6xxx'], ['3002', '6xxx', '2614'], ['2206', '1xx0', '6xxx'], ['4xxx', '4xxx', '4xxx']], [[[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [1, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [1, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]], [[1, 4, 0, 1], [1, 3, 0, 1], [1, 2, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 2, 4, 1], [1, 3, 4, 1], [1, 4, 4, 1]]], [[['2616', '3514', '3500'], ['2614', '5xxx', '2214'], ['6xxx', '6xxx', '6xxx'], ['2610', '1xx0', '6xxx'], ['4xxx', '4xxx', '4xxx']], [[[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]], [[1, 4, 0, 1], [1, 3, 0, 1], [1, 2, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 2, 4, 1], [1, 3, 4, 1], [1, 4, 4, 1]]], [[['3322', '6xxx', '3216'], ['6xxx', '5xxx', '6xxx'], ['3302', '6xxx', '6xxx'], ['2614', '1xx0', '6xxx'], ['4xxx', '4xxx', '4xxx']], [[[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]], [[1, 4, 0, 1], [1, 3, 0, 1], [1, 2, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 2, 4, 1], [1, 3, 4, 1], [1, 4, 4, 1]]], [[['6xxx', '6xxx', '3420'], ['3410', '5xxx', '6xxx'], ['2602', '6xxx', '3216'], ['6xxx', '1xx0', '6xxx'], ['4xxx', '4xxx', '4xxx']], [[[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]], [[1, 4, 0, 1], [1, 3, 0, 1], [1, 2, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 2, 4, 1], [1, 3, 4, 1], [1, 4, 4, 1]]], [[['2220', '2610', '3320'], ['3006', '5xxx', '2620'], ['6xxx', '6xxx', '3114'], ['2600', '1xx0', '2222'], ['4xxx', '4xxx', '4xxx']], [[[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 1], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 1], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]], [[1, 4, 0, 1], [1, 3, 0, 1], [1, 2, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 2, 4, 1], [1, 3, 4, 1], [1, 4, 4, 1]]], [[['3516', '3322', '2210'], ['2624', '5xxx', '6xxx'], ['3104', '6xxx', '6xxx'], ['2616', '1xx0', '3000'], ['4xxx', '4xxx', '4xxx']], [[[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [1, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [1, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]], [[1, 4, 0, 1], [1, 3, 0, 1], [1, 2, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 2, 4, 1], [1, 3, 4, 1], [1, 4, 4, 1]]], [[['3510', '3514', '2604'], ['6xxx', '5xxx', '2604'], ['6xxx', '6xxx', '6xxx'], ['6xxx', '1xx0', '6xxx'], ['4xxx', '4xxx', '4xxx']], [[[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]], [[1, 4, 0, 1], [1, 3, 0, 1], [1, 2, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 2, 4, 1], [1, 3, 4, 1], [1, 4, 4, 1]]], [[['3100', '2612', '2610'], ['6xxx', '5xxx', '2600'], ['2210', '6xxx', '6xxx'], ['3520', '1xx0', '6xxx'], ['4xxx', '4xxx', '4xxx']], [[[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]], [[1, 4, 0, 1], [1, 3, 0, 1], [1, 2, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 2, 4, 1], [1, 3, 4, 1], [1, 4, 4, 1]]], [[['3400', '3502', '3006'], ['6xxx', '5xxx', '3322'], ['3512', '6xxx', '6xxx'], ['2604', '1xx0', '6xxx'], ['4xxx', '4xxx', '4xxx']], [[[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]], [[1, 4, 0, 1], [1, 3, 0, 1], [1, 2, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 1, 0, 1], [1, 2, 4, 1], [1, 3, 4, 1], [1, 4, 4, 1]]], [[['2622', '3314', '6xxx'], ['3106', '5xxx', '3216'], ['3204', '6xxx', '2214'], ['3320', '1xx0', '3012'], ['4xxx', '4xxx', '4xxx']], [[[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 1], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]], [[1, 4, 0, 1], [1, 3, 0, 1], [1, 2, 0, 0]]]];
+terrainList = [[['4xxx', '4xxx', '4xxx', '4xxx', '4xxx'], ['4xxx', '4xxx', '4xxx', '4xxx', '4xxx'], ['4xxx', '4xxx', '4xxx', '4xxx', '4xxx'], ['4xxx', '4xxx', '4xxx', '4xxx', '4xxx'], ['4xxx', '4xxx', '4xxx', '4xxx', '4xxx']], []];
 }
