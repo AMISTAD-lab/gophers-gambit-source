@@ -152,7 +152,7 @@ def addTrapToTerrain(terrain, start_x, start_y, trapboard):
         raise Exception("This board does not fit")
 
 ## still need to check in the case that the connected wire cells are the same thicktype
-def checkBrokenTrap(trap, wire):
+def checkBrokenTrap(trap):
     """
     Helper function for gopherProbEnter.
     Covers the base cases for a broken trap--traps that pose no danger to the gopher.
@@ -199,7 +199,6 @@ def checkBrokenTrap(trap, wire):
             else:
                 return 0.9 # or 1?
     
-    
 
 def gopherProbEnter1(trap):
     """
@@ -209,6 +208,7 @@ def gopherProbEnter1(trap):
     ## WORKING TRAP CASES
     ## Case: only arrows with no wires, but arrows are connected to the gate so they still fire
 
+    
     if (wireThickTypes[2] and arrowThickTypes[2] > 0) and all(i is 0 for i in wireThickTypes[:2]) and all(j is 0 for j in arrowThickTypes[:2]):
         print("All wide thickness. very thicc. Highest danger and low probability of entering")
         return 0.1
