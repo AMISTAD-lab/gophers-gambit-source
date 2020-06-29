@@ -33,7 +33,7 @@ html, body{
 	display: flex; /* makes z-index work */
 	justify-content: center;
 	align-items: center;
-	border: 2px solid black;
+	/* border: 2px solid black;*/ /* Uncomment for grid lines */
 	position: relative;
 	/*border-radius: 3px;*/
 }
