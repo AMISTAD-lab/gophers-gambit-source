@@ -64,7 +64,7 @@ class Board(metaclass = ABCMeta):
                 allcells[y][x] = self.board[y][x].getBaseInfo()
         return allcells
 
-    def emptyBoard(self, rowLength, colLength):
+    def emptyBoard(self, rowLength, colLength):  
         """generates a board full of dirt for a default terrain"""
         board = []
         for y in range(colLength):

@@ -152,6 +152,8 @@ def addTrapToTerrain(terrain, start_x, start_y, trapboard):
         raise Exception("This board does not fit")
 
 ## still need to check in the case that the connected wire cells are the same thicktype
+
+## helper
 def checkBrokenTrap(trap):
     """
     USE IN ALL GOPHER ENTER FUNCS
@@ -200,6 +202,8 @@ def checkBrokenTrap(trap):
             else:
                 return 0.9 # or 1?
 
+## Cindy TODO: Change the reused code in both functions
+## Fix BrokenTrapHelper to a return type and import the arrays
 
 def gopherProbEnter1(trap):
     """
@@ -213,6 +217,28 @@ def gopherProbEnter1(trap):
     checkBrokenTrap(trap)
     ## WORKING TRAP CASES
     ## Case: only arrows with no wires, but arrows are connected to the gate so they still fire
+    allCells = flatten(trap.board[y][x])
+    wireCells = []
+    arrowCells = []
+    arrowLoc = [] #will be list of lists
+    doorLoc = []
+    wireThickTypes = [0,0,0]
+    arrowThickTypes = [0,0,0]
+    # [skinny, normal, wide]
+
+    # Collect the cells' info
+    for cell in allCells: # flattens board into 1d  array
+        if cell.cellType == CellType.wire:
+            wireCells.append(cell)
+        elif cell.cellType == CellType.arrow:
+            arrowCells.append(cell)
+            arrowLoc.append(cell)
+        elif cell.cellType == CellType.door:
+            doorLoc.append(cell)
+
+    for cell in wireCells:
+        wireThickTypes[cell.thickType.value] += 1
+    for cell in arrowCells:
 
     if (wireThickTypes[2] and arrowThickTypes[2] > 0) and all(i is 0 for i in wireThickTypes[:2]) and all(j is 0 for j in arrowThickTypes[:2]):
         print("All wide thickness. very thicc. Highest danger and low probability of entering")

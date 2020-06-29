@@ -31,7 +31,6 @@ class Gopher:
     def updateCell(self):
         if self.hit:
             self.hit = False
-
         if self.entering:
             self.rotationType = RotationType.up
             self.enter()
