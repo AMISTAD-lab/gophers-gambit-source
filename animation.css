@@ -1,0 +1,48 @@
+/** animation.css
+Stylesheet for third experiment's animation.
+Created on June 23, 2020 by Cynthia Hom
+*/
+
+*{ /** By default, take up entirety of container*/
+	padding: 0;
+	margin: 0;
+	height: 100%;
+	width: 100%;
+	box-sizing: border-box;
+}
+
+html, body{
+	/*background-color: red;*/
+}
+
+#gridContainer{
+	display: grid;
+	/*grid-gap: 1px; show grid lines */
+}
+
+/* Make the gopher appear on top of everything else */
+#gopher{
+	position: absolute;
+	left: 0px;
+	top: 0px;
+	z-index: 1;
+}
+
+/* Each div in the grid layout */
+.gridDiv{
+	display: flex; /* makes z-index work */
+	justify-content: center;
+	align-items: center;
+	border: 2px solid black;
+	position: relative;
+	/*border-radius: 3px;*/
+}
+
+/* One image in the grid */
+.gridImage{
+	position: absolute;
+	left: 0px;
+	top: 0px;
+	z-index: 0;
+}
+
