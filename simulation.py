@@ -2,9 +2,10 @@ from classGopher import *
 
 import algorithms as alg
 import math as m
+import numpy as np
 
-gopher = None
-
+gopher = None    
+    
 def simulateTrap(trap, intention, maxSteps=20):
     center_x = m.ceil(trap.rowLength / 2) - 1
     global gopher
@@ -20,7 +21,7 @@ def simulateTrap(trap, intention, maxSteps=20):
         gopherStuff.append(gopherInfo)
         step += 1
     inSimulation = False
-    return [initialboard, activeCells, gopherStuff, gopher.alive]
+    return [initialboard, activeCells, gopherStuff, gopher.alive, gopher.hasEaten]
 
 def updateSimulation(trap, step):
     global gopher
@@ -29,7 +30,7 @@ def updateSimulation(trap, step):
         cell.updateCell(step)
     state = trap.saveState()
     state.append([0]*trap.rowLength) #add inactive dirt beneath trap
-    gopherInfo = (gopher.x, gopher.y, gopher.rotationType.value, gopher.state())
+    gopherInfo = [gopher.x, gopher.y, gopher.rotationType.value, gopher.state()]
     return gopherInfo, state
 
 

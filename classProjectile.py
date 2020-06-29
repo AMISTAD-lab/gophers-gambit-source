@@ -45,11 +45,11 @@ class Projectile:
         """assigns strength based on thick type"""
         #assigning random strength values, definitely subject to change
         if(thicktype == ThickType.skinny):
-            return .2
+            return 0.3
         elif(thicktype == ThickType.normal):
-            return .4
+            return 0.6
         elif(thicktype == ThickType.wide):
-            return .6
+            return 0.9
         else:
             raise Exception("No bueno")
 

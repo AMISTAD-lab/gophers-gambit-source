@@ -1,23 +1,10 @@
 import numpy as np
 import shutil as sh 
-from classTerrain import *
-import simulation as s
+
 
 # random walk stuff here! (generate terrainList)
 
-def visualRun(rowLength, colLength, intention, trapList):
-    trapInfo = []
-    trapboardList = []
-    for trap, x, y in trapList:
-        ib, ac, gc, alive = s.simulateTrap(trap, intention, maxSteps=20)
-        trapInfo.append([ib, ac, gc])
-        trapboardList.append([ib, x, y])
-    terrain = Terrain(rowLength, colLength, trapboardList)
-    #create random walk frames
-    gopherWalkCells = []
-    #####
-    terrainInfo = [terrain.board, gopherWalkCells]
-    return trapInfo, terrainInfo
+
 
 newjsFileName = "animation.js"
 jsTemplateName = "template.js"

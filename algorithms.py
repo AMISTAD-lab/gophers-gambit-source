@@ -199,7 +199,8 @@ def checkBrokenTrap(trap):
                     return 0.7 # or a probability that reflects the 
             else:
                 return 0.9 # or 1?
-    
+
+
 def gopherProbEnter1(trap):
     """
     This returns the probability that the gopher will enter for working traps.
@@ -212,6 +213,7 @@ def gopherProbEnter1(trap):
     checkBrokenTrap(trap)
     ## WORKING TRAP CASES
     ## Case: only arrows with no wires, but arrows are connected to the gate so they still fire
+
     if (wireThickTypes[2] and arrowThickTypes[2] > 0) and all(i is 0 for i in wireThickTypes[:2]) and all(j is 0 for j in arrowThickTypes[:2]):
         print("All wide thickness. very thicc. Highest danger and low probability of entering")
         return 0.1

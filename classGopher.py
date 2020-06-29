@@ -16,6 +16,7 @@ class Gopher:
         self.entering = False
         self.leaving = False
         self.left = False
+        self.hasEaten = False
         self.eatingTimer = 0
 
     def state(self):
@@ -73,6 +74,7 @@ class Gopher:
         self.eatingTimer -= 1
         #increase food/hunger measure (if we care about that)
         if self.eatingTimer <= 0:
+            self.hasEaten = True
             self.leaving = True
             self.entering = False
 
