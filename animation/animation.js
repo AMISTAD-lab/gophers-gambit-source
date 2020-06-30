@@ -3,9 +3,7 @@ Created on June 23, 2020 by Cynthia Hom
 js file for the third experiment's animation
 
 Todo: 
-One frame of all dirt. Gopher "moves to right", everything moves to left.
-Make it work for width 3 height 4 traps
-Test everything using lots of different traps! */
+Test throuroughly. Make the ending screens work */
 
 
 // get elements from the html
@@ -96,13 +94,14 @@ function animate(){
 /** Draws one frame */
 function draw(){
 	console.log("trapFrameNum is " + trapFrameNum);
-	//if (frameNum < getNumStartSteps())
-	//{
-		// make gopher move in 
-		//moveGopher(gopherTuple)
-	//}
+	//console.log("frameNum is " + frameNum);
+	if (frameNum < getNumStartSteps())
+	{
+		// show the first trap
+		updateGrid(trapList[trapNum][0]);
+	}
 	// if moving to a trap or moving away from trap, update the grid and make gopher rotate. 
-	if (areChangingTraps())
+	else if (areChangingTraps())
 	{
 		updateGrid(getCurrentlyDisplayedGrid());
 	}
@@ -119,11 +118,11 @@ function updateVars(){
 	frameNum++;
 	trapFrameNum++;
 	// if we have just finished starting sequence, then don't make gopher "move to" the trap again!
-	//if (frameNum == getNumStartSteps()){
-		//trapFrameNum = getTrapWidth();
-	//}
+	if (frameNum == getNumStartSteps()){
+		trapFrameNum = getTrapWidth();
+	}
 	// if done with this trap, then switch traps. If on the last trap, don't make gopher go to next trap. Note: not sure if this will work as well for hunger. 
-	if ((trapFrameNum > getCurrentGopherList().length + 2 * getTrapWidth()) ||
+	else if ((trapFrameNum > getCurrentGopherList().length + 2 * getTrapWidth()) ||
 		(trapNum == trapList.length - 1 && trapFrameNum >= getCurrentGopherList().length + getTrapWidth()))
 	{
 		console.log("FINISHED TRAP #" + trapNum);
@@ -164,13 +163,22 @@ function updateActiveStates()
 
 /** Moves the gopher and updates its image */
 function updateGopher(){
+	// don't update the gopher on the very first frame of the simulation.
+	if (frameNum <= 0)
+		return;
+
 	let gopherTuple = []
 	// if we are changing traps, make gopher turn to right and be in center of trap area.
 		// otherwise, make gopher do what it is supposed to according to input. 
-	if (areChangingTraps()){
+	if (frameNum > 0 && frameNum < getNumStartSteps()){
+		gopherTuple = [frameNum - 1, getTrapHeight() - 1, 2, 1]; // x then y. Subtract 1 because move mehtod adds one. Gopher state is 1, which is normal.
+		gopher.src = getGopherImageName(gopherTuple); // update gopher image
+		gopher.style.transform = "rotate(90deg)";
+	}
+	else if (frameNum != 0 && areChangingTraps()){
 		gopherTuple = getCurrentGopherList()[0]; // make gopher show up in center, ie. same state as its first step in trap animation.
 		gopher.style.transform = "rotate(90deg)";
-	}else{
+	}else if (frameNum != 0){
 		gopherTuple = getCurrentGopherList()[trapFrameNum - getTrapWidth()];
 		gopher.src = getGopherImageName(gopherTuple); // update gopher image
 		gopher.style.transform = "rotate(" + getRotInDegrees(gopherTuple[2]) + "deg)"; // fourth element is rotation. 
@@ -193,6 +201,11 @@ function moveGopher(gopherTuple){
 
 
 /** --------------- Helper methods ----------*/
+function getNumStartSteps(){
+	// number of steps to the door is Math.floor((getTrapWidth() + 1)/2).
+	// add one more step so we have one step at beginning with just the trap itself.
+	return Math.floor((getTrapWidth() + 1)/2) + 1; 
+}
 
 /** Returns the gopher Image name depending on its tuple. */
 function getGopherImageName(gopherTuple){
