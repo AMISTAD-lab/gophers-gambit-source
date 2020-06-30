@@ -91,5 +91,6 @@ class Gopher:
             self.leaving = True
             self.entering = False
             
+### Brainstorming what a random walk might look like
 
 

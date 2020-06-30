@@ -152,48 +152,75 @@ def addTrapToTerrain(terrain, start_x, start_y, trapboard):
                 return terrain
         raise Exception("This board does not fit")
 
-## still need to check in the case that the connected wire cells are the same thicktype
 
-## Gopher Entering Trap:
-    ## We assume that a gopher will enter a trap based on its danger
-    ## These functions returns the danger of the trap and thus the gopher prob of entering
 
+############### current workspace... 
+
+
+## Probability of Gopher Entering Trap:
+    ## gopher enters trap based on how dangerous it is. especially evaluating if a trap is working. 
     ## different than the probability that a gopher will survive the trap
 
-## helper
-def checkBrokenTrap(trap):
+
+def organizeTrap(trap):
     """
-    USE IN ALL GOPHER ENTER FUNCS
-    Helper function for gopherProbEnter.
-    Covers the base cases for a broken trap--traps that pose no danger to the gopher.
-    Returns a probability of 0.9?? since the gopher will not be hurt by entering
+    Streamlines making arrays for the cellTypes
+    !!!! Trying to make sure I can access data from this helper..
+    ...
+    input: trap
+    output: lists of lists?
     """
     allCells = flatten(trap.board)
     wireCells = []
     arrowCells = []
-    arrowLoc = [] #will be list of lists
-    doorLoc = []
     wireThickTypes = [0,0,0]
     arrowThickTypes = [0,0,0]
+    doorCell = []
     # [skinny, normal, wide]
 
-    # Collect the cells' info
     for cell in allCells: # flattens board into 1d  array
         if cell.cellType == CellType.wire:
             wireCells.append(cell)
         elif cell.cellType == CellType.arrow:
             arrowCells.append(cell)
-            arrowLoc.append(cell)
+        #     arrowLoc.append(cell)
         elif cell.cellType == CellType.door:
-            doorLoc.append(cell)
+            doorCell.append(cell)
 
     for cell in wireCells:
         wireThickTypes[cell.thickType.value] += 1
     for cell in arrowCells:
         arrowThickTypes[cell.thickType.value] += 1
 
-    ## BROKEN TRAP CASES
-    ## !!Need to check if correct thicktypes are connected and return high probability if they are
+    typeLists =[arrowCells, wireCells, arrowThickTypes, wireThickTypes, doorCell]
+    print("[arrowCells, wireCells, arrowThickTypes, wireThickTypes,  doorCell]")
+
+    return typeLists
+    ## measily attempt to save values in helper func
+
+
+# Case: when all arrows/wires are of uniform thickness
+#     if len(arrowCells) == 0:
+#         print("No danger and highest probability")
+#         return 0.9
+#     else: #if more than one arrow, you gotta check that the arrow is next to the door 
+#         if doorLoc : #connected to gate, placed filler
+#             if arrowThickTypes == 0: #not zero!!
+#                 return 0.7 # or a probability that reflects the 
+#         else:
+#             return 0.9 # or 1?
+
+
+
+def uniformTraps(trap):
+    """
+    returns the probability gopher will enter given that
+    the traps are uniform in thickType
+    """
+    arrowCells = organizeTrap(trap)[0]
+    wireCells = organizeTrap(trap)[1]
+    arrowThickTypes = organizeTrap(trap)[2]
+    wireThickTypes = organizeTrap(trap)[3]
 
     only = lambda ind, typelist: sum([typelist[i] > 0 for i in range(len(typelist)) if i != ind])==0
     
@@ -209,27 +236,37 @@ def checkBrokenTrap(trap):
             else:
                 return 0.9 # or 1?
 
+## checks if uniform
+    if (wireThickTypes[2] and arrowThickTypes[2] > 0) and all(i is 0 for i in wireThickTypes[:2]) and all(j is 0 for j in arrowThickTypes[:2]):
+        print("All wide thickness. very thicc. Highest danger and low probability of entering")
+        return 0.1
+    if (wireThickTypes[1] and arrowThickTypes[1] > 0) and all(i is 0 for i in wireThickTypes.remove(wireThickTypes[1])) and only(1, wireThickTypes):
+        print("All normal thickness. Medium danger and medium probability of entering")
+        return 0.5
+    if (wireThickTypes[0] and arrowThickTypes[0] > 0) and all(i is 0 for i in wireThickTypes[0:]) and all(j is 0 for j in wireThickTypes[0:]):
+        print("All skinny thickness. low danger and high probability of entering")
+        return 0.8
 
+    ### CASE: when >1 arrow AND not uniform thickness
 
-############### current workspace... 
 
 def workingTrap(trap):
-    ## follow arrow
-    return False
-
-def assessPath(arrow):
     """
-    Determines type of wire 
-    First takes in an arrow cell
+    Supposed to be the big parent function using helpers to return
+    whether a trap works. ie the trap is dangerous
     """
-    path = []
-    # path = [arrowType, thickType, length]
-    if door 
-    return False
-
-def returnPath(arrow):
-    assessPath(arrow)
-    return [0,0,0]
+    arrowCells = organizeTrap(trap)[0]
+    wireCells = organizeTrap(trap)[1]
+    arrowThickTypes = organizeTrap(trap)[2]
+    wireThickTypes = organizeTrap(trap)[3]
+    
+    for range(len(arrowCells)):
+        i += -1  ## oof I'll google prettier python for loops in a sec
+        if not assessPath(arrowCells[i]):
+            return False
+    return True
+    
+    
 
 def isDoorConnected(cell): #rename later
     """
@@ -237,6 +274,12 @@ def isDoorConnected(cell): #rename later
     Would a charge even go through the door cell?
     returns a True if there are wires or arrows connected
     """
+    # arrowCells = organizeTrap(trap)[0]
+    # wireCells = organizeTrap(trap)[1]
+    # arrowThickTypes = organizeTrap(trap)[2]
+    # wireThickTypes = organizeTrap(trap)[3]
+    # doorCell = organizeTrap(trap)[3][0]
+
     # if there's no wire on either side of door
     if (c.getNeighboringCell(cell, 6).cellType) and (c.getNeighboringCell(cell, 2).cellType) != 3:
         print("no arrows connected")
@@ -244,26 +287,90 @@ def isDoorConnected(cell): #rename later
             print("Broken Trap -- no wires connected")
         return False
     return True
-    
-def followTheCharge(door):
+
+def isSingleArrow(trap):
     """
-    Checks if wire-arrow paths are valid
-    Follows the charge along the trap from the door cell
-    Returns true if the trap is 
-    Returns false if at any point that arrow is invalid
+    Signifies trap is either 1 or 2 acute arrows
     """
-    # check the endpts of a door
-    
+    arrowCells = organizeTrap(trap)[0]
+    wireCells = organizeTrap(trap)[1]
+    arrowThickTypes = organizeTrap(trap)[2]
+    wireThickTypes = organizeTrap(trap)[3]
+    if return True
 
 
+def assessPath(currCell):
+    """
+    Follows the current from arrow to door to checks if wire-arrow paths are valid
+    ---
+    recursive function to FIRST be called on an arrow cell.
+    returns false when cells or thicktype doesnt align.
+    Input: an arrow cell to begin with
+    Output: boolean
+    """
+    activePath = []
+    # activePath = [arrowType, thickType, length]
+    # add to this list to easily evaluate paths later on
+
+    # Base case, if we reach this point the current has successfully traveled
+    # if the cell is a door the arrow-wire path is valid
+    if currCell.cellType == 1: #if door
+        return True
+
+    # draft
+    elif currCell.cellType == 3: #arrow
+        if currCell.
+            
+
+
+    
+def gopherProbEnter2(trap):
+    thickTypes = [0,0,0]
+    hasArrow = False
+    for cell in flatten(trap.board):
+        if cell.thickType != ThickType.na:
+            thickTypes[cell.thickType.value] += 1
+            if cell.cellType == CellType.arrow:
+                hasArrow = True
+    if hasArrow == False:
+        return 1.0
+    valuelist = []
+    for value in range(3):
+        valuelist += [value] * thickTypes[value]
+    std = np.std(valuelist)
+    mean = np.mean(valuelist)
+
+    cohesion = 1 - std #for 3 values, maximum standard deviation is 1, which is least threat
+    damage_potential = mean / 3 #maximum mean is 3 (biggest threat)
+    threat = (0.7 * cohesion) + (0.3 * damage_potential) #cohesion is more important
+    probEnter = 1 - threat
+    return probEnter
+
+
+def gopherEatTimer():
+    return np.random.choice([1,2,3], size=1)[0]
+    #maybe choose based on fear, so like high prob enter = long stay
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+################### Older Codee BEGIN ##########################
 def gopherProbEnter1(trap):
     """
     This returns the probability that the gopher will enter for working traps.
     Working traps are traps that are able to hurt the gopher
     """
-
-    ## import the pre-existing lists without making the
-    ## longest func in the world? 
 
     checkBrokenTrap(trap)
     ## WORKING TRAP CASES
@@ -291,42 +398,57 @@ def gopherProbEnter1(trap):
         wireThickTypes[cell.thickType.value] += 1
     #for cell in arrowCells:
 
-    if (wireThickTypes[2] and arrowThickTypes[2] > 0) and all(i is 0 for i in wireThickTypes[:2]) and all(j is 0 for j in arrowThickTypes[:2]):
-        print("All wide thickness. very thicc. Highest danger and low probability of entering")
-        return 0.1
-    if (wireThickTypes[1] and arrowThickTypes[1] > 0) and all(i is 0 for i in wireThickTypes.remove(wireThickTypes[1])) and only(1, wireThickTypes):
-        print("All normal thickness. Medium danger and medium probability of entering")
-        return 0.5
-    if (wireThickTypes[0] and arrowThickTypes[0] > 0) and all(i is 0 for i in wireThickTypes[0:]) and all(j is 0 for j in wireThickTypes[0:]):
-        print("All skinny thickness. low danger and high probability of entering")
-        return 0.8
-
-    ### CASE: when >1 arrow AND not uniform thickness
+   
 
 
-def gopherProbEnter2(trap):
-    thickTypes = [0,0,0]
-    hasArrow = False
-    for cell in flatten(trap.board):
-        if cell.thickType != ThickType.na:
-            thickTypes[cell.thickType.value] += 1
-            if cell.cellType == CellType.arrow:
-                hasArrow = True
-    if hasArrow == False:
-        return 1.0
-    valuelist = []
-    for value in range(3):
-        valuelist += [value] * thickTypes[value]
-    std = np.std(valuelist)
-    mean = np.mean(valuelist)
 
-    cohesion = 1 - std #for 3 values, maximum standard deviation is 1, which is least threat
-    damage_potential = mean / 3 #maximum mean is 3 (biggest threat)
-    threat = (0.7 * cohesion) + (0.3 * damage_potential) #cohesion is more important
-    probEnter = 1 - threat
-    return probEnter
+# def checkBrokenTrap(trap):
+#     """
+#     USE IN ALL GOPHER ENTER FUNCS
+#     Helper function for gopherProbEnter.
+#     Covers the base cases for a broken trap--traps that pose no danger to the gopher.
+#     Returns a probability of 0.9?? since the gopher will not be hurt by entering
+#     """
+#     allCells = flatten(trap.board)
+#     wireCells = []
+#     arrowCells = []
+#     arrowLoc = [] #will be list of lists
+#     doorLoc = []
+#     wireThickTypes = [0,0,0]
+#     arrowThickTypes = [0,0,0]
+#     # [skinny, normal, wide]
 
+#     # Collect the cells' info
+#     for cell in allCells: # flattens board into 1d  array
+#         if cell.cellType == CellType.wire:
+#             wireCells.append(cell)
+#         elif cell.cellType == CellType.arrow:
+#             arrowCells.append(cell)
+#             arrowLoc.append(cell)
+#         elif cell.cellType == CellType.door:
+#             doorLoc.append(cell)
 
-def gopherEatTimer():
-    return np.random.choice([1,2,3], size=1)[0]
-    #maybe choose based on fear, so like high prob enter = long stay
+#     for cell in wireCells:
+#         wireThickTypes[cell.thickType.value] += 1
+#     for cell in arrowCells:
+#         arrowThickTypes[cell.thickType.value] += 1
+
+#     ## BROKEN TRAP CASES
+#     ## !!Need to check if correct thicktypes are connected and return high probability if they are
+
+#     only = lambda ind, typelist: sum([typelist[i] > 0 for i in range(len(typelist)) if i != ind])==0
+    
+#     # Case: when all arrows/wires are of uniform thickness
+#     if len(wireCells) and len(arrowCells) == 0:
+#         if len(arrowCells) == 0:
+#             print("No danger and highest probability")
+#             return 0.9
+#         else: #if more than one arrow, you gotta check that the arrow is next to the door 
+#             if doorLoc : #connected to gate, placed filler
+#                 if arrowThickTypes == 0: #not zero!!
+#                     return 0.7 # or a probability that reflects the 
+#             else:
+#                 return 0.9 # or 1?
+
+################### Older Codee END ##########################
+
