@@ -9,10 +9,7 @@ Created on June 23, 2020 by Cynthia Hom
 	height: 100%;
 	width: 100%;
 	box-sizing: border-box;
-}
-
-html, body{
-	/*background-color: red;*/
+	z-index: 0;
 }
 
 #gridContainer{
@@ -45,4 +42,6 @@ html, body{
 	top: 0px;
 	z-index: 0;
 }
+
+
 

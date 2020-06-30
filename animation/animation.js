@@ -17,7 +17,7 @@ var trapList = []
 // other vars
 var fps = 2; // show two frames per second
 
-var trapNum = 0;	// current trap animation to play
+var trapNum = 14;	// current trap animation to play
 var trapFrameNum = 0; // current step of the current animation (either trap or movement)
 var frameNum = 0; // frame for the overall animation
 
@@ -33,45 +33,6 @@ function init()
 	animate();
 }
 
-/** Removes any existing grid and sets up a new one. 
-Inputs:
-	gridListIn: the new 2-d array to display */
-function updateGrid(gridListIn)
-{	
-	// remove existing grid by deleting all gridElements.
-	gridContainer.innerHTML = "";
-
-	// set up number of columns in grid. 
-	gridContainer.style.gridTemplateColumns = "repeat(" + String(gridListIn[0].length) + ", 1fr)";
-
-	// set up elements: loop through terrain, adding div element
-	for (let row = 0; row < gridListIn.length; row++)
-	{
-		for (let col = 0; col < gridListIn[0].length; col++)
-		{
-			// create div element, set its position.
-			let div = document.createElement("div");
-			div.style.gridColumnStart = col + 1;
-			div.style.gridRowStart = row + 1; // add 1 because col, rows in gridlayout start at 1. 
-			div.style.gridColumnEnd = col + 2;
-			div.style.gridRowEnd = row + 2;
-			div.classList.add("gridDiv");
-
-			// NOTE: if setting up terrain ONCE and then just updating specific cells 
-				// (i.e where gopher is, then keep this here. Otherwise, set up images each frame.)
-			let image = document.createElement("img");
-			activeStateList = trapList[trapNum][1][0];
-			image.src = getImageName(gridListIn[row][col], "0");// activeStateList[row][col]); // initialize board to its initial state. 
-			image.style.transform = "rotate(" + getRotInDegrees(gridListIn[row][col][3]) + "deg)"; // fourth element is rotation. 
-			image.classList.add(".boardImage");
-			div.appendChild(image);
-
-			// add to grid Container
-			gridContainer.appendChild(div);
-		}
-	}
-}
-
 
 /** The animation. Calls draw.*/
 function animate(){
@@ -82,6 +43,8 @@ function animate(){
 	// animation ends after last trap has been run 
 	if (trapNum >= trapList.length) 
 	{
+		// show the proper ending screen 
+		showEndingImage();
 		console.log("ANIMATION FINISHED");
 		clearTimeout(timer);
 		return;
@@ -94,7 +57,6 @@ function animate(){
 /** Draws one frame */
 function draw(){
 	console.log("trapFrameNum is " + trapFrameNum);
-	//console.log("frameNum is " + frameNum);
 	if (frameNum < getNumStartSteps())
 	{
 		// show the first trap
@@ -199,6 +161,103 @@ function moveGopher(gopherTuple){
 	}
 }
 
+/** Removes any existing grid and sets up a new one. 
+Inputs:
+	gridListIn: the new 2-d array to display */
+function updateGrid(gridListIn)
+{	
+	// remove existing grid by deleting all gridElements.
+	gridContainer.innerHTML = "";
+
+	// set up number of columns in grid. 
+	gridContainer.style.gridTemplateColumns = "repeat(" + String(gridListIn[0].length) + ", 1fr)";
+
+	// set up elements: loop through terrain, adding div element
+	for (let row = 0; row < gridListIn.length; row++)
+	{
+		for (let col = 0; col < gridListIn[0].length; col++)
+		{
+			// create div element, set its position.
+			let div = document.createElement("div");
+			div.style.gridColumnStart = col + 1;
+			div.style.gridRowStart = row + 1; // add 1 because col, rows in gridlayout start at 1. 
+			div.style.gridColumnEnd = col + 2;
+			div.style.gridRowEnd = row + 2;
+			div.classList.add("gridDiv");
+
+			// NOTE: if setting up terrain ONCE and then just updating specific cells 
+				// (i.e where gopher is, then keep this here. Otherwise, set up images each frame.)
+			let image = document.createElement("img");
+			activeStateList = trapList[trapNum][1][0];
+			image.src = getImageName(gridListIn[row][col], "0");// activeStateList[row][col]); // initialize board to its initial state. 
+			image.style.transform = "rotate(" + getRotInDegrees(gridListIn[row][col][3]) + "deg)"; // fourth element is rotation. 
+			//image.classList.add(".gridImage");
+			div.appendChild(image);
+
+			// add to grid Container
+			gridContainer.appendChild(div);
+		}
+	}
+}
+
+
+// show the proper ending screen 
+function showEndingImage()
+{
+	// simply make a grid with only one element, just like before.
+	gridContainer.innerHTML = "";
+	gridContainer.style.gridTemplateColumns = "repeat(1, 1fr)"
+	let div = document.createElement("div");
+	div.style.gridColumnStart = 1;
+	div.style.gridRowStart = 1; // add 1 because col, rows in gridlayout start at 1. 
+	div.style.gridColumnEnd = 2;
+	div.style.gridRowEnd = 2;
+	div.classList.add("gridDiv");
+	let image = document.createElement("img");
+
+	// We need the endsWith because gopher.src contains entire file path.
+	if (gopher.src.endsWith("gopher/gopherdead.png")){
+		image.src = "endingscreens/gophershot.png";
+	}else{
+		image.src = "endingscreens/gopherstarved.png";
+	}
+	div.appendChild(image);
+	gridContainer.appendChild(div);
+}
+
+/** returns a 2d list corresponding to the currently displayed grid. */
+function getCurrentlyDisplayedGrid(){
+	// if we are not in the middle of changing traps, just return the grid. Otherwise, calc the grid.
+	if (!areChangingTraps()){
+		return trapList[trapNum][0];
+	}
+	
+	// create an array initialized to all dirt
+	let gridArr = makeDirtArray();
+
+	// if moving toward a trap, then show the trap slowly coming into view. Replace
+		// the columns of dirt with trap columns.
+	if (trapFrameNum < getTrapWidth()){
+		// start at first column of trap, replace as many columns as trapFrameNum dictates.
+		for (let trapCol = 0; trapCol <= trapFrameNum; trapCol++)
+		{
+			gridCol = getTrapWidth() - 1 - trapFrameNum + trapCol; // which grid column to replace with this trap column.
+			gridArr = replaceCol(gridArr, gridCol, trapCol); 
+		}
+	}
+	// if moving away from a trap, then show trap slowly moving away from view.
+	else{
+		// trapCol is the first col to show. Goes from 0 to 3. AND show all columns after trapCol.
+		let animNum = trapFrameNum - (getTrapWidth() + getCurrentGopherList().length);
+		for (let trapCol = animNum; trapCol < getTrapWidth(); trapCol++) 
+		{
+			gridCol = trapCol - animNum; // grid column to change is dependent upon which stage of animation we are at. Further along we are, the more columns shift to left.
+			gridArr = replaceCol(gridArr, gridCol, trapCol);
+		}
+	}
+	return gridArr;
+}
+
 
 /** --------------- Helper methods ----------*/
 function getNumStartSteps(){
@@ -269,38 +328,7 @@ function getIsActive(isActiveNumIn){
 	return;
 }
 
-/** returns a 2d list corresponding to the currently displayed grid. */
-function getCurrentlyDisplayedGrid(){
-	// if we are not in the middle of changing traps, just return the grid. Otherwise, calc the grid.
-	if (!areChangingTraps()){
-		return trapList[trapNum][0];
-	}
-	
-	// create an array initialized to all dirt
-	let gridArr = makeDirtArray();
 
-	// if moving toward a trap, then show the trap slowly coming into view. Replace
-		// the columns of dirt with trap columns.
-	if (trapFrameNum < getTrapWidth()){
-		// start at first column of trap, replace as many columns as trapFrameNum dictates.
-		for (let trapCol = 0; trapCol <= trapFrameNum; trapCol++)
-		{
-			gridCol = getTrapWidth() - 1 - trapFrameNum + trapCol; // which grid column to replace with this trap column.
-			gridArr = replaceCol(gridArr, gridCol, trapCol); 
-		}
-	}
-	// if moving away from a trap, then show trap slowly moving away from view.
-	else{
-		// trapCol is the first col to show. Goes from 0 to 3. AND show all columns after trapCol.
-		let animNum = trapFrameNum - (getTrapWidth() + getCurrentGopherList().length);
-		for (let trapCol = animNum; trapCol < getTrapWidth(); trapCol++) 
-		{
-			gridCol = trapCol - animNum; // grid column to change is dependent upon which stage of animation we are at. Further along we are, the more columns shift to left.
-			gridArr = replaceCol(gridArr, gridCol, trapCol);
-		}
-	}
-	return gridArr;
-}
 
 /** Replaces the gridCol column in gridArr with the trapCol column in the trap array. 
 Assumes that gridArr and trap array have the same number of rows. */
