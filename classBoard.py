@@ -21,7 +21,7 @@ import algorithms as alg
 import designedTraps as dt
 
 
-functionalTraps = [dt.test1] #list of handmade traps
+functionalTraps = dt.traps #list of handmade traps
 trapPieces = [Wire, Arrow, Floor]
 rotationOptions = {
     Wire : [RotationType.up, RotationType.left, RotationType.right, RotationType.down],

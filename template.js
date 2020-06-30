@@ -1,18 +1,14 @@
-
-/**template.js
+/** animation.js (template.js if does not contain getInput())
 Created on June 23, 2020 by Cynthia Hom
 js file for the third experiment's animation
 
 Todo: 
-Implement image rotation!!!!!! And test it!! yay
-Test active states because for some reason they never seem to be active yet?
-*/
+Test everything using lots of different traps! */
 
 
 // get elements from the html
 var gridContainer = document.getElementById("gridContainer");
 var gopher = document.createElement("img");
-//gopher.src = "testImages/adversaryidle/adversaryidle1.PNG";
 gopher.id = "gopher";
 
 // inputs that will be set using getInput()
@@ -20,7 +16,7 @@ var terrainList = []
 var trapList = [] /// for testing purposes
 
 // other vars
-var fps = 1; // one frame per second
+var fps = 2; // two frames per second
 
 var currentList = []; // which grid to display at the current moment
 var trapNum = 0;	// which trap/random walk animations to play
@@ -34,9 +30,6 @@ $(document).ready(function () {
 /** Called when file is run */
 function init() 
 {
-	//console.log(getImageName("211", 1));
-	//let tupleList = [(1, 4, 0, 1), (1, 3, 0, 1)];
-	//console.log("myTupleList is " + tupleList);
 	getInput(); // get input that is written to the file.
 	currentList = trapList; // CHANGE THIS LATER!
 //	currentList = terrainList; // show the terrain first
@@ -57,12 +50,10 @@ function updateGrid(gridListIn)
 	// set up elements: loop through terrain, adding div element
 	for (let row = 0; row < gridListIn.length; row++)
 	{
-		//var rowList = []; // append an empty list for this row.
-
 		for (let col = 0; col < gridListIn[0].length; col++)
 		{
 			// create div element, set its position.
-			var div = document.createElement("div");
+			let div = document.createElement("div");
 			div.style.gridColumnStart = col + 1;
 			div.style.gridRowStart = row + 1; // add 1 because col, rows in gridlayout start at 1. 
 			div.style.gridColumnEnd = col + 2;
@@ -71,8 +62,10 @@ function updateGrid(gridListIn)
 
 			// NOTE: if setting up terrain ONCE and then just updating specific cells 
 				// (i.e where gopher is, then keep this here. Otherwise, set up images each frame.)
-			image = document.createElement("img");
-			image.src = getImageName(gridListIn[row][col], 0); // initialize board to not active.
+			let image = document.createElement("img");
+			activeStateList = trapList[trapNum][1][0];
+			image.src = getImageName(gridListIn[row][col], activeStateList[row][col]); // initialize board to its initial active state. 
+			image.style.transform = "rotate(" + getRotInDegrees(gridListIn[row][col][3]) + "deg)"; // fourth element is rotation. 
 			image.classList.add(".boardImage");
 			div.appendChild(image);
 
@@ -103,13 +96,14 @@ function animate(){
 
 /** draws one frame */
 function draw(){
+	console.log("trapFrameNum is " + trapFrameNum);
 	// if at the first step of this part, update the grid to reflect the surroundings
 	if (trapFrameNum == 0){
 		updateGrid(getCurrentlyDisplayedGrid());
 	}
 
-	// if it's a trap, also update the active/not active state.
-	if (currentList == trapList){
+	// if it's a trap, also update the active/not active state. Don't bother if grid has just been set up.
+	else if (currentList == trapList){
 		updateActiveStates(); 
 	}
 
@@ -161,13 +155,14 @@ function updateActiveStates()
 				return;
 			}
 
-			let image = $("img.boardImage:nth-of-type(" + String(getNth(cell)) +")");
+			// get image. Must use gridContainer, because otherwise we can't change the src attribute.
+			let image = gridContainer.children[getNth(cell) - 1].children[0]; // subtract 1 because .children returns an array.
+			
 			// make sure image exists first
 			if (image == undefined){
 				console.log("ERROR: image is undefined!");
 				return;
 			}
-
 			isActiveNum = activeStateList[row][col]; 
 			image.src = getImageName(getCurrentlyDisplayedGrid()[row][col], isActiveNum);  // set image src
 		}
@@ -176,10 +171,9 @@ function updateActiveStates()
 
 /** Moves the gopher and updates its image */
 function updateGopher(){
-	console.log("trapFrameNum is " + trapFrameNum);
-	console.log("currentGopherList is " + getCurrentGopherList());
 	let gopherTuple = getCurrentGopherList()[trapFrameNum];
 	gopher.src = getGopherImageName(gopherTuple); // update gopher image
+	gopher.style.transform = "rotate(" + getRotInDegrees(gopherTuple[2]) + "deg)"; // fourth element is rotation. 
 	moveGopher(gopherTuple);
 }
 
@@ -187,12 +181,9 @@ function updateGopher(){
 function moveGopher(gopherTuple){
 	let cell = [gopherTuple[1] + 1, gopherTuple[0] + 1]; // row first then col
 	// check if the grid position is valid first!
-	console.log(String(gopherTuple));
-	console.log(String(getNth(cell)));
-	console.log(String(cell));
 	if (isValidGridPos(cell))
 	{
-		$("div.gridDiv:nth-of-type(" + String(getNth(cell)) +")").prepend(gopher); // prepend so gopher is on top
+		$("div.gridDiv:nth-of-type(" + String(getNth(cell)) +")").append(gopher); // prepend so gopher is on top
 	}
 	else{
 		console.log("ERROR: NOT A VALID GRID POSITION");
@@ -216,8 +207,12 @@ cellType + angleType+ thickType + isActive.
 function getImageName(cellCode, isActiveNum){
 	let cellType = getCellType(cellCode.charAt(0));
 	let thickType = getThickType(cellCode.charAt(2));
-	return cellType + thickType + "/" + cellType + getAngleType(cellCode.charAt(1)) + 
+	let imgName = cellType + thickType + "/" + cellType + getAngleType(cellCode.charAt(1)) + 
 		thickType + getIsActive(isActiveNum) + ".png";
+	//if (!(cellType == "wire" || cellType == "arrow"))
+		//return cellType + thickType + "/" + cellType + getAngleType(cellCode.charAt(1)) + 
+		//thickType + "inactive" + ".png";
+	return imgName;
 }
 
 /** Interpret the char corresponding to cell type */
@@ -244,12 +239,23 @@ function getThickType(thickTypeIn){
 	return thickTypes[parseInt(thickTypeIn)];
 }
 
+/** Interpret the rotation char. Return the rotation from top in degrees */
+function getRotInDegrees(rotTypeIn){
+	if (rotTypeIn == 'x')
+		return 0;
+	return 45 * parseInt(rotTypeIn);
+}
+
 /** Return "true" if input is 1, "false" otherwise */
 function getIsActive(isActiveNumIn){
 	if(isActiveNumIn == 1){
 		return "active";
 	}
-	return "inactive";
+	else if (isActiveNumIn == 0){
+		return "inactive";
+	}
+	console.log("ERROR: isActiveNumIn is neither 1 nor 0");
+	return;
 }
 
 /** returns a 2d list corresponding to the currently displayed grid. */

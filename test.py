@@ -7,26 +7,6 @@ import matplotlib.pyplot as plt
 import experiment as e
 
 
-def printProgressBar (iteration, total, prefix = 'Progress:', suffix = 'Complete', decimals = 1, length = 100, fill = '█', printEnd = "\r"):
-    """
-    Call in a loop to create terminal progress bar
-    @params:
-        iteration   - Required  : current iteration (Int)
-        total       - Required  : total iterations (Int)
-        prefix      - Optional  : prefix string (Str)
-        suffix      - Optional  : suffix string (Str)
-        decimals    - Optional  : positive number of decimals in percent complete (Int)
-        length      - Optional  : character length of bar (Int)
-        fill        - Optional  : bar fill character (Str)
-        printEnd    - Optional  : end character (e.g. "\r", "\r\n") (Str)
-    """
-    percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
-    filledLength = int(length * iteration // total)
-    bar = fill * filledLength + '-' * (length - filledLength)
-    print('\r%s |%s| %s%% %s' % (prefix, bar, percent, suffix), end = printEnd)
-    # Print New Line on Complete
-    if iteration == total: 
-        print()
 
 
 # enterProbs = []
@@ -44,5 +24,6 @@ def printProgressBar (iteration, total, prefix = 'Progress:', suffix = 'Complete
 #v.visualRun(5,5, False, [[trap, 0, 0]])
 
 #s.viewRun(nib, nac, ngc)
-terraininfo, trapinfo = e.test()
-v.writeTojs(terraininfo, trapinfo)
+trapInfo = e.expectedLethality(3,3,4, 500)
+terrainInfo = [[[]], []]
+#v.writeTojs(trapInfo, terrainInfo)

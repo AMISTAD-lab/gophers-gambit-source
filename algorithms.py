@@ -3,6 +3,7 @@ from typeDirection import *
 from typeAngle import *
 from typeCell import *
 from typeThick import *
+import classCell as c
 import numpy as np
 import copy
 
@@ -39,7 +40,7 @@ def findDir(rotationType, angleType):
         elif(angleType == AngleType.lobtuse):
             return DirectionType.upperright
         elif(angleType == AngleType.robtuse):
-            return DirectionType.upperleft
+            return DirectionType.lowerright
         elif(angleType == AngleType.straight):
             return DirectionType.right
         else:
@@ -153,6 +154,12 @@ def addTrapToTerrain(terrain, start_x, start_y, trapboard):
 
 ## still need to check in the case that the connected wire cells are the same thicktype
 
+## Gopher Entering Trap:
+    ## We assume that a gopher will enter a trap based on its danger
+    ## These functions returns the danger of the trap and thus the gopher prob of entering
+
+    ## different than the probability that a gopher will survive the trap
+
 ## helper
 def checkBrokenTrap(trap):
     """
@@ -161,7 +168,7 @@ def checkBrokenTrap(trap):
     Covers the base cases for a broken trap--traps that pose no danger to the gopher.
     Returns a probability of 0.9?? since the gopher will not be hurt by entering
     """
-    allCells = flatten(trap.board[y][x])
+    allCells = flatten(trap.board)
     wireCells = []
     arrowCells = []
     arrowLoc = [] #will be list of lists
@@ -202,8 +209,38 @@ def checkBrokenTrap(trap):
             else:
                 return 0.9 # or 1?
 
-## Cindy TODO: Change the reused code in both functions
+
+
+############### current workspace... 
+## HOW TO IMPORT CELL CLASS SO THAT METHODS AREN'T YELLOW AHHHH
 ## Fix BrokenTrapHelper to a return type and import the arrays
+
+# def noWires
+
+def isDoorConnected(cell): #rename later
+    """
+    returns if the door is connected to power
+    Would a charge even go through the door cell?
+    returns a True if there are wires or arrows connected
+    """
+    # if there's no wire on either side of door
+    if (c.getNeighboringCell(cell, 6).cellType) and (c.getNeighboringCell(cell, 2).cellType) != 3:
+        print("no arrows connected")
+        if (c.getNeighboringCell(cell, 6).cellType) and (c.getNeighboringCell(cell, 2).cellType) != 2: #if its NOT a wire cell
+            print("Broken Trap -- no wires connected")
+        return False
+    return True
+    
+def followTheCharge(door):
+    """
+    Checks if wire-arrow paths are valid
+    Follows the charge along the trap from the door cell
+    Returns true if the trap is 
+    Returns false if at any point that arrow is invalid
+    """
+    # check the endpts of a door
+    
+
 
 def gopherProbEnter1(trap):
     """
@@ -217,7 +254,7 @@ def gopherProbEnter1(trap):
     checkBrokenTrap(trap)
     ## WORKING TRAP CASES
     ## Case: only arrows with no wires, but arrows are connected to the gate so they still fire
-    allCells = flatten(trap.board[y][x])
+    allCells = flatten(trap.board)
     wireCells = []
     arrowCells = []
     arrowLoc = [] #will be list of lists
@@ -238,7 +275,7 @@ def gopherProbEnter1(trap):
 
     for cell in wireCells:
         wireThickTypes[cell.thickType.value] += 1
-    for cell in arrowCells:
+    #for cell in arrowCells:
 
     if (wireThickTypes[2] and arrowThickTypes[2] > 0) and all(i is 0 for i in wireThickTypes[:2]) and all(j is 0 for j in arrowThickTypes[:2]):
         print("All wide thickness. very thicc. Highest danger and low probability of entering")
@@ -251,6 +288,7 @@ def gopherProbEnter1(trap):
         return 0.8
 
     ### CASE: when >1 arrow AND not uniform thickness
+
 
 def gopherProbEnter2(trap):
     thickTypes = [0,0,0]
@@ -273,3 +311,8 @@ def gopherProbEnter2(trap):
     threat = (0.7 * cohesion) + (0.3 * damage_potential) #cohesion is more important
     probEnter = 1 - threat
     return probEnter
+
+
+def gopherEatTimer():
+    return np.random.choice([1,2,3], size=1)[0]
+    #maybe choose based on fear, so like high prob enter = long stay

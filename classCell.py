@@ -22,6 +22,11 @@ class Cell(metaclass = ABCMeta):
     def __repr__(self):
         return str(self.cellType.name) + " " +str(self.active)
 
+    # def __eq__(self, other):
+    #     #does not care about owner, just position and types
+    #     return self.x == other.x and self.y == other.y and self.getBaseInfo() == other.getBaseInfo()
+
+
     def getBaseInfo(self):
         cellStr = str(self.cellType.value)
         cellStr += str(self.angleType.value)

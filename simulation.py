@@ -43,7 +43,7 @@ def viewRun(initialboard, activeCells, gopherCells):
         for y in range(colLength):
             row = []
             for x in range(rowLength):
-                if gopherCells[step][:2] == (x,y):
+                if gopherCells[step][:2] == [x,y]:
                     row.append("GPR" + str(gopherCells[step][2]) + str(gopherCells[step][3]))
                 else:
                     row.append(initialboard[y][x] + active(x,y,step))
