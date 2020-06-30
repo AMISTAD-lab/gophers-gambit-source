@@ -212,10 +212,24 @@ def checkBrokenTrap(trap):
 
 
 ############### current workspace... 
-## HOW TO IMPORT CELL CLASS SO THAT METHODS AREN'T YELLOW AHHHH
-## Fix BrokenTrapHelper to a return type and import the arrays
 
-# def noWires
+def workingTrap(trap):
+    ## follow arrow
+    return False
+
+def assessPath(arrow):
+    """
+    Determines type of wire 
+    First takes in an arrow cell
+    """
+    path = []
+    # path = [arrowType, thickType, length]
+    if door 
+    return False
+
+def returnPath(arrow):
+    assessPath(arrow)
+    return [0,0,0]
 
 def isDoorConnected(cell): #rename later
     """
