@@ -309,7 +309,7 @@ def assessPath(currCell):
     Output: boolean
     """
     activePath = []
-    # activePath = [arrowType, thickType, length]
+    # activePath is the list of cells in a correct door ---> arrow journey
     # add to this list to easily evaluate paths later on
 
     # Base case, if we reach this point the current has successfully traveled
@@ -317,9 +317,34 @@ def assessPath(currCell):
     if currCell.cellType == 1: #if door
         return True
 
-    # draft
+####### Cindy TODO: (if she ever figures out how to refer to endpts correctly)
+## Steps: (for wire and arrow)
+    # 1. find the arrowType/rotationType match
+    # 2. check the neighboring cells matches one of these options
+    # 3. check that the neighboring cell also matches the same WIRE THICCCNESSS
+    # 4. append currCell to activePath = []
+    # 5. if the neighboring cell DOES match, make a recursive call with
+    # with the cell neighboring the endpoint
+    # 6. If it's the correct path, it will eventually reach the door and return true. yay
+
+    # 7. BONUS: Write a helper to save and return the value of activePath, so that we can
+    # use it to determine danger and prob of trap
+
+    # now unleash massive combinations
     elif currCell.cellType == 3: #arrow
-        if currCell.
+        if currCell.rotationtype == 0: #lacute
+            if currCell.rotationType == 0:
+                activePath.append(currCell)
+            
+
+    elif currCell.cellType == 2: #wire
+    if 
+        elif currCell.rotationType == 0 or 4:
+            c.getNeighboringCell(0,)
+        activePath.append(currCell)
+    
+    # return activePath
+    # can't do this because we return a boolean in this func...
             
 
 
