@@ -3,6 +3,8 @@ Created on June 23, 2020 by Cynthia Hom
 js file for the third experiment's animation
 
 Todo: 
+One frame of all dirt. Gopher "moves to right", everything moves to left.
+Make it work for width 3 height 4 traps
 Test everything using lots of different traps! */
 
 
@@ -12,15 +14,14 @@ var gopher = document.createElement("img");
 gopher.id = "gopher";
 
 // inputs that will be set using getInput()
-var terrainList = []
 var trapList = [] 
 
 // other vars
 var fps = 2; // show two frames per second
 
-var currentList = []; // current grid to display
 var trapNum = 0;	// current trap animation to play
-var trapFrameNum = 0; // current step of trap animation
+var trapFrameNum = 0; // current step of the current animation (either trap or movement)
+var frameNum = 0; // frame for the overall animation
 
 // call init once document has loaded.
 $(document).ready(function () {
@@ -31,8 +32,6 @@ $(document).ready(function () {
 function init() 
 {
 	getInput(); // get input that is written to the file.
-	currentList = trapList; // CHANGE THIS LATER!
-//	currentList = terrainList; // show the terrain first
 	animate();
 }
 
@@ -64,7 +63,7 @@ function updateGrid(gridListIn)
 				// (i.e where gopher is, then keep this here. Otherwise, set up images each frame.)
 			let image = document.createElement("img");
 			activeStateList = trapList[trapNum][1][0];
-			image.src = getImageName(gridListIn[row][col], activeStateList[row][col]); // initialize board to its initial state. 
+			image.src = getImageName(gridListIn[row][col], "0");// activeStateList[row][col]); // initialize board to its initial state. 
 			image.style.transform = "rotate(" + getRotInDegrees(gridListIn[row][col][3]) + "deg)"; // fourth element is rotation. 
 			image.classList.add(".boardImage");
 			div.appendChild(image);
@@ -82,7 +81,7 @@ function animate(){
 		requestAnimationFrame(animate);  
 	}, 1000/fps);// repaint fps frames per second
 
-	// animation ends after last trap has been run
+	// animation ends after last trap has been run 
 	if (trapNum >= trapList.length) 
 	{
 		console.log("ANIMATION FINISHED");
@@ -97,40 +96,38 @@ function animate(){
 /** Draws one frame */
 function draw(){
 	console.log("trapFrameNum is " + trapFrameNum);
-	// if at the first step of this trap, update the grid to reflect the new surroundings
-	if (trapFrameNum == 0){
+	//if (frameNum < getNumStartSteps())
+	//{
+		// make gopher move in 
+		//moveGopher(gopherTuple)
+	//}
+	// if moving to a trap or moving away from trap, update the grid and make gopher rotate. 
+	if (areChangingTraps())
+	{
 		updateGrid(getCurrentlyDisplayedGrid());
 	}
-
-	// if it's a trap, also update the active/not active state. Don't bother if grid has just been set up.
-	else if (currentList == trapList){
+	// otherwise, simply update the active states of the grid and the gopher position/rotation.
+	else
+	{
 		updateActiveStates(); 
 	}
-
-	// regardless, update the gopher's state
 	updateGopher();
 }
 
 /** Updates variables to move to next frame, etc. */
 function updateVars(){
+	frameNum++;
 	trapFrameNum++;
-	// if trapFrameNum is greater than max for that trap frame, then increment trapNum, change grid type, etc.
-	if (trapFrameNum >= getCurrentGopherList().length) 
+	// if we have just finished starting sequence, then don't make gopher "move to" the trap again!
+	//if (frameNum == getNumStartSteps()){
+		//trapFrameNum = getTrapWidth();
+	//}
+	// if done with this trap, then switch traps.
+	if (trapFrameNum > getCurrentGopherList().length + 2 * getTrapWidth()) 
 	{
-		console.log("switching to a new trap");
-		// switch between modes
-		if (currentList == terrainList){
-			currentList = trapList;
-			console.log("UH OH");
-		}
-		else if (currentList == trapList){
-//			currentList = terrainList;
-			console.log("FINISHED TRAP #" + trapNum);
-			trapNum++;	// if done with a trap, move on to next trap.
-		}
-		else{
-			console.log("ERROR: currentList is not a terrainList or trapList");
-		}
+		console.log("FINISHED TRAP #" + trapNum);
+		trapNum++;	// if done with a trap, move on to next trap.
+
 		// reset trapFrameNum
 		trapFrameNum = 0;
 	}
@@ -140,13 +137,7 @@ function updateVars(){
 /** Updates whether or not cells are active or not for the trap part of the animation. */
 function updateActiveStates()
 {
-	// make sure this is only being called for traps
-	if (currentList != trapList){
-		console.log("ERROR: Calling updateActiveStates when trapBoard is not showing");
-		return;
-	}
-	
-	activeStateList = trapList[trapNum][1][trapFrameNum];
+	activeStateList = trapList[trapNum][1][trapFrameNum - getTrapWidth()];
 	// loop through, and give appropriate img element the correct src.
 	for (let row = 0; row < activeStateList.length; row++){
 		for (let col = 0; col < activeStateList[0].length; col++){
@@ -172,9 +163,17 @@ function updateActiveStates()
 
 /** Moves the gopher and updates its image */
 function updateGopher(){
-	let gopherTuple = getCurrentGopherList()[trapFrameNum];
-	gopher.src = getGopherImageName(gopherTuple); // update gopher image
-	gopher.style.transform = "rotate(" + getRotInDegrees(gopherTuple[2]) + "deg)"; // fourth element is rotation. 
+	let gopherTuple = []
+	// if we are changing traps, make gopher turn to right and be in center of trap area.
+		// otherwise, make gopher do what it is supposed to according to input. 
+	if (areChangingTraps()){
+		gopherTuple = getCurrentGopherList()[0]; // make gopher show up in center, ie. same state as its first step in trap animation.
+		gopher.style.transform = "rotate(90deg)";
+	}else{
+		gopherTuple = getCurrentGopherList()[trapFrameNum - getTrapWidth()];
+		gopher.src = getGopherImageName(gopherTuple); // update gopher image
+		gopher.style.transform = "rotate(" + getRotInDegrees(gopherTuple[2]) + "deg)"; // fourth element is rotation. 
+	}
 	moveGopher(gopherTuple);
 }
 
@@ -258,23 +257,75 @@ function getIsActive(isActiveNumIn){
 
 /** returns a 2d list corresponding to the currently displayed grid. */
 function getCurrentlyDisplayedGrid(){
-	if (currentList == terrainList){
-		return currentList[0]; // terrain stays same before and after gopher goes into traps
+	// if we are not in the middle of changing traps, just return the grid. Otherwise, calc the grid.
+	if (!areChangingTraps()){
+		return trapList[trapNum][0];
 	}
-	return currentList[trapNum][0]; // the grid corresponding to the current trap.
+	
+	// create an array initialized to all dirt
+	let gridArr = makeDirtArray();
+
+	// if moving toward a trap, then show the trap slowly coming into view. Replace
+		// the columns of dirt with trap columns.
+	if (trapFrameNum < getTrapWidth()){
+		// start at first column of trap, replace as many columns as trapFrameNum dictates.
+		for (let trapCol = 0; trapCol <= trapFrameNum; trapCol++)
+		{
+			gridCol = getTrapWidth() - 1 - trapFrameNum + trapCol; // which grid column to replace with this trap column.
+			gridArr = replaceCol(gridArr, gridCol, trapCol); 
+		}
+	}
+	// if moving away from a trap, then show trap slowly moving away from view.
+	else{
+		// trapCol is the first col to show. Goes from 0 to 3. AND show all columns after trapCol.
+		let animNum = trapFrameNum - (getTrapWidth() + getCurrentGopherList().length);
+		for (let trapCol = animNum; trapCol < getTrapWidth(); trapCol++) 
+		{
+			gridCol = trapCol - animNum; // grid column to change is dependent upon which stage of animation we are at. Further along we are, the more columns shift to left.
+			gridArr = replaceCol(gridArr, gridCol, trapCol);
+		}
+	}
+	return gridArr;
+}
+
+/** Replaces the gridCol column in gridArr with the trapCol column in the trap array. 
+Assumes that gridArr and trap array have the same number of rows. */
+function replaceCol(gridArr, gridCol, trapCol){
+	// loop through all rows, change that column.
+	for (let row = 0; row < gridArr[0].length; row++){
+		gridArr[row][gridCol] = trapList[trapNum][0][row][trapCol]; // Don't add 0 to make it inactive, this is done in updateGRid()
+	}
+	return gridArr
+}
+
+/** Returns a 2-d array of all dirt, with same size as the current trap board. */
+function makeDirtArray(){
+	// create an array initialized to all dirt
+	let gridArr = []
+	for (let row = 0; row < getTrapHeight(); row++){
+		gridArr.push([])
+		for (let col = 0; col < getTrapWidth(); col++){
+			gridArr[row].push('4xxx');
+		}
+	}
+	return gridArr;
+}
+
+
+function getTrapWidth(){
+	let grid = trapList[trapNum][0]; // first element is the grid
+	return grid[0].length;
+}
+
+function getTrapHeight(){
+	let grid = trapList[trapNum][0]; // first element is the grid
+	return grid.length;
 }
 
 /** returns a 2d list consisting of gopher tuples for 
 	this given part of the animation. */
 function getCurrentGopherList(){
-	if (currentList == terrainList){
-		return currentList[1][trapNum]; // overall gopher list is second element, must access this particular gopherList
-	}else if (currentList == trapList){
-		//console.log.log("returning " + currentList[trapNum][2]);
-		return currentList[trapNum][2]; // third element in each tuple is gopherList
-	}else{
-		console.log("ERROR: currentList is not a terrainList or trapList");
-	}
+	return trapList[trapNum][2]; // third element in each tuple is gopherList
 }
 
 /** determines if the inputted list is a valid grid position. 
@@ -288,6 +339,11 @@ function isValidGridPos(gridPos){
 		return false;
 	}
 	return true;
+}
+
+/** returns true if we are currently in the middle of switching from one trap to the next, false otherwise */
+function areChangingTraps(){
+	return (trapFrameNum < getTrapWidth()) || (trapFrameNum >= getCurrentGopherList().length + getTrapWidth());
 }
 
 /** Calculates the cell number. Upper leftmost cell is #1. Read across rows and move down columns.
