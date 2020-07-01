@@ -163,6 +163,8 @@ def workingTrap(trap):
     MAIN FUNCTION
     Supposed to be the big parent function using helpers to return
     whether a trap works. ie the trap is dangerous
+    ...
+    returning 2 lists
     """
 
     arrowCells, wireCells, arrowThickTypes, wireThickTypes, doorCell = organizeTrap(trap)

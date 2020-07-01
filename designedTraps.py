@@ -102,7 +102,7 @@ trap13 = [
     [Floor(0,0,None), Floor(1,0,None), Floor(2,0,None)],
     [Floor(0,1,None), Food(1,1, None), Floor(2,1,None)],
     [Floor(0,2,None), Floor(1,2,None), Floor(2,2,None)],
-    [Arrow(0,3, None, angleType=AngleType.racute, rotationType=RotationType.left, thickType=ThickType.wide), Door(1,3,None), Wire(2,3, None, angleType=AngleType.lacute, rotationType=RotationType.right, thickType=ThickType.wide)]
+    [Arrow(0,3, None, angleType=AngleType.racute, rotationType=RotationType.left, thickType=ThickType.wide), Door(1,3,None), Arrow(2,3, None, angleType=AngleType.lacute, rotationType=RotationType.right, thickType=ThickType.wide)]
 ]
 
 trap14 = [
@@ -118,5 +118,153 @@ trap15 = [
     [Arrow(0,2, None, angleType=AngleType.robtuse, rotationType=RotationType.up, thickType=ThickType.normal), Floor(1,2,None), Arrow(2,2, None, angleType=AngleType.lacute, rotationType=RotationType.up, thickType=ThickType.wide)],
     [Wire(0,3, None, angleType=AngleType.rright, rotationType=RotationType.left, thickType=ThickType.normal), Door(1,3,None), Wire(2,3, None, angleType=AngleType.lright, rotationType=RotationType.right, thickType=ThickType.wide)]
 ]
+
+# mor trapz
+trap16 = [
+    [Floor(0,0,None), Floor(1,0,None), Floor(2,0,None)],
+    [Floor(0,1,None), Food(1,1, None), Floor(2,1,None)],
+    [Arrow(0,2, None, angleType=AngleType.robtuse, rotationType=RotationType.up, thickType=ThickType.wide), Floor(1,2,None), Arrow(2,2, None, angleType=AngleType.lobtuse, rotationType=RotationType.up, thickType=ThickType.skinny)],
+    [Wire(0,3, None, angleType=AngleType.rright, rotationType=RotationType.left, thickType=ThickType.wide), Door(1,3,None), Wire(2,3, None, angleType=AngleType.lright, rotationType=RotationType.right, thickType=ThickType.skinny)]
+]
+
+trap17 = [
+    [Floor(0,0,None), Floor(1,0,None), Floor(2,0,None)],
+    [Floor(0,1,None), Food(1,1, None), Floor(2,1,None)],
+    [Floor(0,2, None), Floor(1,2,None), Floor(2,2, None)],
+    [Arrow(0,3, None, angleType=AngleType.racute, rotationType=RotationType.left, thickType=ThickType.normal), Door(1,3,None), Arrow(2,3, None, angleType=AngleType.lacute, rotationType=RotationType.right, thickType=ThickType.normal)]
+]
+
+trap18 = [
+    [Floor(0,0,None), Floor(1,0,None), Floor(2,0,None)],
+    [Floor(0,1,None), Food(1,1, None), Floor(2,1,None)],
+    [Floor(0,2, None), Floor(1,2,None), Floor(2,2, None)],
+    [Arrow(0,3, None, angleType=AngleType.racute, rotationType=RotationType.left, thickType=ThickType.skinny), Door(1,3,None), Arrow(2,3, None, angleType=AngleType.lacute, rotationType=RotationType.right, thickType=ThickType.skinny)]
+]
+
+trap19 = [
+    [Arrow(0,0, None, angleType=AngleType.racute, rotationType=RotationType.up, thickType=ThickType.wide), Floor(1,0, None),  Floor(2,0, None)],
+    [Wire(0,1,None, angleType=AngleType.straight, rotationType=RotationType.up, thickType=ThickType.wide), Food(1,1, None), Floor(2,1, None)],
+    [Wire(0,2,None, angleType=AngleType.straight, rotationType=RotationType.up, thickType=ThickType.wide), Floor(1,2, None), Arrow(2,2, None, angleType=AngleType.lright, rotationType=RotationType.up, thickType=ThickType.skinny)],
+    [Wire(0,3,None, angleType=AngleType.rright, rotationType=RotationType.left, thickType=ThickType.wide), Door(1,3, None), Wire(2,3, None, angleType=AngleType.lright, rotationType=RotationType.right, thickType=ThickType.skinny)]
+]
+
+trap20 = [
+    [Wire(0,0, None, angleType=AngleType.racute, rotationType=RotationType.up, thickType=ThickType.skinny), Wire(1,0, None, angleType=AngleType.straight, rotationType=RotationType.right, thickType=ThickType.skinny),  Arrow(2,0, None, angleType=AngleType.racute, rotationType=RotationType.right, thickType=ThickType.skinny)],
+    [Wire(0,1,None, angleType=AngleType.straight, rotationType=RotationType.up, thickType=ThickType.skinny), Food(1,1, None), Floor(2,1, None)],
+    [Wire(0,2,None, angleType=AngleType.straight, rotationType=RotationType.up, thickType=ThickType.skinny), Floor(1,2, None), Arrow(2,2, None, angleType=AngleType.lright, rotationType=RotationType.up, thickType=ThickType.wide)],
+    [Wire(0,3,None, angleType=AngleType.rright, rotationType=RotationType.left, thickType=ThickType.skinny), Door(1,3, None), Wire(2,3, None, angleType=AngleType.lright, rotationType=RotationType.right, thickType=ThickType.wide)]
+]
+
+trap21 = [
+    [Wire(0,0, None, angleType=AngleType.racute, rotationType=RotationType.up, thickType=ThickType.wide), Wire(1,0, None, angleType=AngleType.straight, rotationType=RotationType.right, thickType=ThickType.wide),  Arrow(2,0, None, angleType=AngleType.racute, rotationType=RotationType.right, thickType=ThickType.wide)],
+    [Wire(0,1,None, angleType=AngleType.straight, rotationType=RotationType.up, thickType=ThickType.wide), Food(1,1, None), Arrow(2,1, None, angleType=AngleType.lright, rotationType=RotationType.up, thickType=ThickType.skinny)],
+    [Wire(0,2,None, angleType=AngleType.straight, rotationType=RotationType.up, thickType=ThickType.wide), Floor(1,2, None), Wire(2,2, None, angleType=AngleType.straight, rotationType=RotationType.up, thickType=ThickType.skinny)],
+    [Wire(0,3,None, angleType=AngleType.rright, rotationType=RotationType.left, thickType=ThickType.wide), Door(1,3, None), Wire(2,3, None, angleType=AngleType.lright, rotationType=RotationType.right, thickType=ThickType.skinny)]
+]
+
+trap22 = [
+    [Wire(0,0, None, angleType=AngleType.racute, rotationType=RotationType.up, thickType=ThickType.normal), Wire(1,0, None, angleType=AngleType.straight, rotationType=RotationType.right, thickType=ThickType.normal),  Arrow(2,0, None, angleType=AngleType.racute, rotationType=RotationType.right, thickType=ThickType.normal)],
+    [Wire(0,1,None, angleType=AngleType.straight, rotationType=RotationType.up, thickType=ThickType.normal), Food(1,1, None), Floor(2,1, None)],
+    [Wire(0,2,None, angleType=AngleType.straight, rotationType=RotationType.up, thickType=ThickType.normal), Floor(1,2, None), Floor(2,2, None)],
+    [Wire(0,3,None, angleType=AngleType.rright, rotationType=RotationType.left, thickType=ThickType.normal), Door(1,3, None), Wire(2,3, None, angleType=AngleType.lacute, rotationType=RotationType.right, thickType=ThickType.normal)]
+]
+
+trap23 = [
+    [Floor(0,0, None), Floor(1,0, None), Floor(2,0, None)],
+    [Floor(0,1, None), Food(1,1, None), Arrow(2,1, None, angleType=AngleType.lright, rotationType=RotationType.up, thickType=ThickType.normal)],
+    [Arrow(0,2,None, angleType=AngleType.rright, rotationType=RotationType.up, thickType=ThickType.wide), Floor(1,2, None), Wire(2,2, None, angleType=AngleType.straight, rotationType=RotationType.up, thickType=ThickType.normal)],
+    [Wire(0,3,None, angleType=AngleType.rright, rotationType=RotationType.left, thickType=ThickType.wide), Door(1,3, None), Wire(2,3, None, angleType=AngleType.lright, rotationType=RotationType.right, thickType=ThickType.normal)]
+]
+
+trap24 = [
+    [Floor(0,0, None), Floor(1,0, None), Arrow(2,0, None, angleType=AngleType.lacute, rotationType=RotationType.up, thickType=ThickType.wide)],
+    [Floor(0,1, None), Food(1,1,None), Wire(2,1, None, angleType=AngleType.straight, rotationType=RotationType.up, thickType=ThickType.wide)],
+    [Floor(0,2, None), Floor(1,2,None), Wire(2,2,None,angleType=AngleType.straight, rotationType=RotationType.up, thickType=ThickType.wide)],
+    [Arrow(0,3, None, angleType=AngleType.racute, rotationType=RotationType.left, thickType=ThickType.skinny), Door(1,3, None), Wire(2,3, None, angleType=AngleType.lright, rotationType=RotationType.right, thickType=ThickType.wide)]
+]
+
+trap25 = [
+    [Floor(0,0, None), Floor(1,0, None), Arrow(2,0, None, angleType=AngleType.lacute, rotationType=RotationType.up, thickType=ThickType.normal)],
+    [Floor(0,1, None), Food(1,1,None), Wire(2,1, None, angleType=AngleType.straight, rotationType=RotationType.up, thickType=ThickType.normal)],
+    [Floor(0,2, None), Floor(1,2,None), Wire(2,2,None,angleType=AngleType.straight, rotationType=RotationType.up, thickType=ThickType.normal)],
+    [Arrow(0,3, None, angleType=AngleType.racute, rotationType=RotationType.left, thickType=ThickType.wide), Door(1,3, None), Wire(2,3, None, angleType=AngleType.lright, rotationType=RotationType.right, thickType=ThickType.normal)]
+]
+
+trap26 = [
+    [Floor(0,0, None), Floor(1,0, None), Arrow(2,0, None, angleType=AngleType.lacute, rotationType=RotationType.up, thickType=ThickType.skinny)],
+    [Floor(0,1, None), Food(1,1,None), Wire(2,1, None, angleType=AngleType.straight, rotationType=RotationType.up, thickType=ThickType.skinny)],
+    [Floor(0,2, None), Floor(1,2,None), Wire(2,2,None,angleType=AngleType.straight, rotationType=RotationType.up, thickType=ThickType.skinny)],
+    [Arrow(0,3, None, angleType=AngleType.racute, rotationType=RotationType.left, thickType=ThickType.normal), Door(1,3, None), Wire(2,3, None, angleType=AngleType.lright, rotationType=RotationType.right, thickType=ThickType.skinny)]
+]
+
+trap27 = [
+    [Floor(0,0, None), Floor(1,0, None), Floor(2,0, None)],
+    [Floor(0,1, None), Food(1,1,None), Floor(2,1, None)],
+    [Arrow(0,2, None, angleType=AngleType.robtuse, rotationType=RotationType.up, thickType=ThickType.normal), Floor(1,2,None), Arrow(2,2,None,angleType=AngleType.lobtuse, rotationType=RotationType.up, thickType=ThickType.normal)],
+    [Wire(0,3, None, angleType=AngleType.rright, rotationType=RotationType.left, thickType=ThickType.normal), Door(1,3, None), Wire(2,3, None, angleType=AngleType.lright, rotationType=RotationType.right, thickType=ThickType.normal)]
+]
+
+trap28 = [
+    [Floor(0,0, None), Floor(1,0, None), Floor(2,0, None)],
+    [Floor(0,1, None), Food(1,1,None), Floor(2,1, None)],
+    [Arrow(0,2, None, angleType=AngleType.robtuse, rotationType=RotationType.up, thickType=ThickType.skinny), Floor(1,2,None), Arrow(2,2,None,angleType=AngleType.lobtuse, rotationType=RotationType.up, thickType=ThickType.skinny)],
+    [Wire(0,3, None, angleType=AngleType.rright, rotationType=RotationType.left, thickType=ThickType.skinny), Door(1,3, None), Wire(2,3, None, angleType=AngleType.lright, rotationType=RotationType.right, thickType=ThickType.skinny)]
+]
+
+trap29 = [
+    [Floor(0,0, None), Floor(1,0, None), Floor(2,0, None)],
+    [Floor(0,1, None), Food(1,1,None), Floor(2,1, None)],
+    [Arrow(0,2, None, angleType=AngleType.robtuse, rotationType=RotationType.up, thickType=ThickType.wide), Floor(1,2,None), Arrow(2,2,None,angleType=AngleType.lobtuse, rotationType=RotationType.up, thickType=ThickType.wide)],
+    [Wire(0,3, None, angleType=AngleType.rright, rotationType=RotationType.left, thickType=ThickType.wide), Door(1,3, None), Wire(2,3, None, angleType=AngleType.lright, rotationType=RotationType.right, thickType=ThickType.wide)]
+]
+
+trap30 = [
+    [Floor(0,0, None), Floor(1,0, None), Floor(2,0, None)],
+    [Floor(0,1, None), Food(1,1,None), Floor(2,1, None)],
+    [Arrow(0,2, None, angleType=AngleType.rright, rotationType=RotationType.up, thickType=ThickType.skinny), Floor(1,2,None), Arrow(2,2,None,angleType=AngleType.lright, rotationType=RotationType.up, thickType=ThickType.skinny)],
+    [Wire(0,3, None, angleType=AngleType.rright, rotationType=RotationType.left, thickType=ThickType.skinny), Door(1,3, None), Wire(2,3, None, angleType=AngleType.lright, rotationType=RotationType.right, thickType=ThickType.skinny)]
+]
+
+trap31 = [
+    [Floor(0,0, None), Floor(1,0, None), Floor(2,0, None)],
+    [Floor(0,1, None), Food(1,1,None), Floor(2,1, None)],
+    [Arrow(0,2, None, angleType=AngleType.rright, rotationType=RotationType.up, thickType=ThickType.normal), Floor(1,2,None), Arrow(2,2,None,angleType=AngleType.lright, rotationType=RotationType.up, thickType=ThickType.normal)],
+    [Wire(0,3, None, angleType=AngleType.rright, rotationType=RotationType.left, thickType=ThickType.normal), Door(1,3, None), Wire(2,3, None, angleType=AngleType.lright, rotationType=RotationType.right, thickType=ThickType.normal)]
+]
+
+trap32 = [
+    [Floor(0,0, None), Floor(1,0, None), Floor(2,0, None)],
+    [Floor(0,1, None), Food(1,1,None), Floor(2,1, None)],
+    [Arrow(0,2, None, angleType=AngleType.rright, rotationType=RotationType.up, thickType=ThickType.wide), Floor(1,2,None), Arrow(2,2,None,angleType=AngleType.lright, rotationType=RotationType.up, thickType=ThickType.wide)],
+    [Wire(0,3, None, angleType=AngleType.rright, rotationType=RotationType.left, thickType=ThickType.wide), Door(1,3, None), Wire(2,3, None, angleType=AngleType.lright, rotationType=RotationType.right, thickType=ThickType.wide)]
+]
+
+trap33 = [
+    [Floor(0,0, None), Floor(1,0, None), Floor(2,0, None)],
+    [Floor(0,1, None), Food(1,1,None), Floor(2,1, None)],
+    [Arrow(0,2, None, angleType=AngleType.rright, rotationType=RotationType.up, thickType=ThickType.normal), Floor(1,2,None), Arrow(2,2,None,angleType=AngleType.lright, rotationType=RotationType.up, thickType=ThickType.skinny)],
+    [Wire(0,3, None, angleType=AngleType.rright, rotationType=RotationType.left, thickType=ThickType.normal), Door(1,3, None), Wire(2,3, None, angleType=AngleType.lright, rotationType=RotationType.right, thickType=ThickType.skinny)]
+]
+
+trap34 = [
+    [Floor(0,0, None), Floor(1,0, None), Floor(2,0, None)],
+    [Floor(0,1, None), Food(1,1,None), Floor(2,1, None)],
+    [Arrow(0,2, None, angleType=AngleType.rright, rotationType=RotationType.up, thickType=ThickType.normal), Floor(1,2,None), Arrow(2,2,None,angleType=AngleType.lacute, rotationType=RotationType.up, thickType=ThickType.wide)],
+    [Wire(0,3, None, angleType=AngleType.rright, rotationType=RotationType.left, thickType=ThickType.normal), Door(1,3, None), Wire(2,3, None, angleType=AngleType.lright, rotationType=RotationType.right, thickType=ThickType.wide)]
+]
+
+trap35 = [
+    [Floor(0,0, None), Floor(1,0, None), Floor(2,0, None)],
+    [Floor(0,1, None), Food(1,1,None), Floor(2,1, None)],
+    [Arrow(0,2, None, angleType=AngleType.rright, rotationType=RotationType.up, thickType=ThickType.normal), Floor(1,2,None), Arrow(2,2,None,angleType=AngleType.lacute, rotationType=RotationType.up, thickType=ThickType.normal)],
+    [Wire(0,3, None, angleType=AngleType.rright, rotationType=RotationType.left, thickType=ThickType.normal), Door(1,3, None), Wire(2,3, None, angleType=AngleType.lright, rotationType=RotationType.right, thickType=ThickType.normal)]
+]
+
+# TODO: make these 4 traps
+# traps 36, 37, 38, and 39 have not been made
+# I think I lost my train of thought before moving onto one arrow traps... reminder do this cindz
+
+
+### Here come the one arrow traps!!
 
 traps = [trap0, trap1, trap2, trap3, trap4, trap5, trap6, trap7, trap8, trap9, trap10, trap11, trap12, trap13, trap14, trap15]
