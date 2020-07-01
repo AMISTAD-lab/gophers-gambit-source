@@ -213,7 +213,7 @@ def organizeTrap(trap):
     ## measily attempt to save values in helper func
 
 
-def isDoorSetUp(cell): #rename later
+def isDoorSetUp(cell): #rename later? 
     """
     returns true if the door is connected to power ie proper arrow/wire
     Would a charge even go through the door cell?
@@ -228,7 +228,7 @@ def isDoorSetUp(cell): #rename later
     rightOfDoor = doorCell.getNeighboringCell(2)
 
     # if there's no wire on either side of door
-    if (leftOfDoor.cellType) and (rightOfDoor.getNeighboringCell(cell, 2).cellType) != 3:
+    if (leftOfDoor.cellType) and (rightOfDoor.cellType) != 3:
         print("no arrows connected")
         if (c.getNeighboringCell(cell, 6).cellType) and (c.getNeighboringCell(cell, 2).cellType) != 2: #if its NOT a wire cell
             print("Broken Trap -- no wires connected")
@@ -238,6 +238,8 @@ def isDoorSetUp(cell): #rename later
 def workingSingleArrows(trap):
     """
     RETURNS FOR ACUTE ANGLES OR RIGHT ANGLES
+    runs on the condition that the door is connected to valid wires/arrows
+    ...
     Signifies trap is either 1 or 2 acute arrows
     returns list of single arrrows and Boolean
     """
@@ -369,7 +371,9 @@ def threatAssessment(cellList):
     
 
 def gopherEatTimer(probEnter):
-    #assigns probs for timer based on gopher's detection of threat.
+    """
+    assigns probs for timer based on gopher's detection of threat.
+    """
     idealTimer = probEnter * 5
     initialProbs = [0.05, 0.05, 0.05, 0.05, 0.05]
     for i in range(5):
