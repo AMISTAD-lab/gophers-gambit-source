@@ -54,7 +54,7 @@ class Board(metaclass = ABCMeta):
         activecells = self.emptyBoard(self.rowLength, self.colLength)
         for y in range(self.colLength):
             for x in range(self.rowLength):
-                activecells[y][x] = int(self.board[y][x].active == True)
+                activecells[y][x] = int(self.board[y][x].active)
         return activecells
 
     def saveCells(self):
@@ -74,18 +74,22 @@ class Board(metaclass = ABCMeta):
             board.append(row)
         return board
 
-    def realTrap(self, rowLength, colLength):
+    def realTrap(self, rowLength, colLength, chosenTrap=None):
         """chooses a trap from the real selection, filtered to right dimensions"""
-        dimCheck = lambda board: len(board[0]) == rowLength and len(board) == colLength
-        filteredTraps = list(filter(dimCheck, functionalTraps))
-        if len(filteredTraps) == 0:
-            raise Exception("No traps met that specification")
-        trapIndices = list(range(len(filteredTraps)))
-        choice = np.random.choice(trapIndices, size=1)[0]
-        board = filteredTraps[choice]
-        #will want something to prevent repeated selection of a trap probably
+        if chosenTrap:
+            board = chosenTrap
+        else:
+            dimCheck = lambda board: len(board[0]) == rowLength and len(board) == colLength
+            filteredTraps = list(filter(dimCheck, functionalTraps))
+            if len(filteredTraps) == 0:
+                raise Exception("No traps met that specification")
+            trapIndices = list(range(len(filteredTraps)))
+            choice = np.random.choice(trapIndices, size=1)[0]
+            board = filteredTraps[choice]
+            #will want something to prevent repeated selection of a trap probably
         for cell in alg.flatten(board):
             cell.ownerBoard = self
+            cell.active = False
         return board
 
     def randomTrap(self, rowLength, colLength):

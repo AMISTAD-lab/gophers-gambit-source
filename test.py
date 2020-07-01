@@ -5,9 +5,7 @@ import simulation as s
 import algorithms as alg
 import matplotlib.pyplot as plt
 import experiment as e
-
-
-
+import designedTraps as dt
 
 # enterProbs = []
 # astats = []
@@ -24,6 +22,31 @@ import experiment as e
 #v.visualRun(5,5, False, [[trap, 0, 0]])
 
 #s.viewRun(nib, nac, ngc)
-trapInfo = e.expectedLethality(3,3,4, 500)
-terrainInfo = [[[]], []]
-#v.writeTojs(trapInfo, terrainInfo)
+# trapInfo = e.expectedLethality(3,4,3, 500)
+# terrainInfo = [[[]], []]
+
+trapInfo = []
+i = 0
+isKilled = True
+while len(trapInfo) < 10 or isKilled == True:
+    i += 1
+    data, trapInfo = e.simulate(e.pref)
+    isKilled = data["killedByHunger"]
+print(i)
+print(len(trapInfo))
+v.writeTojs(trapInfo)
+
+# def histProbEnter(algorithm):
+#     probList = []
+#     allTraps = e.trapEnumerator(3, 4, 2)
+#     for trap in allTraps:
+#         #trap = Trap(3,4,trapboard)
+#         probEnter = algorithm(trap)
+#         probList.append(probEnter)
+#     plt.hist(probList)
+#     plt.show()
+
+#e.expectedLethality(3,4,3,100)
+#e.runExperiment("testrun.csv", "defaultProbEnter", 100)
+
+#histProbEnter(alg.gopherProbEnter3)

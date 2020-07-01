@@ -1,6 +1,7 @@
 from typeDirection import *
 from typeThick import *
 import simulation as s
+import magicVariables as mv
 
 
 class Projectile:
@@ -45,11 +46,11 @@ class Projectile:
         """assigns strength based on thick type"""
         #assigning random strength values, definitely subject to change
         if(thicktype == ThickType.skinny):
-            return 0.15
+            return mv.SKINNY_PROJECTILE_STRENGTH
         elif(thicktype == ThickType.normal):
-            return 0.30
+            return mv.NORMAL_PROJECTILE_STRENGTH
         elif(thicktype == ThickType.wide):
-            return 0.45
+            return mv.WIDE_PROJECTILE_STRENGTH
         else:
             raise Exception("No bueno")
 

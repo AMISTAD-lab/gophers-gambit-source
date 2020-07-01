@@ -23,7 +23,7 @@ class Cell(metaclass = ABCMeta):
         return str(self.cellType.name) + " " +str(self.active)
 
     # def __eq__(self, other):
-    #     #does not care about owner, just position and types
+    #     #does not care about owner, just position and typesn
     #     return self.x == other.x and self.y == other.y and self.getBaseInfo() == other.getBaseInfo()
 
 
@@ -71,7 +71,7 @@ class Cell(metaclass = ABCMeta):
             return self.ownerBoard.board[self.y][self.x - 1]
         else:
             return None
-    
+
 def getOppositeEndpoint(endpoint):
     """Gets the opposite endpoint to the one passed in"""
     return (endpoint + 4) % 8

@@ -9,7 +9,7 @@ import shutil as sh
 newjsFileName = "animation.js"
 jsTemplateName = "template.js"
 
-def writeTojs(trapList, terrainList):
+def writeTojs(trapList):
     """ 
     Inputs:
         trapList: a list with elements of the form [initTrapBoard, activeTrapCells, gopherTrapCells]
@@ -26,6 +26,5 @@ def writeTojs(trapList, terrainList):
     jsFile = open(newjsFileName, "a") # open the file to append to
     jsFile.write("function getInput(){\n")
     jsFile.write("trapList = " + str(trapList) + ";\n")
-    jsFile.write("terrainList = " + str(terrainList) + ";\n")
     jsFile.write("}")
     jsFile.close()

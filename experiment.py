@@ -3,22 +3,139 @@ import copy
 from classTrap import *
 from classTerrain import *
 import numpy as np
+import magicVariables as mv
+import data as d
+
+pref = {
+    "intention" : True, #if gopher has intention
+    "defaultProbEnter" : 0.8, #probability of gopher entering trap (not intention)
+    "probReal" : 0.5, #percentage of traps that are designed as opposed to random
+    "nTrapsWithoutFood" : 3, #the amount of traps a gopher can survive without entering (due to starvation)
+    "maxProjectileStrength" : 0.45, #thickWire strength
+}
 
 
-def simulate(intention, probreal, nTrapsWithoutFood=3):
+
+def runExperiment(filename, inputToVary, numSimulations):
+    inputfile = createExpInputFile(inputToVary)
+    seedList = createSeedListFromFile(inputfile)
+    allData = simulateManySetups(numSimulations, seedList)
+    d.allDataToCSV(allData, filename)
+
+
+
+def createExpInputFile(inputToVary):
+    """Inputs:
+        inputToVary: String, the input to vary. 
+            eg. "predSightDistance"
+        startValue: the starting value of input, inclusive
+        endingValue: the ending value of input, inclusive
+        stepValue: the stepValue for input
+    """
+    filename = "experimentInput.txt"
+    file = open(filename, "w")
+    for intention in [True, False]:
+        toWrite = "intention " + str(intention) + "\n" 
+        if inputToVary == "probReal":
+            for percent in range(0, 100+1, 5):
+                percent /= 100
+                file.write(toWrite)
+                file.write("probReal " + str(percent) + "\n\n")
+        elif inputToVary == "nTrapsWithoutFood":
+            for n in range(1, 20+1, 1):
+                file.write(toWrite)
+                file.write("nTrapsWithout Food " + str(n) + "\n\n")
+        elif inputToVary == "maxProjectileStrength":
+            for probKill in range(3, 99+1, 6):
+                probKill /= 100
+                file.write(toWrite)
+                file.write("maxProjectileStrength " + str(probKill) + "\n\n")
+        elif inputToVary == "defaultProbEnter":
+            for probEnter in range(0, 100+1, 5):
+                probEnter /= 100
+                file.write(toWrite)
+                file.write("defaultProbEnter " + str(probEnter) + "\n\n")
+        else:
+            raise Exception("Something went wrong")
+    file.close() 
+    return filename
+
+
+def createSeedListFromFile(filename):
+    seedFile = open(filename, "r")
+    lineList = seedFile.readlines()
+    seedFile.close()
+    lineList = [x.strip("\n") for x in lineList]
+    lineList = lineList[:-1] # crop out extra line in file (hacky ik)
+
+    standardSeed = {
+        "intention" : True,
+        "defaultProbEnter" : 1,
+        "probReal" : 0,
+        "nTrapsWithoutFood" : 3,
+        "maxProjectileStrength" : 0.45,
+    }
+
+    seedList = []
+    preferences = copy.deepcopy(standardSeed)
+    for line in lineList:
+        if line == "":
+            seedList.append(preferences)
+            preferences = copy.deepcopy(standardSeed)
+        else:
+            key, value = line.split()
+            if key in preferences:
+                if value == "True":
+                    preferences[key] = True
+                elif value == "False":  
+                    preferences[key] = False
+                else:
+                    preferences[key] = float(value)
+            else:
+                raise Exception(key + " is not a value in preferences!")
+    seedList.append(preferences)
+    return seedList
+
+
+def simulateManySetups(numSimulations, seedList):
+    allData = []
+    numSeeds = len(seedList)
+    for i in range(numSeeds):
+        allData.append(batchSimulate(numSimulations, seedList[i], [True, i, numSeeds]))
+    return allData
+
+
+def batchSimulate(numSimulations, pref, manySetups=[False,0,0]):
+    """runs simulate many times"""
+    batchData = copy.deepcopy(pref) # holds runData, as well as averages for each set of parameters
+    runsData = [] # holds data dictionaries for runs with a given set of parameters. (greater number of runs = greater precision)
+    for i in range(numSimulations):
+        data, trapInfo = simulate(pref)
+        runsData.append(data)
+        if manySetups[0]:
+            printProgressBar((i+1) + (manySetups[1] * numSimulations), numSimulations * manySetups[2])
+    batchData["runsData"] = runsData 
+    return batchData
+
+def simulate(pref):
+    intention = pref["intention"]
+    probReal = pref["probReal"]
+    nTrapsWithoutFood = pref["nTrapsWithoutFood"]
+
+    mv.initializeVariables(pref)
+
     stillAlive = True
     trapsWithoutFood = 0
     numTraps = 0
     killedByHunger = False
     trapInfo = []
     while stillAlive:
-        rowLength = 3 #should generate randomly within a small range instead
+        rowLength = 3
         colLength = 4
-        functional = np.random.binomial(1, probreal)
+        functional = np.random.binomial(1, probReal)
         trap = Trap(rowLength, colLength, functional)
         ib, ac, gc, alive, eaten = s.simulateTrap(trap, intention)
         trapInfo.append([ib, ac, gc])
-        #s.viewRun(ib, ac, gc)
         stillAlive = alive
         if alive:
             numTraps += 1
@@ -29,40 +146,11 @@ def simulate(intention, probreal, nTrapsWithoutFood=3):
             if trapsWithoutFood >= nTrapsWithoutFood:
                 killedByHunger = True
                 stillAlive = False
-    return numTraps, killedByHunger, trapInfo
-
-
-def test():
-    terrain = Terrain(5,5)
-    n, kh, trapinfo = simulate(False, 0, 3)
-    terraininfo = [terrain.board, []]
-    return trapinfo, terraininfo
-
-
-
-
-def visualRun(rowLength, colLength, intention, trapList):
-    trapInfo = []
-    trapboardList = []
-    for trap, x, y in trapList:
-        ib, ac, gc, alive = s.simulateTrap(trap, intention, maxSteps=20)
-        trapInfo.append([ib, ac, gc])
-        trapboardList.append([ib, x, y])
-    terrain = Terrain(rowLength, colLength, trapboardList)
-    #create random walk frames
-    gopherWalkCells = [] #NEED TO IMPLEMENT
-    #####
-    terrainInfo = [terrain.board, gopherWalkCells]
-    return trapInfo, terrainInfo
-
-
-
-
-
-
-
-
-
+    
+    data = copy.deepcopy(pref)
+    data["numTraps"] = numTraps
+    data["killedByHunger"] = killedByHunger
+    return data, trapInfo
 
 
 
@@ -78,7 +166,7 @@ def expectedLethality(rowLength, colLength, n, r):
     for i in range(total):
         for j in range(r):
             printProgressBar(i*r + j + 1, runs)
-            ib, ac, gc, alive, eaten = s.simulateTrap(traps[i], False)
+            ib, ac, gc, alive, eaten = s.simulateTrap(traps[i], True)
             if alive == False:
                 lethal += 1
     print("\nlethal runs:", lethal, "\ntotal runs:", runs, "\nnum traps:", total)

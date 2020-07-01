@@ -3,6 +3,7 @@ from classFloor import *
 from typeRotation import *
 import algorithms as alg
 import numpy as np
+import magicVariables as mv
 
 class Gopher:
     def __init__(self, start_x, start_y, ownerBoard, intention, rotationType=RotationType.up):
@@ -18,6 +19,7 @@ class Gopher:
         self.left = False
         self.hasEaten = False
         self.eatingTimer = 0
+        self.initialTimer = 0
 
     def state(self):
         if not self.alive:
@@ -42,10 +44,11 @@ class Gopher:
         else:
             #at beginning of trap, so figure out whether to enter or not (done in algs)
             if self.intention:
-                probEnter = alg.gopherProbEnter2(self.ownerBoard) #currently using the cohesion one
+                probEnter = alg.gopherProbEnter3(self.ownerBoard) #currently using the cohesion one
             else:
-                probEnter = 1 #arbitrarily chosen rn
-            if np.random.binomial(1, probEnter) == 1:
+                probEnter = mv.DEFAULT_PROB_ENTER
+            if np.random.binomial(n=1, p=probEnter) == 1:
+                self.initialTimer = alg.gopherEatTimer(probEnter)
                 self.entering = True
                 self.leaving = False
             else:
@@ -56,7 +59,7 @@ class Gopher:
     def enter(self):
         self.y -= 1
         if self.ownerBoard.board[self.y][self.x].cellType == CellType.food:
-            self.eatingTimer = 3 #set this randomly
+            self.eatingTimer = self.initialTimer
             self.entering = False
             self.leaving = False
     
@@ -91,6 +94,5 @@ class Gopher:
             self.leaving = True
             self.entering = False
             
-### Brainstorming what a random walk might look like
 
 
