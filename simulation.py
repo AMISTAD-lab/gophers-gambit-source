@@ -6,10 +6,11 @@ import numpy as np
 
 gopher = None    
     
-def simulateTrap(trap, intention, maxSteps=20):
+def simulateTrap(trap, intention, hunger=0, maxSteps=20):
     center_x = m.ceil(trap.rowLength / 2) - 1
     global gopher
     gopher = Gopher(center_x, trap.colLength, trap, intention)
+    gopher.hunger = hunger
     step = 0
     initialboard = trap.saveCells()
     initialboard.append(["4xxx"]*trap.rowLength) #add dirt beneath trap

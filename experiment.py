@@ -12,6 +12,7 @@ pref = {
     "probReal" : 0.5, #percentage of traps that are designed as opposed to random
     "nTrapsWithoutFood" : 3, #the amount of traps a gopher can survive without entering (due to starvation)
     "maxProjectileStrength" : 0.45, #thickWire strength
+    "hungerWeight" : 0.2,
 }
 
 
@@ -55,6 +56,11 @@ def createExpInputFile(inputToVary):
                 probEnter /= 100
                 file.write(toWrite)
                 file.write("defaultProbEnter " + str(probEnter) + "\n\n")
+        elif inputToVary == "hungerWeight":
+            for hungerWeight in range(0, 100, 5):
+                hungerWeight /= 100
+                file.write(toWrite)
+                file.write("hungerWeight " + str(hungerWeight) + "\n\n")
         else:
             raise Exception("Something went wrong")
     file.close() 
@@ -74,6 +80,7 @@ def createSeedListFromFile(filename):
         "probReal" : 0,
         "nTrapsWithoutFood" : 3,
         "maxProjectileStrength" : 0.45,
+        "hungerWeight" : 0.2,
     }
 
     seedList = []
@@ -134,7 +141,8 @@ def simulate(pref):
         colLength = 4
         functional = np.random.binomial(1, probReal)
         trap = Trap(rowLength, colLength, functional)
-        ib, ac, gc, alive, eaten = s.simulateTrap(trap, intention)
+        hunger = (trapsWithoutFood + 1)/nTrapsWithoutFood
+        ib, ac, gc, alive, eaten = s.simulateTrap(trap, intention, hunger)
         trapInfo.append([ib, ac, gc])
         stillAlive = alive
         if alive:

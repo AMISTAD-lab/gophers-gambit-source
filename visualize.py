@@ -6,8 +6,8 @@ import shutil as sh
 
 
 
-newjsFileName = "animation.js"
-jsTemplateName = "template.js"
+newjsFileName = "animation/animation.js" # will write and read files in the animation folder.
+jsTemplateName = "animation/template.js"
 
 def writeTojs(trapList):
     """ 

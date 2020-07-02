@@ -25,15 +25,22 @@ import designedTraps as dt
 # trapInfo = e.expectedLethality(3,4,3, 500)
 # terrainInfo = [[[]], []]
 
+# trapInfo = []
+# i = 0
+# isKilled = True
+# while len(trapInfo) < 10 or isKilled == True:
+#     i += 1
+#     data, trapInfo = e.simulate(e.pref)
+#     isKilled = data["killedByHunger"]
+# print(i)
+# print(len(trapInfo))
+# v.writeTojs(trapInfo)
+
 trapInfo = []
-i = 0
-isKilled = True
-while len(trapInfo) < 10 or isKilled == True:
-    i += 1
-    data, trapInfo = e.simulate(e.pref)
-    isKilled = data["killedByHunger"]
-print(i)
-print(len(trapInfo))
+for trapboard in dt.traps:
+    trap = Trap(3,4,trapboard)
+    ib, ac, gc, a, e = s.simulateTrap(trap, False)
+    trapInfo.append([ib, ac, gc])
 v.writeTojs(trapInfo)
 
 # def histProbEnter(algorithm):

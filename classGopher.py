@@ -20,6 +20,7 @@ class Gopher:
         self.hasEaten = False
         self.eatingTimer = 0
         self.initialTimer = 0
+        self.hunger = 0
 
     def state(self):
         if not self.alive:
@@ -44,11 +45,12 @@ class Gopher:
         else:
             #at beginning of trap, so figure out whether to enter or not (done in algs)
             if self.intention:
-                probEnter = alg.gopherProbEnter3(self.ownerBoard) #currently using the cohesion one
+                enterGivenTrap = alg.gopherProbEnter3(self.ownerBoard) #currently using the cohesion one
             else:
-                probEnter = mv.DEFAULT_PROB_ENTER
+                enterGivenTrap = mv.DEFAULT_PROB_ENTER
+            probEnter = (enterGivenTrap * (1-mv.HUNGER_WEIGHT)) + (self.hunger * (mv.HUNGER_WEIGHT))
             if np.random.binomial(n=1, p=probEnter) == 1:
-                self.initialTimer = alg.gopherEatTimer(probEnter)
+                self.initialTimer = alg.gopherEatTimer(enterGivenTrap)
                 self.entering = True
                 self.leaving = False
             else:
