@@ -158,25 +158,36 @@ def addTrapToTerrain(terrain, start_x, start_y, trapboard):
 ## Probability of Gopher Entering Trap: gopher enters trap based on how dangerous it is. especially evaluating if a trap is working. 
 ## different than the probability that a gopher will survive the trap
 
-def workingTrap(trap):
-    """
-    MAIN FUNCTION
-    Supposed to be the big parent function using helpers to return
-    whether a trap works. ie the trap is dangerous
-    ...
-    returning 2 lists
-    """
+#################
+# List of Cells
+# starting with cell adj to door and last is arrow
+trapPaths = [[],[]]  # [[left path], [right path]]
 
+def returnFunctionalPaths(trap):
+    """
+    Assesses when traps are working.
+    This will likely be run on random traps
+    ...
+    Returns list of two lists: Lpath and Rpath
+    If a list is empty that path doesnt work
+    """
     arrowCells, wireCells, arrowThickTypes, wireThickTypes, doorCell = organizeTrap(trap)
-    
-    if isDoorSetUp(doorCell):
-        if workingSingleArrows(trap):
-            return 0
-        for i in range(len(arrowCells)):
-            i += -1  ## oof I'll google prettier python for loops in a sec
-            if not assessPath(arrowCells[i]):
-                return False
-        return True
+
+    if len(arrowCells) == 0: # no arrows? can't zap.
+        return trapPaths
+    elif workingSingleArrows(trap): # no wire trap
+        return trapPaths
+    else: 
+    # for all other types of traps
+     
+    # elif isDoorSetUp(doorCell): # to begin with, does the door have proper wires attached?
+    #     if workingSingleArrows(trap):
+    #         return 0
+    #     for i in range(len(arrowCells)):
+    #         i += -1  ## oof I'll google prettier python for loops in a sec
+    #         if not assessPath(arrowCells[i]):
+    #             return False
+    #     return True
     
 def organizeTrap(trap):
     """
@@ -212,13 +223,41 @@ def organizeTrap(trap):
     print("[arrowCells, wireCells, arrowThickTypes, wireThickTypes,  doorCell]")
 
     return typeLists
-    ## measily attempt to save values in helper func
 
 
-def isDoorSetUp(cell): #rename later? 
+
+def workingSingleArrows(trap):
     """
-    returns true if the door is connected to power ie proper arrow/wire
-    Would a charge even go through the door cell?
+    Edited to reflect that only ACUTE ANGLES are functional. One arrow RIGHT ANGLES are not
+    ...
+    returns True if this is a 
+    """
+    arrowCells, wireCells, arrowThickTypes, wireThickTypes, doorCell = organizeTrap(trap)
+
+    leftOfDoor = doorCell.getNeighboringCell(6)
+    rightOfDoor = doorCell.getNeighboringCell(2)
+
+    if len(wireCells) == 0 and len(arrowCells) != 0: # no wire cells only arrows
+        if leftOfDoor.angleType == 1 and leftOfDoor.rotationType == 6: #racute, left
+            trapPaths[0].append(leftOfDoor)
+            if rightOfDoor.angleType == 0 and leftOfDoor.rotationType == 2: #lacute, right
+                trapPaths[1].append(leftOfDoor)
+     
+        if rightOfDoor.angleType == 0 and leftOfDoor.rotationType == 2: #lacute, right
+                trapPaths[1].append(leftOfDoor)
+                if leftOfDoor.angleType == 1 and leftOfDoor.rotationType == 6: #racute, left
+                    trapPaths[0].append(leftOfDoor)
+        else:
+            return False
+
+ # elif leftOfDoor.angleType == 3 and leftOfDoor.rotationType == 6: #rright, left
+        #     singleArrows[0] = 2
+        # elif leftOfDoor.angleType == 2 and leftOfDoor.rotationType == 2: #lright, right
+        #     singleArrows[1] = 2
+
+def door connected(cell): #rename later? 
+    """
+    only runs on traps with wires AND arrows
     ...
     Input: Door Cell
     returns a True if there are wires or arrows connected
@@ -237,36 +276,7 @@ def isDoorSetUp(cell): #rename later?
         return False
     return True, doorMap
 
-def workingSingleArrows(trap):
-    """
-    RETURNS FOR ACUTE ANGLES OR RIGHT ANGLES
-    runs on the condition that the door is connected to valid wires/arrows
-    ...
-    Signifies trap is either 1 or 2 acute arrows
-    returns list of single arrrows and Boolean
-    """
-    arrowCells, wireCells, arrowThickTypes, wireThickTypes, doorCell = organizeTrap(trap)
-    arrowMap = [[0,0,0],[0,0,0]]  # [L,R] acute arrows,  1 = acute and 2 = rightangle
-    # [angle, rotation, cellType, thickType]
-    leftOfDoor = doorCell.getNeighboringCell(6)
-    rightOfDoor = doorCell.getNeighboringCell(2)
 
-    if len(wireCells) == 0 and len(arrowCells) != 0: # no wire cells only arrows
-        if leftOfDoor.angleType == 1 and leftOfDoor.rotationType == 6: #racute, left
-            singleArrows[0][0] = 1 #angleType
-        elif leftOfDoor.angleType == 0 and leftOfDoor.rotationType == 2: #lacute, right
-            singleArrows[1] = 1
-        elif leftOfDoor.angleType == 3 and leftOfDoor.rotationType == 6: #rright, left
-            singleArrows[0] = 2
-        elif leftOfDoor.angleType == 2 and leftOfDoor.rotationType == 2: #lright, right
-            singleArrows[1] = 2
-        else:
-            print("the arrows in this trap are not connected")
-            print("or there aren't arrows beside the door")
-            return False
-    return arrowMap
-    # no working arrows [0,0]
-    # left is acute angle, right is right angle [1,2]
 
 def assessPath(currCell):
     """
