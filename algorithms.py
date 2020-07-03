@@ -193,8 +193,10 @@ def isTrap(trap, alg, sigVal=4.33):
 
 
 
-<<<<<<< HEAD
 ################
+## The below is so bad my heart cringes
+###############
+
 def whatConnections(trap):
     """
     this function returns how many connections a trap has
@@ -209,18 +211,33 @@ def whatConnections(trap):
     y = [3,3,0,1,0,0,0,2,2,3]
 
     numConnect = 0
-    # for i in len(x) and j in len(y):
-    #     trap[i][j]
-    #     # if 
+    for i in len(x) and j in len(y):  #wrong syntax!!!!!!!!
+        if i=1 and j=3: #[1,3]
+            if (trap[0,3]).cellType = arrow and (trap[0,3]).rotationtype = down:
+                numConnect += 1
+            elif (trap[0,3]).cellType = wire:
+                if (trap[0,3]).angleType = lright and ((trap[0,3]).rotationtype = down or left):
+                    numConnect += 1
+                elif (trap[0,3]).angleType = rright and ((trap[0,3]).rotationtype = up or left):
+                    numConnect += 1
+                elif (trap[0,3]).angleType = straight and ((trap[0,3]).rotationtype = right or left):
+                    umConnect += 1
+        
+        elif i=0 and j=3:
+        elif i=2 and j=0:
+        elif i=0 and j=1:
+        elif i=0 and j=0:
+        elif i=1 and j=0:
+        elif i=2 and j=0:
+        elif i=1 and j=2:
+        elif i=2 and j=2:
+        elif i=2 and j=3:
 
-    if
+            ## mmm... maybe not do this for every one
 
 
 
-=======
-## Probability of Gopher Entering Trap: gopher enters trap based on how dangerous it is. especially evaluating if a trap is working. 
-## different than the probability that a gopher will survive the trap
->>>>>>> a4f8f658565d2d2e3e1e71a3e111d3fe564aa7ff
+
 
 #################
 ## Get Trap Description
