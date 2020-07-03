@@ -154,11 +154,34 @@ def addTrapToTerrain(terrain, start_x, start_y, trapboard):
 
 
 
-############### current workspace... 
-## Probability of Gopher Entering Trap: gopher enters trap based on how dangerous it is. especially evaluating if a trap is working. 
-## different than the probability that a gopher will survive the trap
+################
+def whatConnections(trap):
+    """
+    this function returns how many connections a trap has
+    """
+    doorCell
+    for cell in allCells: # flattens board into 1d  array
+        if cell.cellType == CellType.door:
+            doorCell = cell
+
+    ## specified path in order to go around a trap
+    x = [1,0,2,0,0,1,2,1,2,2]
+    y = [3,3,0,1,0,0,0,2,2,3]
+
+    numConnect = 0
+    # for i in len(x) and j in len(y):
+    #     trap[i][j]
+    #     # if 
+
+    if
+
+
+
 
 #################
+## Get Trap Description
+
+
 # List of Cells
 # starting with cell adj to door and last is arrow
 trapPaths = [[],[]]  # [[left path], [right path]]
