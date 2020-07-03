@@ -6,6 +6,8 @@ from typeThick import *
 import classCell as c
 import numpy as np
 import copy
+import csv
+import math as m
 
 def findDir(rotationType, angleType):
     """returns the direction from our perspective (primarily for the arrow)"""
@@ -153,8 +155,44 @@ def addTrapToTerrain(terrain, start_x, start_y, trapboard):
         raise Exception("This board does not fit")
 
 
+def findCohesionPercent(filename, cohesionVal, returnVals=False):
+    cohesionCounter = 0.0
+    elementCounter = 0.0
+    with open(filename) as csvfile:
+        readCSV = csv.reader(csvfile, delimiter=',')
+        rows = [row[0] for row in readCSV]
+        numVals = int(rows[0])
+        for row in rows[1 : numVals]:
+            elementCounter += 1
+            if float(row) >= cohesionVal:
+                cohesionCounter += 1
+        if cohesionCounter == 0:
+            cohesionCounter += 1
+            elementCounter += 1
+        percent = cohesionCounter / elementCounter
+        if returnVals:
+            p_hat = float(rows[-2])
+            r_hat = float(rows[-1])
+            return percent, p_hat, r_hat
+        else:
+            return percent
 
-############### current workspace... 
+def fsc(cohesion, filename="cohesionVals.csv"):
+    fsc = 0.0
+    for val in findCohesionPercent(filename, cohesion, True):
+        fsc += -m.log(val, 2)
+    return fsc
+
+def isTrap(trap, alg, sigVal=4.33):
+    cohesion = alg(trap)
+    if fsc(cohesion) > sigVal:
+        return True
+    else:
+        return False
+        
+
+
+
 ## Probability of Gopher Entering Trap: gopher enters trap based on how dangerous it is. especially evaluating if a trap is working. 
 ## different than the probability that a gopher will survive the trap
 
@@ -163,22 +201,24 @@ def addTrapToTerrain(terrain, start_x, start_y, trapboard):
 # starting with cell adj to door and last is arrow
 trapPaths = [[],[]]  # [[left path], [right path]]
 
-def returnFunctionalPaths(trap):
+def functionalPaths(trap):
     """
-    Assesses when traps are working.
+    Assess when traps are working.
     This will likely be run on random traps
     ...
     Returns list of two lists: Lpath and Rpath
     If a list is empty that path doesnt work
     """
-    arrowCells, wireCells, arrowThickTypes, wireThickTypes, doorCell = organizeTrap(trap)
+    arrowCells, wireCells, arrowThickTypes, wireThickTypes, doorCell, leftDoor, rightDoor = organizeTrap(trap)
 
     if len(arrowCells) == 0: # no arrows? can't zap.
         return trapPaths
     elif workingSingleArrows(trap): # no wire trap
         return trapPaths
-    else: 
+    #else:
     # for all other types of traps
+        # check door
+        # check others
      
     # elif isDoorSetUp(doorCell): # to begin with, does the door have proper wires attached?
     #     if workingSingleArrows(trap):
@@ -203,6 +243,7 @@ def organizeTrap(trap):
     wireThickTypes = [0,0,0]
     arrowThickTypes = [0,0,0]
     doorCell = []
+
     # [skinny, normal, wide]
 
     for cell in allCells: # flattens board into 1d  array
@@ -218,83 +259,75 @@ def organizeTrap(trap):
         wireThickTypes[cell.thickType.value] += 1
     for cell in arrowCells:
         arrowThickTypes[cell.thickType.value] += 1
+    
+    # bad style to define vars here? but I need doorCell value first
+    leftDoor = doorCell.getNeighboringCell(6) 
+    rightDoor = doorCell.getNeighboringCell(2)
 
-    typeLists =[arrowCells, wireCells, arrowThickTypes, wireThickTypes, doorCell]
+    typeLists =[arrowCells, wireCells, arrowThickTypes, wireThickTypes, doorCell, leftDoor, rightDoor]
     print("[arrowCells, wireCells, arrowThickTypes, wireThickTypes,  doorCell]")
 
     return typeLists
 
 
-
 def workingSingleArrows(trap):
     """
-    Edited to reflect that only ACUTE ANGLES are functional. One arrow RIGHT ANGLES are not
+    updates trapPaths if correct connection
     ...
-    returns True if this is a 
+    does not classify single right angles as functional traps
     """
-    arrowCells, wireCells, arrowThickTypes, wireThickTypes, doorCell = organizeTrap(trap)
-
-    leftOfDoor = doorCell.getNeighboringCell(6)
-    rightOfDoor = doorCell.getNeighboringCell(2)
+    arrowCells, wireCells, arrowThickTypes, wireThickTypes, doorCell, leftDoor, rightDoor = organizeTrap(trap)
 
     if len(wireCells) == 0 and len(arrowCells) != 0: # no wire cells only arrows
-        if leftOfDoor.angleType == 1 and leftOfDoor.rotationType == 6: #racute, left
-            trapPaths[0].append(leftOfDoor)
-            if rightOfDoor.angleType == 0 and leftOfDoor.rotationType == 2: #lacute, right
-                trapPaths[1].append(leftOfDoor)
-     
-        if rightOfDoor.angleType == 0 and leftOfDoor.rotationType == 2: #lacute, right
-                trapPaths[1].append(leftOfDoor)
-                if leftOfDoor.angleType == 1 and leftOfDoor.rotationType == 6: #racute, left
-                    trapPaths[0].append(leftOfDoor)
-        else:
-            return False
+        if leftDoor.angleType == 1 and leftDoor.rotationType == 6: #racute, left
+            trapPaths[0].append(leftDoor)
+        if rightDoor.angleType == 0 and rightDoor.rotationType == 2: #lacute, right
+            trapPaths[1].append(rightDoor)
 
- # elif leftOfDoor.angleType == 3 and leftOfDoor.rotationType == 6: #rright, left
-        #     singleArrows[0] = 2
-        # elif leftOfDoor.angleType == 2 and leftOfDoor.rotationType == 2: #lright, right
-        #     singleArrows[1] = 2
 
-def door connected(cell): #rename later? 
-    """
-    only runs on traps with wires AND arrows
-    ...
+def doorConnected(doorCell):
+    """ 
     Input: Door Cell
-    returns a True if there are wires or arrows connected
+    adds to global lists if there are wires/arrows are connected properly
+    ...
+    only runs on traps with wires AND arrows
+    Runs on the condition that it is not a single arrow trap
     """
-    
-    arrowCells, wireCells, arrowThickTypes, wireThickTypes, doorCell = organizeTrap(trap)
-    doorMap = [[0,0,0,0],[0,0,0,0]]  # [L,R] --- inner: [angle, rotation, cellType, thickType]
     leftOfDoor = doorCell.getNeighboringCell(6)
     rightOfDoor = doorCell.getNeighboringCell(2)
 
-    # if there's no wire on either side of door
-    if (leftOfDoor.cellType) and (rightOfDoor.cellType) != 3:
-        print("no arrows connected")
-        if (c.getNeighboringCell(cell, 6).cellType) and (c.getNeighboringCell(cell, 2).cellType) != 2: #if its NOT a wire cell
-            print("Broken Trap -- no wires connected")
-        return False
-    return True, doorMap
+    if (leftOfDoor.angleType == 3) and (leftOfDoor.rotationType == 6): #if rright3,left6 I_
+        trapPaths[0].append(leftOfDoor)
+    if (rightOfDoor.angleType == 2) and (rightOfDoor.rotationType == 2): #lright2, right2 _I
+        trapPaths[1].append(leftOfDoor)
 
 
 
 def assessPath(currCell):
     """
-    Follows the current from arrow to door to checks if wire-arrow paths are valid
+    Follows the current from L or R of door to check if wire-arrow paths are valid
     ---
-    recursive function to FIRST be called on an arrow cell.
     returns false when cells or thicktype doesnt align.
-    Input: an arrow cell to begin with
+    updates list when cells/thicktypes align
+    If a path is false, it sets the list to empty
+    Input: an door cell to begin with
     Output: boolean, activePath
     """
-    activePath = []
-    # activePath is the list of cells in a correct door ---> arrow journey
-    # add to this list to easily evaluate paths later on
+
+    leftOfDoor = currCell.getNeighboringCell(6)
+    rightOfDoor = doorCell.getNeighboringCell(2)
+
+    if len(trapPaths[0]) and len(trapPaths[1]) == 1:
+        doorConnected(currCell)
+        assessPath(currCell.getNeighbors(6)) #leftDoor
+        assessPath(currCell.getNeighbors(2)) #rightDoor
 
     # Base case, if we reach this point the current has successfully traveled
     # if the cell is a door the arrow-wire path is valid
-    if currCell.cellType == 1: #if door
-        return True
+    if currCell.cellType == 3: #if arrow cell 
+        # if -- check endpoints
+        # check 
+        return trapPaths
 
 ####### Cindy TODO: (if she ever figures out how to refer to endpts correctly)
 ## Steps: (for wire and arrow)
@@ -310,6 +343,7 @@ def assessPath(currCell):
     # use it to determine danger and prob of trap
 
     # now unleash massive combinations
+    
     elif currCell.cellType == 3: #arrow
         if currCell.rotationtype == 0: #lacute
             if currCell.rotationType == 0:
@@ -324,20 +358,18 @@ def assessPath(currCell):
     #     activePath.append(currCell)
     
     # return activePath
-    # can't do this because we return a boolean in this func...
-            
 
+###################################################################################
+###################################################################################
 
-## Hopefully you will have one or more activePaths for each side of the trap when this is run
-
-def gopherProbEnter2(trap):
+def trapDanger2(trap):
     cellList = flatten(trap.board)
     if not hasArrow(cellList):
         return 1.0
     else:
-        return 1 - threatAssessment(cellList)
+        return threatAssessment(cellList)
 
-def gopherProbEnter3(trap):
+def trapDanger3(trap):
     row = trap.rowLength
     cellList = flatten(trap.board)
     if not hasArrow(cellList):
@@ -348,7 +380,7 @@ def gopherProbEnter3(trap):
         leftThreat = threatAssessment(leftCol)
         rightThreat = threatAssessment(rightCol)
         avgThreat = (leftThreat + rightThreat)/2.0
-        return 1 - avgThreat
+        return avgThreat
 
 
 def hasArrow(cellList):
@@ -490,5 +522,13 @@ def uniformTraps(trap):
 #     #for cell in arrowCells:
 
    
+# wiree stuff:
+ # elif leftDoor.angleType == 3 and leftDoor.rotationType == 6: #rright, left
+        #     singleArrows[0] = 2
+        # elif leftDoor.angleType == 2 and leftDoor.rotationType == 2: #lright, right
+        #     singleArrows[1] = 2
 
-
+  # if rightDoor.angleType == 0 and leftDoor.rotationType == 2: #lacute, right
+        #         trapPaths[1].append(rightDoor)
+        #         if rightDoor.angleType == 1 and rightDoor.rotationType == 6: #racute, left
+        #             trapPaths[0].append(rightDoor)

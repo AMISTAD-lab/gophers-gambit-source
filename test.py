@@ -36,12 +36,12 @@ import designedTraps as dt
 # print(len(trapInfo))
 # v.writeTojs(trapInfo)
 
-trapInfo = []
-for trapboard in dt.traps:
-    trap = Trap(3,4,trapboard)
-    ib, ac, gc, a, e = s.simulateTrap(trap, False)
-    trapInfo.append([ib, ac, gc])
-v.writeTojs(trapInfo)
+# trapInfo = []
+# for trapboard in dt.traps:
+#     trap = Trap(3,4,trapboard)
+#     ib, ac, gc, a, e = s.simulateTrap(trap, False)
+#     trapInfo.append([ib, ac, gc])
+# v.writeTojs(trapInfo)
 
 # def histProbEnter(algorithm):
 #     probList = []
@@ -57,3 +57,30 @@ v.writeTojs(trapInfo)
 #e.runExperiment("testrun.csv", "defaultProbEnter", 100)
 
 #histProbEnter(alg.gopherProbEnter3)
+
+
+#e.saveCohesionValues(alg.trapDanger3, 3)
+
+probList = []
+allTraps = e.trapEnumerator(3, 4, 2)
+for trap in allTraps:
+    # c = alg.trapDanger3(trap)
+    # fsc = alg.fsc(c)
+    # probList.append(fsc)
+    probList.append(int(alg.isTrap(trap, alg.trapDanger3)))
+plt.hist(probList)
+plt.title("random")
+plt.show()
+
+probList = []
+for trapboard in dt.traps:
+    trap = Trap(3,4, True, trapboard)
+    # c = alg.trapDanger3(trap)
+    # fsc = alg.fsc(c)
+    # probList.append(fsc)
+    probList.append(int(alg.isTrap(trap, alg.trapDanger3)))
+plt.hist(probList)
+plt.title("real")
+plt.show()
+
+

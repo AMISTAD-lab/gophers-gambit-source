@@ -86,7 +86,7 @@ class Board(metaclass = ABCMeta):
             trapIndices = list(range(len(filteredTraps)))
             choice = np.random.choice(trapIndices, size=1)[0]
             board = filteredTraps[choice]
-            #will want something to prevent repeated selection of a trap probably
+
         for cell in alg.flatten(board):
             cell.ownerBoard = self
             cell.active = False

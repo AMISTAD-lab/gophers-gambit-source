@@ -45,7 +45,7 @@ class Gopher:
         else:
             #at beginning of trap, so figure out whether to enter or not (done in algs)
             if self.intention:
-                enterGivenTrap = alg.gopherProbEnter3(self.ownerBoard) #currently using the cohesion one
+                enterGivenTrap = 1 - alg.trapDanger3(self.ownerBoard) #currently using the cohesion one
             else:
                 enterGivenTrap = mv.DEFAULT_PROB_ENTER
             probEnter = (enterGivenTrap * (1-mv.HUNGER_WEIGHT)) + (self.hunger * (mv.HUNGER_WEIGHT))

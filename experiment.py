@@ -1,5 +1,6 @@
 import simulation as s
 import copy
+import csv
 from classTrap import *
 from classTerrain import *
 import numpy as np
@@ -162,7 +163,29 @@ def simulate(pref):
 
 
 
-
+def saveCohesionValues(algorithm, n, filename="cohesionVals.csv"):
+    """To help in computing Mg(x)"""
+    sample = trapEnumerator(3,4,n)
+    cohesion = []
+    for trap in sample:
+        cohesion.append([algorithm(trap)])
+    numTraps = len(cohesion)
+    with open(filename, 'w', newline='') as csvfile:     
+        write = csv.writer(csvfile) 
+        write.writerow([numTraps])
+        write.writerows(cohesion)
+    p_hat = 1.0/numTraps
+    r_hat = 0.0
+    with open(filename, 'r') as csvfile:
+        readCSV = csv.reader(csvfile, delimiter=',')
+        rows = [row[0] for row in readCSV]
+        numVals = int(rows[0])
+        for x in rows[1:numVals]:
+            r_hat += 1.0/alg.findCohesionPercent(filename, float(x))
+    with open(filename, 'a', newline='') as csvfile:     
+        write = csv.writer(csvfile)
+        write.writerow([p_hat])
+        write.writerow([r_hat])
 
 
 def expectedLethality(rowLength, colLength, n, r):
