@@ -194,34 +194,46 @@ def isTrap(trap, alg, sigVal=4.33):
 
 
 ################
-## The below is so bad my heart cringes
+## Finding Connections
 ###############
 
-def whatConnections(trap):
+## global vars:
+usedCells = [] #so we don't double count connections
+
+def totalConnections(trap):
     """
     this function returns how many connections a trap has
     """
-    doorCell
+    endpoints = 0
+    allCells = flatten(trap.board)
     for cell in allCells: # flattens board into 1d  array
         if cell.cellType == CellType.door:
-            doorCell = cell
+            if checkConnection(cell, 2):
+                endpoints += 1
+                usedCells.append(cell)
+            if checkConnection(cell, 6):
+                endpoints += 1
+                usedCells.append(cell)
+        elif cell.cellType == CellType.arrow:
+            return "finish this part"
+
 
     ## specified path in order to go around a trap
     x = [1,0,2,0,0,1,2,1,2,2]
     y = [3,3,0,1,0,0,0,2,2,3]
 
-    numConnect = 0
-    for i in len(x) and j in len(y):  #wrong syntax!!!!!!!!
-        if i=1 and j=3: #[1,3]
-            if (trap[0,3]).cellType = arrow and (trap[0,3]).rotationtype = down:
-                numConnect += 1
-            elif (trap[0,3]).cellType = wire:
-                if (trap[0,3]).angleType = lright and ((trap[0,3]).rotationtype = down or left):
-                    numConnect += 1
-                elif (trap[0,3]).angleType = rright and ((trap[0,3]).rotationtype = up or left):
-                    numConnect += 1
-                elif (trap[0,3]).angleType = straight and ((trap[0,3]).rotationtype = right or left):
-                    umConnect += 1
+    # numConnect = 0
+    # for i in len(x) and j in len(y):  #wrong syntax!!!!!!!!
+    #     if i=1 and j=3: #[1,3]
+    #         if (trap[0,3]).cellType = arrow and (trap[0,3]).rotationtype = down:
+    #             numConnect += 1
+    #         elif (trap[0,3]).cellType = wire:
+    #             if (trap[0,3]).angleType = lright and ((trap[0,3]).rotationtype = down or left):
+    #                 numConnect += 1
+    #             elif (trap[0,3]).angleType = rright and ((trap[0,3]).rotationtype = up or left):
+    #                 numConnect += 1
+    #             elif (trap[0,3]).angleType = straight and ((trap[0,3]).rotationtype = right or left):
+    #                 umConnect += 1
         
         # elif i=0 and j=3:
         # elif i=2 and j=0:
@@ -233,15 +245,18 @@ def whatConnections(trap):
         # elif i=2 and j=2:
         # elif i=2 and j=3:
 
-            ## mmm... maybe not do this for every one
-
-
-
+def checkConnection(cell, endpoint):
+    """
+    returns true if that cell is connected at that endpoint and thicktypes match
+    """
+    cellAtEndpoint = cell.getNeighboringCell(endpoint)
+    # why are food and floor giving me red lines?
+    if (cellAtEndpoint.cellType != food) and (cellAtEndpoint.cellType != floor) and (cellAtEndpoint not in usedCells) and (cellAtEndpoint.rotation == endpoint) and (cell.thickType == cellAtEndpoint.thickType):
+        return True
 
 
 #################
 ## Get Trap Description
-
 
 # List of Cells
 # starting with cell adj to door and last is arrow
