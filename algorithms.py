@@ -223,15 +223,15 @@ def whatConnections(trap):
                 elif (trap[0,3]).angleType = straight and ((trap[0,3]).rotationtype = right or left):
                     umConnect += 1
         
-        elif i=0 and j=3:
-        elif i=2 and j=0:
-        elif i=0 and j=1:
-        elif i=0 and j=0:
-        elif i=1 and j=0:
-        elif i=2 and j=0:
-        elif i=1 and j=2:
-        elif i=2 and j=2:
-        elif i=2 and j=3:
+        # elif i=0 and j=3:
+        # elif i=2 and j=0:
+        # elif i=0 and j=1:
+        # elif i=0 and j=0:
+        # elif i=1 and j=0:
+        # elif i=2 and j=0:
+        # elif i=1 and j=2:
+        # elif i=2 and j=2:
+        # elif i=2 and j=3:
 
             ## mmm... maybe not do this for every one
 
