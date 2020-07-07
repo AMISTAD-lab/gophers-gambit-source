@@ -188,7 +188,6 @@ def isTrap(trap, sigVal=4.33):
     else:
         return False
 
-
 ################
 ## Finding Connections Function
 
@@ -232,6 +231,69 @@ def checkConnection(cell, endpoint):
             return True
     return False
 
+def isDoorArrow(trap):
+    """
+    checks if door has door connections and arrow cells
+    """
+    cellList = flatten(trap.board)
+    doorCell = []
+    for cell in cellList:
+        if cell.cellType == CellType.door:
+            doorCell.append(cell)
+    cleft = doorCell[0].getNeighboringCell(6)
+    cright = doorCell[0].getNeighboringCell(2)
+    if cleft.cellType == (CellType.arrow or CellType.wire):
+        if cleft.rotationType == RotationType.left:
+            if hasArrow:
+                return 0.1
+    elif cright.cellType == (CellType.arrow or CellType.wire):
+        if cright.rotationType == (RotationType.right):
+            if hasArrow:
+                return 0.1
+    else:
+        return 1 # not dangerous trap
+
+
+
+def organizeTrap(trap):
+    """
+    Helper Function
+    Streamlines making arrays for the cellTypes
+    ...
+    input: trap
+    output: lists of lists?
+    """
+    allCells = flatten(trap.board)
+    wireCells = []
+    arrowCells = []
+    wireThickTypes = [0,0,0]
+    arrowThickTypes = [0,0,0]
+    doorCell = []
+
+    # [skinny, normal, wide]
+
+    for cell in allCells: # flattens board into 1d  array
+        if cell.cellType == CellType.wire:
+            wireCells.append(cell)
+        elif cell.cellType == CellType.arrow:
+            arrowCells.append(cell)
+        #     arrowLoc.append(cell)
+        elif cell.cellType == CellType.door:
+            doorCell.append(cell)
+
+    for cell in wireCells:
+        wireThickTypes[cell.thickType.value] += 1
+    for cell in arrowCells:
+        arrowThickTypes[cell.thickType.value] += 1
+    
+    # bad style to define vars here? but I need doorCell value first
+    leftDoor = doorCell[0].getNeighboringCell(6) 
+    rightDoor = doorCell[0].getNeighboringCell(2)
+
+    typeLists =[arrowCells, wireCells, arrowThickTypes, wireThickTypes, doorCell, leftDoor, rightDoor]
+    print("[arrowCells, wireCells, arrowThickTypes, wireThickTypes,  doorCell]")
+
+    return typeLists
 
 
 def trapDanger2(trap):
@@ -283,7 +345,6 @@ def threatAssessment(cellList):
     damage_potential = mean / 3 #maximum mean is 3 (biggest threat)
     threat = (0.7 * cohesion) + (0.3 * damage_potential) #cohesion is more important
     return threat
-
     
 
 def gopherEatTimer(probEnter):
@@ -307,38 +368,44 @@ def gopherEatTimer(probEnter):
             break
     return np.random.choice([1,2,3,4,5], p=initialProbs, size=1)[0]
 
-def uniformTraps(trap):
-    """
-    This function is probably not helpful
-    ...
-    returns the probability gopher will enter given that
-    the traps are uniform in thickType
-    """
-    arrowCells, wireCells, arrowThickTypes, wireThickTypes, doorCell = organizeTrap(trap)
+## uniform was causing errors so I commented it out:
 
-    only = lambda ind, typelist: sum([typelist[i] > 0 for i in range(len(typelist)) if i != ind])==0
+# def uniformTraps(trap):
+#     """
+#     This function is probably not helpful
+#     ...
+#     returns the probability gopher will enter given that
+#     the traps are uniform in thickType
+#     """
+#     arrowCells, wireCells, arrowThickTypes, wireThickTypes, doorCell = organizeTrap(trap)
+
+#     only = lambda ind, typelist: sum([typelist[i] > 0 for i in range(len(typelist)) if i != ind])==0
     
-    # Case: when all arrows/wires are of uniform thickness
-    if len(wireCells) and len(arrowCells) == 0:
-        if len(arrowCells) == 0:
-            print("No danger and highest probability")
-            return 0.9
-        else: #if more than one arrow, you gotta check that the arrow is next to the door 
-            if doorCell: #connected to gate, placed filler
-                if arrowThickTypes == 0: #not zero!!
-                    return 0.7 # or a probability that reflects the 
-            else:
-                return 0.9 # or 1?
-                
-    if (wireThickTypes[2] and arrowThickTypes[2] > 0) and all(i is 0 for i in wireThickTypes[:2]) and all(j is 0 for j in arrowThickTypes[:2]):
-        print("All wide thickness. very thicc. Highest danger and low probability of entering")
-        return 0.1
-    if (wireThickTypes[1] and arrowThickTypes[1] > 0) and all(i is 0 for i in wireThickTypes.remove(wireThickTypes[1])) and only(1, wireThickTypes):
-        print("All normal thickness. Medium danger and medium probability of entering")
-        return 0.5
-    if (wireThickTypes[0] and arrowThickTypes[0] > 0) and all(i is 0 for i in wireThickTypes[0:]) and all(j is 0 for j in wireThickTypes[0:]):
-        print("All skinny thickness. low danger and high probability of entering")
-        return 0.8
+#     # Case: when all arrows/wires are of uniform thickness
+#     if len(wireCells) and len(arrowCells) == 0:
+#         if len(arrowCells) == 0:
+#             print("No danger and highest probability")
+#             return 1
+#         else: #if more than one arrow, you gotta check that the arrow is next to the door 
+#             if doorCell: #connected to gate, placed filler
+#                 if arrowThickTypes == 0: #not zero!!
+#                     return 0.7 # or a probability that reflects the 
+#             else:
+#                 return 0.9 # or 1?
+
+#     if (wireThickTypes[2] and arrowThickTypes[2] > 0) and all(i is 0 for i in wireThickTypes[:2]) and all(j is 0 for j in arrowThickTypes[:2]):
+#         print("All wide thickness. very thicc. Highest danger and low probability of entering")
+#         return 0.1
+#     if (wireThickTypes[1] and arrowThickTypes[1] > 0) and all(i is 0 for i in wireThickTypes.remove(wireThickTypes[1])) and only(1, wireThickTypes):
+#         print("All normal thickness. Medium danger and medium probability of entering")
+#         return 0.5
+#     if (wireThickTypes[0] and arrowThickTypes[0] > 0) and all(i is 0 for i in wireThickTypes[0:]) and all(j is 0 for j in wireThickTypes[0:]):
+#         print("All skinny thickness. low danger and high probability of entering")
+#         return 0.8
+
+#     else:
+#         cellList = flatten(trap.board)
+#         return threatAssessment(cellList)
 
 
 
@@ -351,10 +418,11 @@ def uniformTraps(trap):
 #################################################################
 ########## The worst and longest function ever  START ###########
 #################################################################
-## Get Trap Description
+# Get Trap Description
 
 # List of Cells
 # starting with cell adj to door and last is arrow
+
 # trapPaths = [[],[]]  # [[left path], [right path]]
 
 # def functionalPaths(trap):
@@ -385,45 +453,6 @@ def uniformTraps(trap):
 #     #             return False
 #     #     return True
     
-# def organizeTrap(trap):
-#     """
-#     Helper Function
-#     Streamlines making arrays for the cellTypes
-#     ...
-#     input: trap
-#     output: lists of lists?
-#     """
-#     allCells = flatten(trap.board)
-#     wireCells = []
-#     arrowCells = []
-#     wireThickTypes = [0,0,0]
-#     arrowThickTypes = [0,0,0]
-#     doorCell = []
-
-#     # [skinny, normal, wide]
-
-#     for cell in allCells: # flattens board into 1d  array
-#         if cell.cellType == CellType.wire:
-#             wireCells.append(cell)
-#         elif cell.cellType == CellType.arrow:
-#             arrowCells.append(cell)
-#         #     arrowLoc.append(cell)
-#         elif cell.cellType == CellType.door:
-#             doorCell.append(cell)
-
-#     for cell in wireCells:
-#         wireThickTypes[cell.thickType.value] += 1
-#     for cell in arrowCells:
-#         arrowThickTypes[cell.thickType.value] += 1
-    
-#     # bad style to define vars here? but I need doorCell value first
-#     leftDoor = doorCell.getNeighboringCell(6) 
-#     rightDoor = doorCell.getNeighboringCell(2)
-
-#     typeLists =[arrowCells, wireCells, arrowThickTypes, wireThickTypes, doorCell, leftDoor, rightDoor]
-#     print("[arrowCells, wireCells, arrowThickTypes, wireThickTypes,  doorCell]")
-
-#     return typeLists
 
 
 # def workingSingleArrows(trap):

@@ -70,7 +70,7 @@ def histProbEnter(alg, real):
     plt.title("Distribution of ProbEnter for Traps\nReal: " + str(real))
     plt.show()
 
-histProbEnter(alg.trapDanger3, False)
+histProbEnter(alg.isDoorArrow, True)
 
 
 #e.expectedLethality(3,4,3,100)
