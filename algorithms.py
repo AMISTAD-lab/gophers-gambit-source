@@ -155,105 +155,83 @@ def addTrapToTerrain(terrain, start_x, start_y, trapboard):
         raise Exception("This board does not fit")
 
 
-def findCohesionPercent(filename, cohesionVal, returnVals=False):
-    cohesionCounter = 0.0
-    elementCounter = 0.0
-    with open(filename) as csvfile:
-        readCSV = csv.reader(csvfile, delimiter=',')
-        rows = [row[0] for row in readCSV]
-        numVals = int(rows[0])
-        for row in rows[1 : numVals]:
-            elementCounter += 1
-            if float(row) >= cohesionVal:
-                cohesionCounter += 1
-        if cohesionCounter == 0:
-            cohesionCounter += 1
-            elementCounter += 1
-        percent = cohesionCounter / elementCounter
-        if returnVals:
-            p_hat = float(rows[-2])
-            r_hat = float(rows[-1])
-            return percent, p_hat, r_hat
-        else:
-            return percent
+#Functional Specified Complexity Stuff
 
-def fsc(cohesion, filename="cohesionVals.csv"):
-    fsc = 0.0
-    for val in findCohesionPercent(filename, cohesion, True):
-        fsc += -m.log(val, 2)
+r = 427929800129788411 * (1 + m.log(427929800129788411))
+p = 1 / 427929800129788411
+f_g = {
+    0 : 1.0,
+    1 : 0.8281608501388721,
+    2 : 0.23678550834319834,
+    3 : 0.02827735771621005,
+    4 : 0.0015818193867090915,
+    5 : 4.2655010533381585e-05,
+    6 : 5.489893272371954e-07,
+    7 : 3.3738511119396526e-09,
+    8 : 1.0005077932645628e-11,
+    9 : 1.3754592454684888e-14,
+    10 : 7.010495644589648e-18
+}
+
+def functional_specified_complexity(connection_count):
+    global r
+    global p
+    v = 1 / f_g[connection_count]
+    k = r * p / v
+    fsc = -m.log(k, 2)
     return fsc
 
-def isTrap(trap, alg, sigVal=4.33):
-    cohesion = alg(trap)
-    if fsc(cohesion) > sigVal:
+def isTrap(trap, sigVal=4.33):
+    connection_count = totalConnections(trap)
+    if functional_specified_complexity(connection_count) >= sigVal:
         return True
     else:
         return False
-        
-
 
 
 ################
-## Finding Connections
-###############
+## Finding Connections Function
 
-## global vars:
-usedCells = [] #so we don't double count connections
+usedCells = []
 
 def totalConnections(trap):
     """
     this function returns how many connections a trap has
     """
+    global usedCells
+    usedCells = []
     endpoints = 0
     allCells = flatten(trap.board)
-    for cell in allCells: # flattens board into 1d  array
-        if cell.cellType == CellType.door:
-            if checkConnection(cell, 2):
-                endpoints += 1
-                usedCells.append(cell)
-            if checkConnection(cell, 6):
-                endpoints += 1
-                usedCells.append(cell)
-        elif cell.cellType == CellType.arrow:
-            return "finish this part"
+    for cell in allCells:
+        if cell.cellType == CellType.arrow or cell.cellType == CellType.wire or cell.cellType == CellType.door:
+            for endpoint in cell.endpoints:
+                neighbor = cell.getNeighboringCell(endpoint)
+                if neighbor != None:
+                    if (neighbor.cellType == CellType.wire) or ((cell.cellType == CellType.wire or cell.cellType == CellType.door) and neighbor.cellType == CellType.arrow):
+                        if checkConnection(cell, endpoint):
+                            endpoints += 1
+                            usedCells.append(cell)   
+    return endpoints
 
-
-    ## specified path in order to go around a trap
-    x = [1,0,2,0,0,1,2,1,2,2]
-    y = [3,3,0,1,0,0,0,2,2,3]
-
-    # numConnect = 0
-    # for i in len(x) and j in len(y):  #wrong syntax!!!!!!!!
-    #     if i=1 and j=3: #[1,3]
-    #         if (trap[0,3]).cellType = arrow and (trap[0,3]).rotationtype = down:
-    #             numConnect += 1
-    #         elif (trap[0,3]).cellType = wire:
-    #             if (trap[0,3]).angleType = lright and ((trap[0,3]).rotationtype = down or left):
-    #                 numConnect += 1
-    #             elif (trap[0,3]).angleType = rright and ((trap[0,3]).rotationtype = up or left):
-    #                 numConnect += 1
-    #             elif (trap[0,3]).angleType = straight and ((trap[0,3]).rotationtype = right or left):
-    #                 umConnect += 1
-        
-        # elif i=0 and j=3:
-        # elif i=2 and j=0:
-        # elif i=0 and j=1:
-        # elif i=0 and j=0:
-        # elif i=1 and j=0:
-        # elif i=2 and j=0:
-        # elif i=1 and j=2:
-        # elif i=2 and j=2:
-        # elif i=2 and j=3:
 
 def checkConnection(cell, endpoint):
     """
+    Helper func:
     returns true if that cell is connected at that endpoint and thicktypes match
+    Also makes sure that the connect
     """
+    global usedCells
     cellAtEndpoint = cell.getNeighboringCell(endpoint)
-    # why are food and floor giving me red lines?
-    if (cellAtEndpoint.cellType != food) and (cellAtEndpoint.cellType != floor) and (cellAtEndpoint not in usedCells) and (cellAtEndpoint.rotation == endpoint) and (cell.thickType == cellAtEndpoint.thickType):
-        return True
-
+    matchingEndpoint = c.getOppositeEndpoint(endpoint)
+    
+    if cell.cellType == CellType.door:
+        if (cellAtEndpoint not in usedCells) and (matchingEndpoint in cellAtEndpoint.endpoints):
+            return True
+    ## arrow or wire cell
+    elif (cellAtEndpoint not in usedCells) and (matchingEndpoint in cellAtEndpoint.endpoints):
+        if (cell.thickType == cellAtEndpoint.thickType):
+            return True
+    return False
 
 #################
 ## Get Trap Description
@@ -417,11 +395,7 @@ def assessPath(currCell):
     #         c.getNeighboringCell(0,)
     #thickness
     #     activePath.append(currCell)
-    
     # return activePath
-
-###################################################################################
-###################################################################################
 
 def trapDanger2(trap):
     cellList = flatten(trap.board)
@@ -538,11 +512,112 @@ def uniformTraps(trap):
 
 
 
+### CODE ABYSS
+
+ # if cell.cellType == CellType.door:
+        #     if checkConnection(cell, 2):
+        #         endpoints += 1
+        #         usedCells.append(cell)
+        #     if checkConnection(cell, 6):
+        #         endpoints += 1
+        #         usedCells.append(cell)
+
+        # elif cell.cellType == CellType.wire:    
+        #     for endpoint in range(0,6+1,2):
+        #         neighbor = cell.getNeighboringCell(endpoint)
+        #         if neighbor != None:
+        #             if neighbor.cellType == CellType.arrow or neighbor.cellType == CellType.wire:
+        #                 if checkConnection(cell, endpoint):
+        #                     endpoints += 1
+        #                     usedCells.append(cell)
+
+
+        #     if (cell.getNeighboringCell(0).cellType != None) and (cell.getNeighboringCell(0).cellType == CellType.wire):
+        #         if checkConnection(cell, 0):
+        #             endpoints += 1
+        #             usedCells.append(cell)
+        #     if cell.getNeighboringCell(2).cellType == CellType.wire:
+        #         if checkConnection(cell, 2):
+        #             endpoints += 1
+        #             usedCells.append(cell)
+        #     if cell.getNeighboringCell(4).cellType == CellType.wire:
+        #         if checkConnection(cell, 4):
+        #             endpoints += 1
+        #             usedCells.append(cell)
+        #     if cell.getNeighboringCell(6).cellType == CellType.wire:
+        #         if checkConnection(cell, 6):
+        #             endpoints += 1
+        #             usedCells.append(cell)
+
+        # elif cell.cellType == CellType.wire:
+        #     if cell.getNeighboringCell(0).cellType == CellType.arrow:
+        #         if checkConnection(cell, 0):
+        #             endpoints += 1
+        #             usedCells.append(cell)
+        #     if cell.getNeighboringCell(2).cellType == CellType.arrow:
+        #         if checkConnection(cell, 2):
+        #             endpoints += 1
+        #             usedCells.append(cell)
+        #     if cell.getNeighbor(4).cellType == CellType.arrow:
+        #         if checkConnection(cell, 4):
+        #             endpoints += 1
+        #             usedCells.append(cell)
+        #     if cell.getNeighboringCell(6).cellType == CellType.wire:
+        #         if checkConnection(cell, 6):
+        #             endpoints += 1
+        #             usedCells.append(cell)
 
 
 
+# also old code:
+
+## global vars:
+# usedCells = [] #so we don't double count connections
+
+# def totalConnections(trap):
+#     """
+#     this function returns how many connections a trap has
+#     """
+#     endpoints = 0
+#     allCells = flatten(trap.board)
+#     for cell in allCells: # flattens board into 1d  array
+#         if cell.cellType == CellType.door:
+#             if checkConnection(cell, 2):
+#                 endpoints += 1
+#                 usedCells.append(cell)
+#             if checkConnection(cell, 6):
+#                 endpoints += 1
+#                 usedCells.append(cell)
+#         elif cell.cellType == CellType.arrow:
+#             return "finish this part"
 
 
+#     ## specified path in order to go around a trap
+#     x = [1,0,2,0,0,1,2,1,2,2]
+#     y = [3,3,0,1,0,0,0,2,2,3]
+
+    # numConnect = 0
+    # for i in len(x) and j in len(y):  #wrong syntax!!!!!!!!
+    #     if i=1 and j=3: #[1,3]
+    #         if (trap[0,3]).cellType = arrow and (trap[0,3]).rotationtype = down:
+    #             numConnect += 1
+    #         elif (trap[0,3]).cellType = wire:
+    #             if (trap[0,3]).angleType = lright and ((trap[0,3]).rotationtype = down or left):
+    #                 numConnect += 1
+    #             elif (trap[0,3]).angleType = rright and ((trap[0,3]).rotationtype = up or left):
+    #                 numConnect += 1
+    #             elif (trap[0,3]).angleType = straight and ((trap[0,3]).rotationtype = right or left):
+    #                 umConnect += 1
+        
+        # elif i=0 and j=3:
+        # elif i=2 and j=0:
+        # elif i=0 and j=1:
+        # elif i=0 and j=0:
+        # elif i=1 and j=0:
+        # elif i=2 and j=0:
+        # elif i=1 and j=2:
+        # elif i=2 and j=2:
+        # elif i=2 and j=3:
 
 
 
@@ -593,3 +668,4 @@ def uniformTraps(trap):
         #         trapPaths[1].append(rightDoor)
         #         if rightDoor.angleType == 1 and rightDoor.rotationType == 6: #racute, left
         #             trapPaths[0].append(rightDoor)
+

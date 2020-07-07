@@ -107,8 +107,12 @@ class Board(metaclass = ABCMeta):
                     piece = Floor
                 else:
                     piece = np.random.choice(trapPieces, size=1)[0]
-                    rotation = np.random.choice(rotationOptions[piece], size=1)[0]
                     angle = np.random.choice(angleOptions[piece], size=1)[0]
+                    #not sure what I'm doing here Amani, I apologize in advance...
+                    if piece == Wire and angle == AngleType.straight:
+                        rotation = np.random.choice([RotationType.up, RotationType.right], size=1)[0]
+                    else:
+                        rotation = np.random.choice(rotationOptions[piece], size=1)[0]
                     thick = np.random.choice(thickOptions[piece], size=1)[0]
                 row.append(piece(x, y, self, angleType=angle, rotationType=rotation, thickType=thick))
             board.append(row)
