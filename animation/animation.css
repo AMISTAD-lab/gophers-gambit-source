@@ -30,7 +30,7 @@ Created on June 23, 2020 by Cynthia Hom
 	display: flex; /* makes z-index work */
 	justify-content: center;
 	align-items: center;
-	border: 2px solid black; /* Uncomment for grid lines */
+	/*border: 2px solid black;*/ /* Uncomment for grid lines */
 	position: relative;
 	/*border-radius: 3px;*/
 }
