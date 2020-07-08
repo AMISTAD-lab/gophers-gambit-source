@@ -298,48 +298,6 @@ def isDoorArrow(trap):
     return 1 # not dangerous trap
 
 
-
-def organizeTrap(trap):
-    """
-    Helper Function
-    Streamlines making arrays for the cellTypes
-    ...
-    input: trap
-    output: lists of lists?
-    """
-    allCells = flatten(trap.board)
-    wireCells = []
-    arrowCells = []
-    wireThickTypes = [0,0,0]
-    arrowThickTypes = [0,0,0]
-    doorCell = []
-
-    # [skinny, normal, wide]
-
-    for cell in allCells: # flattens board into 1d  array
-        if cell.cellType == CellType.wire:
-            wireCells.append(cell)
-        elif cell.cellType == CellType.arrow:
-            arrowCells.append(cell)
-        #     arrowLoc.append(cell)
-        elif cell.cellType == CellType.door:
-            doorCell.append(cell)
-
-    for cell in wireCells:
-        wireThickTypes[cell.thickType.value] += 1
-    for cell in arrowCells:
-        arrowThickTypes[cell.thickType.value] += 1
-    
-    # bad style to define vars here? but I need doorCell value first
-    leftDoor = doorCell[0].getNeighboringCell(6) 
-    rightDoor = doorCell[0].getNeighboringCell(2)
-
-    typeLists =[arrowCells, wireCells, arrowThickTypes, wireThickTypes, doorCell, leftDoor, rightDoor]
-    print("[arrowCells, wireCells, arrowThickTypes, wireThickTypes,  doorCell]")
-
-    return typeLists
-
-
 def trapDanger2(trap):
     cellList = flatten(trap.board)
     if not hasArrow(cellList):
@@ -569,7 +527,7 @@ def gopherEatTimer(probEnter):
 
 ##### lowly function --------------------------------------------------------->
 
-####### Cindy TODO: (if she ever figures out how to refer to endpts correctly)
+####### Cindy todo: (if she ever figures out how to refer to endpts correctly)
 ## Steps: (for wire and arrow)
     # 1. find the arrowType/rotationType match
     # 2. check the neighboring cells matches one of these options
@@ -601,5 +559,47 @@ def gopherEatTimer(probEnter):
 ##### end lowly function --------------------------------------------------------->
 
 
+
+
+
+# def organizeTrap(trap):
+#     """
+#     Helper Function
+#     Streamlines making arrays for the cellTypes
+#     ...
+#     input: trap
+#     output: lists of lists?
+#     """
+#     allCells = flatten(trap.board)
+#     wireCells = []
+#     arrowCells = []
+#     wireThickTypes = [0,0,0]
+#     arrowThickTypes = [0,0,0]
+#     doorCell = []
+
+#     # [skinny, normal, wide]
+
+#     for cell in allCells: # flattens board into 1d  array
+#         if cell.cellType == CellType.wire:
+#             wireCells.append(cell)
+#         elif cell.cellType == CellType.arrow:
+#             arrowCells.append(cell)
+#         #     arrowLoc.append(cell)
+#         elif cell.cellType == CellType.door:
+#             doorCell.append(cell)
+
+#     for cell in wireCells:
+#         wireThickTypes[cell.thickType.value] += 1
+#     for cell in arrowCells:
+#         arrowThickTypes[cell.thickType.value] += 1
+    
+#     # bad style to define vars here? but I need doorCell value first
+#     leftDoor = doorCell[0].getNeighboringCell(6) 
+#     rightDoor = doorCell[0].getNeighboringCell(2)
+
+#     typeLists =[arrowCells, wireCells, arrowThickTypes, wireThickTypes, doorCell, leftDoor, rightDoor]
+#     print("[arrowCells, wireCells, arrowThickTypes, wireThickTypes,  doorCell]")
+
+#     return typeLists
 
 

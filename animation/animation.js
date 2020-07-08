@@ -3,7 +3,7 @@ Created on June 23, 2020 by Cynthia Hom
 js file for the third experiment's animation
 
 Todo: 
-Test throuroughly. Make the ending screens work */
+Test thoroughly. Make the ending screens work */
 
 
 // get elements from the html
