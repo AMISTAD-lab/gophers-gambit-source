@@ -156,37 +156,82 @@ def addTrapToTerrain(terrain, start_x, start_y, trapboard):
 
 ################
 ## Functional Specified Complexity Stuff
-
-r = 427929800129788411 * (1 + m.log(427929800129788411))
-p = 1 / 427929800129788411
+TOTAL = 427929800129788411
+r = TOTAL * (1 + m.log(TOTAL))
+p = 1 / TOTAL
 f_g = {
-    0 : 1.0,
-    1 : 0.8281608501388721,
-    2 : 0.23678550834319834,
-    3 : 0.02827735771621005,
-    4 : 0.0015818193867090915,
-    5 : 4.2655010533381585e-05,
-    6 : 5.489893272371954e-07,
-    7 : 3.3738511119396526e-09,
-    8 : 1.0005077932645628e-11,
-    9 : 1.3754592454684888e-14,
-    10 : 7.010495644589648e-18
+    (0.0, 1.0): 427929800129788411 / TOTAL, 
+    (1.0, 9.0): 325433210760000000 / TOTAL, 
+    (1.0, 8.0): 27894275208000000 / TOTAL, 
+    (1.0, 7.0): 1044600429600000 / TOTAL, 
+    (1.0, 6.0): 22320522000000 / TOTAL, 
+    (1.0, 5.0): 297606960000 / TOTAL, 
+    (1.0, 4.0): 6634219686620400 / TOTAL, 
+    (1.0, 3.0): 11484970933030920 / TOTAL, 
+    (1.0, 2.0): 23517963156798 / TOTAL,
+    (1.0, 1.0): 26730 / TOTAL,
+    (2.0, 9.0): 94491857267100000 / TOTAL,
+    (2.0, 7.0): 198206235360000 / TOTAL, 
+    (2.0, 5.0): 31903190550 / TOTAL, 
+    (2.0, 3.0): 234190287720 / TOTAL, 
+    (3.0, 8.0): 605992606362000 / TOTAL, 
+    (3.0, 7.0): 12883086433800 / TOTAL, 
+    (3.0, 5.0): 783120960 / TOTAL, 
+    (3.0, 4.0): 2472025149 / TOTAL, 
+    (4.0, 9.0): 653221475739450 / TOTAL, 
+    (4.0, 7.0): 305813393190 / TOTAL, 
+    (4.0, 5.0): 3863700 / TOTAL, 
+    (5.0, 9.0): 17872285365378 / TOTAL, 
+    (5.0, 8.0): 378560698308 / TOTAL, 
+    (5.0, 7.0): 2498533776 / TOTAL, 
+    (5.0, 6.0): 5531652 / TOTAL, 
+    (6.0, 7.0): 6510699 / TOTAL, 
+    (7.0, 9.0): 1437497604 / TOTAL, 
+    (7.0, 8.0): 6269400 / TOTAL, 
+    (8.0, 9.0): 4276314 / TOTAL, 
+    (10.0, 9.0): 3 / TOTAL
 }
 
-def functional_specified_complexity(connection_count):
+def functional_specified_complexity(connectionTuple):
     global r
     global p
-    v = 1 / f_g[connection_count]
+    v = 1 / f_g[connectionTuple]
     k = r * p / v
     fsc = -m.log(k, 2)
     return fsc
 
-def isTrap(trap, sigVal=4.33):
-    connection_count = totalConnections(trap)
-    if functional_specified_complexity(connection_count) >= sigVal:
+def isTrap(trap, sigVal=13.29):
+    connectionTuple = connectionsPerPiece(trap)
+    if functional_specified_complexity(connectionTuple) >= sigVal:
         return True
     else:
         return False
+
+def connectionsPerPiece(trap):
+    connections = totalConnections(trap)
+    if connections == 0:
+        return (0, 1.0)
+    numPieces = 0
+    for cell in flatten(trap.board):
+        if cell.cellType == CellType.wire or cell.cellType == CellType.arrow:
+            numPieces += 1
+    return simplifyRatioTuple(connections, numPieces)
+
+
+def simplifyRatioTuple(num, denom):
+	"""Simplifies the tuple, which represents the numerator and denominator of a fraction.
+	Inputs: 
+		num: the numerator
+		denom: the denominator"""
+	if num == 0:# group anything with num 0 into the (0, 1) category
+		return (0.0, 1.0)
+	elif num != 0 and denom == 0:
+		raise Exception("ERROR: All cells are floor cells, but connections were found.")
+
+	gcd = int(np.gcd(num, denom))
+	num = num/gcd
+	denom = denom/gcd
+	return (num, denom) 
 
 ################
 ## Finding Connections Function
@@ -250,8 +295,7 @@ def isDoorArrow(trap):
         if cright.rotationType == (RotationType.right):
             if hasArrow:
                 return 0.1
-    else:
-        return 1 # not dangerous trap
+    return 1 # not dangerous trap
 
 
 
@@ -299,7 +343,7 @@ def organizeTrap(trap):
 def trapDanger2(trap):
     cellList = flatten(trap.board)
     if not hasArrow(cellList):
-        return 1.0
+        return 0
     else:
         return threatAssessment(cellList)
 
@@ -307,7 +351,7 @@ def trapDanger3(trap):
     row = trap.rowLength
     cellList = flatten(trap.board)
     if not hasArrow(cellList):
-        return 1
+        return 0
     else:
         leftCol = [cellList[i] for i in range(len(cellList)) if i % row == 0]
         rightCol = [cellList[i] for i in range(len(cellList)) if (i + 1) % row == 0 and i != 0]
@@ -343,7 +387,7 @@ def threatAssessment(cellList):
 
     cohesion = 1 - std #for 3 values, maximum standard deviation is 1, which is least threat
     damage_potential = mean / 3 #maximum mean is 3 (biggest threat)
-    threat = (0.7 * cohesion) + (0.3 * damage_potential) #cohesion is more important
+    threat = (0.8 * cohesion) + (0.2 * damage_potential) #cohesion is more important
     return threat
     
 

@@ -10,10 +10,10 @@ import data as d
 pref = {
     "intention" : True, #if gopher has intention
     "defaultProbEnter" : 0.8, #probability of gopher entering trap (not intention)
-    "probReal" : 0.5, #percentage of traps that are designed as opposed to random
+    "probReal" : 0.2, #percentage of traps that are designed as opposed to random
     "nTrapsWithoutFood" : 3, #the amount of traps a gopher can survive without entering (due to starvation)
     "maxProjectileStrength" : 0.45, #thickWire strength
-    "hungerWeight" : 0.2,
+    "hungerWeight" : 0.0,
 }
 
 
@@ -78,7 +78,7 @@ def createSeedListFromFile(filename):
     standardSeed = {
         "intention" : True,
         "defaultProbEnter" : 1,
-        "probReal" : 0,
+        "probReal" : 0.5,
         "nTrapsWithoutFood" : 3,
         "maxProjectileStrength" : 0.45,
         "hungerWeight" : 0.2,
@@ -256,8 +256,12 @@ def enumeratorHelper(x,y, rowLength, colLength, n):
         cellPossibilities.append(Floor(x,y, None))
     else:
         for piece in trapPieces:
-            for rotation in rotationOptions[piece]:
-                for angle in angleOptions[piece]:
+            for angle in angleOptions[piece]:
+                if piece == Wire and angle == AngleType.straight:
+                    options = [RotationType.up, RotationType.right]
+                else:
+                    options = rotationOptions[piece]
+                for rotation in options:
                     for thick in thickOptions[piece]:
                         cellPossibilities.append(piece(x, y, None, angleType=angle, rotationType=rotation, thickType=thick))
 

@@ -48,14 +48,16 @@ class Gopher:
             if self.intention:
                 confirmedTrap = alg.isTrap(self.ownerBoard) #confirmed handmade
                 if confirmedTrap:
-                    enterGiven = 0
+                    enterGivenTrap = 0
                     foundTrap = True
-                else: #random or manmade
-                    enterGivenTrap = 1 - alg.trapDanger3(self.ownerBoard) #what to do here?
+                else:
+                    enterGivenTrap = 1 #i'm thinking lets keep it simple and revolving around intention. if our new measure rejects well, we should be fine.
             else:
                 enterGivenTrap = mv.DEFAULT_PROB_ENTER
-            if foundTrap == False:
-                probEnter = (enterGivenTrap * (1-mv.HUNGER_WEIGHT)) + (self.hunger * (mv.HUNGER_WEIGHT))
+            if foundTrap == False and enterGivenTrap < self.hunger:
+                    probEnter = (enterGivenTrap * (1-mv.HUNGER_WEIGHT)) + (self.hunger * (mv.HUNGER_WEIGHT))
+            else:
+                probEnter = enterGivenTrap
             if np.random.binomial(n=1, p=probEnter) == 1:
                 self.initialTimer = alg.gopherEatTimer(enterGivenTrap)
                 self.entering = True

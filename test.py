@@ -62,16 +62,51 @@ def histProbEnter(alg, real):
     if real:
         traps = [Trap(3,4,False,trapboard) for trapboard in dt.traps]
     else:
-        traps = e.trapEnumerator(3,4,2)
-    for trap in traps:
+        print("Generating Traps")
+        traps = e.trapEnumerator(3,4,4)
+    num_traps = len(traps)
+    for i in range(num_traps):
+        e.printProgressBar(i+1,num_traps)
+        trap = traps[i]
         probEnter = alg(trap)
         probList.append(probEnter)
+    print(max(probList))
     plt.hist(probList)
-    plt.title("Distribution of ProbEnter for Traps\nReal: " + str(real))
+    plt.title("Distribution of FSC for Traps\nReal: " + str(real))
     plt.show()
 
-histProbEnter(alg.isDoorArrow, True)
+#histProbEnter(alg.isDoorArrow, True)
+def histNumTraps(n):
+    num_list = []
+    for i in range(n):
+        e.printProgressBar(i+1,n)
+        data, trapInfo = e.simulate(e.pref)
+        num_list.append(data["numTraps"])
+    plt.hist(num_list)
+    plt.title("Distribution of numTraps")
+    plt.show()
+#histNumTraps(10000)
+#e.expectedLethality(3,4,3,500)
 
+method = lambda trap: alg.functional_specified_complexity(alg.connectionsPerPiece(trap))
+histProbEnter(method, False)
+
+
+
+# method = lambda trap: 1 - (alg.trapDanger3(trap))**5
+# histProbEnter(method, True)
+#histNumTraps(10000)
+# def lowFSCtraps():
+#     trapInfo = []
+#     for trapboard in dt.traps:
+#         trap = Trap(3,4,False,trapboard)
+#         if alg.isTrap(trap, 3.33) == False:
+#             ib, ac, gc, a, e = s.simulateTrap(trap, False)
+#             trapInfo.append([ib, ac, gc])
+#     v.writeTojs(trapInfo)
+#     print("done")
+
+# lowFSCtraps()
 
 #e.expectedLethality(3,4,3,100)
 #e.runExperiment("testrun.csv", "defaultProbEnter", 100)
