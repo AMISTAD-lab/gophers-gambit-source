@@ -92,35 +92,6 @@ class Board(metaclass = ABCMeta):
             cell.active = False
         return board
 
-    def randomTrap(self, rowLength, colLength):
-        """randomly generates a trap with the given dimensions, with door at the bottom and food in the center"""
-        #need to decide if inner cells have to be floor or can be trap pieces
-        board = []
-        bottom_y = colLength - 1
-        center_x = m.ceil(rowLength / 2) - 1
-        center_y = m.ceil(colLength / 2) - 1
-        for y in range(colLength):
-            row = []
-            for x in range(rowLength):
-                if x == center_x and y > center_y:
-                    #allow path to food
-                    piece = Floor
-                else:
-                    piece = np.random.choice(trapPieces, size=1)[0]
-                    angle = np.random.choice(angleOptions[piece], size=1)[0]
-                    
-                    if piece == Wire and angle == AngleType.straight:
-                        rotation = np.random.choice([RotationType.up, RotationType.right], size=1)[0]
-                    else:
-                        rotation = np.random.choice(rotationOptions[piece], size=1)[0]
-                    thick = np.random.choice(thickOptions[piece], size=1)[0]
-                row.append(piece(x, y, self, angleType=angle, rotationType=rotation, thickType=thick))
-            board.append(row)
-        #overwrite food and door placement
-        board[bottom_y][center_x] = Door(center_x, bottom_y, self)
-        board[center_y][center_x] = Food(center_x, center_y, self)
-        return board
-
 
 
     

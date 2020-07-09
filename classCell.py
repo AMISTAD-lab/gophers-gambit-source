@@ -36,7 +36,6 @@ class Cell(metaclass = ABCMeta):
 
     def updateCell(self, step):
         ...
-
     
     def activateCell(self, timeStep, inputEndpointIn):
         self.activatedTimeStep = timeStep

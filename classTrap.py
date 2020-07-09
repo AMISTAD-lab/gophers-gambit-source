@@ -17,7 +17,13 @@ class Trap(Board):
         elif functional:
             self.board = super().realTrap(rowLength, colLength)
         else:
-            self.board = sampleRandomBoards(1)[0]
+            self.board = self.randomBoard()
+
+    def randomBoard(self):
+        trapboard = sampleRandomBoards(1)[0]
+        for cell in alg.flatten(trapboard):
+            cell.ownerBoard = self
+        return trapboard
 
 def sampleRandomBoards(n):
     trapboards = []

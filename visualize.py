@@ -1,11 +1,6 @@
 import numpy as np
 import shutil as sh 
 
-
-# random walk stuff here! (generate terrainList)
-
-
-
 newjsFileName = "animation/animation.js" # will write and read files in the animation folder.
 jsTemplateName = "animation/template.js"
 

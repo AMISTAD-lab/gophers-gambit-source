@@ -2,7 +2,6 @@ import simulation as s
 import copy
 import csv
 import classTrap as t
-from classTerrain import *
 import numpy as np
 import magicVariables as mv
 import data as d
@@ -16,15 +15,11 @@ pref = {
     "hungerWeight" : 0.2,
 }
 
-
-
 def runExperiment(filename, inputToVary, numSimulations):
     inputfile = createExpInputFile(inputToVary)
     seedList = createSeedListFromFile(inputfile)
     allData = simulateManySetups(numSimulations, seedList)
     d.allDataToCSV(allData, filename)
-
-
 
 def createExpInputFile(inputToVary):
     """Inputs:
@@ -46,7 +41,7 @@ def createExpInputFile(inputToVary):
         elif inputToVary == "nTrapsWithoutFood":
             for n in range(1, 5+1, 1):
                 file.write(toWrite)
-                file.write("nTrapsWithout Food " + str(n) + "\n\n")
+                file.write("nTrapsWithoutFood " + str(n) + "\n\n")
         elif inputToVary == "maxProjectileStrength":
             for probKill in range(3, 99+1, 6):
                 probKill /= 100
@@ -161,30 +156,6 @@ def simulate(pref):
     data["killedByHunger"] = killedByHunger
     return data, trapInfo
 
-def saveCohesionValues(algorithm, n, filename="cohesionVals.csv"):
-    """To help in computing Mg(x)"""
-    sample = trapEnumerator(3,4,n)
-    cohesion = []
-    for trap in sample:
-        cohesion.append([algorithm(trap)])
-    numTraps = len(cohesion)
-    with open(filename, 'w', newline='') as csvfile:     
-        write = csv.writer(csvfile) 
-        write.writerow([numTraps])
-        write.writerows(cohesion)
-    p_hat = 1.0/numTraps
-    r_hat = 0.0
-    with open(filename, 'r') as csvfile:
-        readCSV = csv.reader(csvfile, delimiter=',')
-        rows = [row[0] for row in readCSV]
-        numVals = int(rows[0])
-        for x in rows[1:numVals]:
-            r_hat += 1.0/alg.findCohesionPercent(filename, float(x))
-    with open(filename, 'a', newline='') as csvfile:     
-        write = csv.writer(csvfile)
-        write.writerow([p_hat])
-        write.writerow([r_hat])
-
 def expectedLethality(n, r):
     lethal = 0.0
     traps = [t.Trap(3,4,False,trapboard) for trapboard in t.sampleRandomBoards(n)]
@@ -205,82 +176,6 @@ def expectedLethality(n, r):
     ci *= 100
     print("%s +/- %s" % (p, ci))
     return trapInfo
-
-
-trapPieces = [Wire, Arrow, Floor]
-rotationOptions = {
-    Wire : [RotationType.up, RotationType.left, RotationType.right, RotationType.down],
-    Arrow : [RotationType.up, RotationType.left, RotationType.right, RotationType.down],
-    Floor : [RotationType.na],
-}
-thickOptions = {
-    Wire : [ThickType.skinny, ThickType.normal, ThickType.wide],
-    Arrow : [ThickType.skinny, ThickType.normal, ThickType.wide],
-    Floor : [ThickType.na],
-}
-angleOptions = {
-    Wire : [AngleType.straight, AngleType.lright], #excluding rright bc they're same for wires
-    Arrow : [AngleType.lacute, AngleType.racute, AngleType.lright, AngleType.rright, AngleType.lobtuse, AngleType.robtuse],
-    Floor : [AngleType.na],
-}
-
-
-def trapEnumerator(rowLength, colLength, n):
-    trapPossibilities = enumeratorHelper(0, 0, rowLength, colLength, n)
-    allTraps = []
-    for trapPossibility in trapPossibilities:
-        trap = t.Trap(rowLength, colLength, False)
-        for i in range(len(trapPossibility)):
-            cell = trapPossibility[i]
-            cell.ownerBoard = trap
-            trap.board[cell.y][cell.x] = cell
-        allTraps.append(trap)
-    return allTraps
-
-
-def enumeratorHelper(x,y, rowLength, colLength, n):
-
-    bottom_y = colLength - 1
-    center_x = m.ceil(rowLength / 2) - 1
-    center_y = m.ceil(colLength / 2) - 1
-
-    cellPossibilities = []
-    if x == center_x and y == bottom_y:
-        cellPossibilities.append(Door(x, y, None))
-    elif x == center_x and y == center_y:
-        cellPossibilities.append(Food(x,y, None))
-    elif x == center_x and y > center_y:
-        cellPossibilities.append(Floor(x,y, None))
-    else:
-        for piece in trapPieces:
-            for angle in angleOptions[piece]:
-                if piece == Wire and angle == AngleType.straight:
-                    options = [RotationType.up, RotationType.right]
-                else:
-                    options = rotationOptions[piece]
-                for rotation in options:
-                    for thick in thickOptions[piece]:
-                        cellPossibilities.append(piece(x, y, None, angleType=angle, rotationType=rotation, thickType=thick))
-
-    next_x = x+1
-    next_y = y
-    if next_x == rowLength:
-        next_x = 0
-        next_y = y + 1
-
-    if len(cellPossibilities) > n:
-        cellPossibilities = np.random.choice(cellPossibilities, size=n, replace=False).tolist()
-    
-    if next_y == colLength:
-        return copy.deepcopy([[cell] for cell in cellPossibilities])
-
-    trapPossibilities = []
-    for cell in cellPossibilities:
-         for possibility in enumeratorHelper(next_x, next_y, rowLength, colLength, n):
-             trapPossibilities.append(copy.deepcopy([cell] + possibility))
-
-    return trapPossibilities
-
 
 def printProgressBar (iteration, total, prefix = 'Progress:', suffix = 'Complete', decimals = 1, length = 100, fill = '█', printEnd = "\r"):
     """

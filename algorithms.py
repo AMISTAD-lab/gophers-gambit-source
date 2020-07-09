@@ -84,7 +84,6 @@ def findDir(rotationType, angleType):
         else:
             raise Exception("uh oh, either angleType is NA or arrow is somehow going in a straight line :O")
 
-
 def formatMatrix(matrix):  
     string = ""
     colLength = len(matrix)
@@ -97,62 +96,6 @@ def formatMatrix(matrix):
 
 def flatten(l):
     return [item for sublist in l for item in sublist]
-
-
-def rotateInitialBoard(initialboard):
-    initialboard = copy.deepcopy(initialboard)
-    colLength = len(initialboard)
-    rowLength = len(initialboard[0])
-    for y in range(colLength):
-        for x in range(rowLength):
-            cellInfo = initialboard[y][x]
-            if cellInfo[3] != RotationType.na.value:
-                print(initialboard[y][x])
-                initialboard[y][x] = cellInfo[:3] + str((int(cellInfo[3]) + 6) % 8) + cellInfo[4:] #rotate 90 degrees
-                print(initialboard[y][x])
-    return rotateMatrix(initialboard)
-
-def rotateMatrix(matrix):
-    newRowLength = len(matrix)
-    newColLength = len(matrix[0])
-    newMatrix = []
-    for y in range(newColLength):
-        row = []
-        for x in range(newRowLength):
-            row.append(copy.deepcopy(matrix[x][newColLength-1-y]))
-        newMatrix.append(row)
-    return newMatrix
-
-def rotateGopherCell(gopherCell, originalrowlength):
-    oldx, oldy, oldrotation, state = gopherCell
-    newx = oldy
-    newy = originalrowlength - 1 - oldx
-    newrotation = (oldrotation + 6) % 8
-    return (newx, newy, newrotation, state)
-
-def rotateSimulation(initialboard, activeCells, gopherCells):
-    newac = []
-    newgc = []
-    originalrowlength = len(initialboard[0])
-    for step in range(len(activeCells)):
-        newac.append(rotateMatrix(activeCells[step]))
-        newgc.append(rotateGopherCell(gopherCells[step], originalrowlength))
-    newib = rotateInitialBoard(initialboard)
-    return newib, newac, newgc
-
-def addTrapToTerrain(terrain, start_x, start_y, trapboard):
-        """adds a 'miniboard' to self's board with the top left corner at the indicated position"""
-        rowLength = len(trapboard[0])
-        colLength = len(trapboard)
-        trLength = len(terrain[0])
-        tcLength = len(terrain)
-        if start_x + rowLength <= trLength:
-            if start_y + colLength <= tcLength:
-                for x in range(rowLength):
-                    for y in range(colLength):
-                        terrain[start_y + y][start_x + x] = trapboard[y][x]
-                return terrain
-        raise Exception("This board does not fit")
 
 
 TOTAL = 427929800129788411
@@ -216,7 +159,6 @@ def connectionsPerPiece(trap):
             numPieces += 1
     return simplifyRatioTuple(connections, numPieces)
 
-
 def simplifyRatioTuple(num, denom):
 	"""Simplifies the tuple, which represents the numerator and denominator of a fraction.
 	Inputs: 
@@ -254,7 +196,6 @@ def totalConnections(trap):
                             usedCells.append(cell)   
     return endpoints
 
-
 def checkConnection(cell, endpoint):
     """
     Helper func:
@@ -272,80 +213,7 @@ def checkConnection(cell, endpoint):
         if (cell.thickType == cellAtEndpoint.thickType):
             return True
     return False
-
-def isDoorArrow(trap):
-    """
-    checks if door has door connections and arrow cells
-    """
-    cellList = flatten(trap.board)
-    doorCell = []
-    for cell in cellList:
-        if cell.cellType == CellType.door:
-            doorCell.append(cell)
-    cleft = doorCell[0].getNeighboringCell(6)
-    cright = doorCell[0].getNeighboringCell(2)
-    if cleft.cellType == (CellType.arrow or CellType.wire):
-        if cleft.rotationType == RotationType.left:
-            if hasArrow:
-                return 0.1
-    elif cright.cellType == (CellType.arrow or CellType.wire):
-        if cright.rotationType == (RotationType.right):
-            if hasArrow:
-                return 0.1
-    return 1 # not dangerous trap
-
-
-def trapDanger2(trap):
-    cellList = flatten(trap.board)
-    if not hasArrow(cellList):
-        return 0
-    else:
-        return threatAssessment(cellList)
-
-def trapDanger3(trap):
-    row = trap.rowLength
-    cellList = flatten(trap.board)
-    if not hasArrow(cellList):
-        return 0
-    else:
-        leftCol = [cellList[i] for i in range(len(cellList)) if i % row == 0]
-        rightCol = [cellList[i] for i in range(len(cellList)) if (i + 1) % row == 0 and i != 0]
-        leftThreat = threatAssessment(leftCol)
-        rightThreat = threatAssessment(rightCol)
-        avgThreat = (leftThreat + rightThreat)/2.0
-        return avgThreat
-
-
-def hasArrow(cellList):
-    hasArrow = False
-    for cell in cellList:
-        if cell.cellType == CellType.arrow:
-            hasArrow = True
-    return hasArrow
-
-
-def threatAssessment(cellList):
-    thickTypes = [0,0,0]
-    for cell in cellList:
-        if cell.thickType != ThickType.na:
-            thickTypes[cell.thickType.value] += 1
-    valuelist = []
-    for value in range(3):
-        valuelist += [value + 1] * thickTypes[value]
-    if len(valuelist) == 0:
-        return 0 #if nothing, no threat
-    elif len(valuelist) == 1:
-        std = 0 #if only one thing, maximum cohesion/minimum std
-    else:
-        std = np.std(valuelist)
-    mean = np.mean(valuelist)
-
-    cohesion = 1 - std #for 3 values, maximum standard deviation is 1, which is least threat
-    damage_potential = mean / 3 #maximum mean is 3 (biggest threat)
-    threat = (0.8 * cohesion) + (0.2 * damage_potential) #cohesion is more important
-    return threat
     
-
 def gopherEatTimer(probEnter):
     """
     assigns probs for timer based on gopher's detection of threat.
@@ -366,16 +234,3 @@ def gopherEatTimer(probEnter):
                 initialProbs[i-1] = 0.15
             break
     return np.random.choice([1,2,3,4,5], p=initialProbs, size=1)[0]
-
-
-
-
-
-
-
-
-
-
-
-
-

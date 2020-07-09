@@ -3,7 +3,6 @@ import csv
 def allDataToCSV(allData, filename):
     """takes in a data list obtained from simulateManySetups and writes all of the run information into a csv"""
     with open(filename, 'w', newline='') as csvfile:
-        print([key for key in allData[0]["runsData"][0]])
         fieldnames = ["BATCH #"] + ["RUN #"] + [key for key in allData[0]["runsData"][0]]
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
