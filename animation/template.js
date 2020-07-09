@@ -17,7 +17,7 @@ var trapList = []
 // other vars
 var fps = 2; // show two frames per second
 
-var trapNum = 0;	// current trap animation to play
+var trapNum = 1;	// current trap animation to play
 var trapFrameNum = 0; // current step of the current animation (either trap or movement)
 var frameNum = 0; // frame for the overall animation
 
@@ -217,7 +217,7 @@ function showEndingImage()
 
 	// We need the endsWith because gopher.src contains entire file path.
 	if (gopher.src.endsWith("gopher/gopherdead.png")){
-		image.src = "endingscreens/gophershot.png";
+		image.src = "endingscreens/gopherzapped.png";
 	}else{
 		image.src = "endingscreens/gopherstarved.png";
 	}
