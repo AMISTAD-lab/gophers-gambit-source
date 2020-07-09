@@ -1,7 +1,7 @@
 import simulation as s
 import copy
 import csv
-from classTrap import *
+import classTrap as t
 from classTerrain import *
 import numpy as np
 import magicVariables as mv
@@ -13,7 +13,7 @@ pref = {
     "probReal" : 0.2, #percentage of traps that are designed as opposed to random
     "nTrapsWithoutFood" : 3, #the amount of traps a gopher can survive without entering (due to starvation)
     "maxProjectileStrength" : 0.45, #thickWire strength
-    "hungerWeight" : 0.0,
+    "hungerWeight" : 0.2,
 }
 
 
@@ -44,7 +44,7 @@ def createExpInputFile(inputToVary):
                 file.write(toWrite)
                 file.write("probReal " + str(percent) + "\n\n")
         elif inputToVary == "nTrapsWithoutFood":
-            for n in range(1, 20+1, 1):
+            for n in range(1, 5+1, 1):
                 file.write(toWrite)
                 file.write("nTrapsWithout Food " + str(n) + "\n\n")
         elif inputToVary == "maxProjectileStrength":
@@ -77,8 +77,8 @@ def createSeedListFromFile(filename):
 
     standardSeed = {
         "intention" : True,
-        "defaultProbEnter" : 1,
-        "probReal" : 0.5,
+        "defaultProbEnter" : 0.8,
+        "probReal" : 0.2,
         "nTrapsWithoutFood" : 3,
         "maxProjectileStrength" : 0.45,
         "hungerWeight" : 0.2,
@@ -141,7 +141,7 @@ def simulate(pref):
         rowLength = 3
         colLength = 4
         functional = np.random.binomial(1, probReal)
-        trap = Trap(rowLength, colLength, functional)
+        trap = t.Trap(rowLength, colLength, functional)
         hunger = (trapsWithoutFood + 1)/nTrapsWithoutFood
         ib, ac, gc, alive, eaten = s.simulateTrap(trap, intention, hunger)
         trapInfo.append([ib, ac, gc])
@@ -160,8 +160,6 @@ def simulate(pref):
     data["numTraps"] = numTraps
     data["killedByHunger"] = killedByHunger
     return data, trapInfo
-
-
 
 def saveCohesionValues(algorithm, n, filename="cohesionVals.csv"):
     """To help in computing Mg(x)"""
@@ -187,10 +185,9 @@ def saveCohesionValues(algorithm, n, filename="cohesionVals.csv"):
         write.writerow([p_hat])
         write.writerow([r_hat])
 
-
-def expectedLethality(rowLength, colLength, n, r):
+def expectedLethality(n, r):
     lethal = 0.0
-    traps = trapEnumerator(rowLength, colLength, n)
+    traps = [t.Trap(3,4,False,trapboard) for trapboard in t.sampleRandomBoards(n)]
     total = len(traps)
     runs = total*r
     trapInfo = []
@@ -232,7 +229,7 @@ def trapEnumerator(rowLength, colLength, n):
     trapPossibilities = enumeratorHelper(0, 0, rowLength, colLength, n)
     allTraps = []
     for trapPossibility in trapPossibilities:
-        trap = Trap(rowLength, colLength, False)
+        trap = t.Trap(rowLength, colLength, False)
         for i in range(len(trapPossibility)):
             cell = trapPossibility[i]
             cell.ownerBoard = trap
@@ -283,9 +280,6 @@ def enumeratorHelper(x,y, rowLength, colLength, n):
              trapPossibilities.append(copy.deepcopy([cell] + possibility))
 
     return trapPossibilities
-
-
-
 
 
 def printProgressBar (iteration, total, prefix = 'Progress:', suffix = 'Complete', decimals = 1, length = 100, fill = '█', printEnd = "\r"):

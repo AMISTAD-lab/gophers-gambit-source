@@ -154,8 +154,7 @@ def addTrapToTerrain(terrain, start_x, start_y, trapboard):
                 return terrain
         raise Exception("This board does not fit")
 
-################
-## Functional Specified Complexity Stuff
+
 TOTAL = 427929800129788411
 r = TOTAL * (1 + m.log(TOTAL))
 p = 1 / TOTAL
@@ -233,8 +232,6 @@ def simplifyRatioTuple(num, denom):
 	denom = denom/gcd
 	return (num, denom) 
 
-################
-## Finding Connections Function
 
 usedCells = []
 
@@ -296,48 +293,6 @@ def isDoorArrow(trap):
             if hasArrow:
                 return 0.1
     return 1 # not dangerous trap
-
-
-
-def organizeTrap(trap):
-    """
-    Helper Function
-    Streamlines making arrays for the cellTypes
-    ...
-    input: trap
-    output: lists of lists?
-    """
-    allCells = flatten(trap.board)
-    wireCells = []
-    arrowCells = []
-    wireThickTypes = [0,0,0]
-    arrowThickTypes = [0,0,0]
-    doorCell = []
-
-    # [skinny, normal, wide]
-
-    for cell in allCells: # flattens board into 1d  array
-        if cell.cellType == CellType.wire:
-            wireCells.append(cell)
-        elif cell.cellType == CellType.arrow:
-            arrowCells.append(cell)
-        #     arrowLoc.append(cell)
-        elif cell.cellType == CellType.door:
-            doorCell.append(cell)
-
-    for cell in wireCells:
-        wireThickTypes[cell.thickType.value] += 1
-    for cell in arrowCells:
-        arrowThickTypes[cell.thickType.value] += 1
-    
-    # bad style to define vars here? but I need doorCell value first
-    leftDoor = doorCell[0].getNeighboringCell(6) 
-    rightDoor = doorCell[0].getNeighboringCell(2)
-
-    typeLists =[arrowCells, wireCells, arrowThickTypes, wireThickTypes, doorCell, leftDoor, rightDoor]
-    print("[arrowCells, wireCells, arrowThickTypes, wireThickTypes,  doorCell]")
-
-    return typeLists
 
 
 def trapDanger2(trap):
@@ -412,153 +367,6 @@ def gopherEatTimer(probEnter):
             break
     return np.random.choice([1,2,3,4,5], p=initialProbs, size=1)[0]
 
-## uniform was causing errors so I commented it out:
-
-# def uniformTraps(trap):
-#     """
-#     This function is probably not helpful
-#     ...
-#     returns the probability gopher will enter given that
-#     the traps are uniform in thickType
-#     """
-#     arrowCells, wireCells, arrowThickTypes, wireThickTypes, doorCell = organizeTrap(trap)
-
-#     only = lambda ind, typelist: sum([typelist[i] > 0 for i in range(len(typelist)) if i != ind])==0
-    
-#     # Case: when all arrows/wires are of uniform thickness
-#     if len(wireCells) and len(arrowCells) == 0:
-#         if len(arrowCells) == 0:
-#             print("No danger and highest probability")
-#             return 1
-#         else: #if more than one arrow, you gotta check that the arrow is next to the door 
-#             if doorCell: #connected to gate, placed filler
-#                 if arrowThickTypes == 0: #not zero!!
-#                     return 0.7 # or a probability that reflects the 
-#             else:
-#                 return 0.9 # or 1?
-
-#     if (wireThickTypes[2] and arrowThickTypes[2] > 0) and all(i is 0 for i in wireThickTypes[:2]) and all(j is 0 for j in arrowThickTypes[:2]):
-#         print("All wide thickness. very thicc. Highest danger and low probability of entering")
-#         return 0.1
-#     if (wireThickTypes[1] and arrowThickTypes[1] > 0) and all(i is 0 for i in wireThickTypes.remove(wireThickTypes[1])) and only(1, wireThickTypes):
-#         print("All normal thickness. Medium danger and medium probability of entering")
-#         return 0.5
-#     if (wireThickTypes[0] and arrowThickTypes[0] > 0) and all(i is 0 for i in wireThickTypes[0:]) and all(j is 0 for j in wireThickTypes[0:]):
-#         print("All skinny thickness. low danger and high probability of entering")
-#         return 0.8
-
-#     else:
-#         cellList = flatten(trap.board)
-#         return threatAssessment(cellList)
-
-
-
-
-
-
-################################################# CODE ABYSS ######################################################
-
-
-#################################################################
-########## The worst and longest function ever  START ###########
-#################################################################
-# Get Trap Description
-
-# List of Cells
-# starting with cell adj to door and last is arrow
-
-# trapPaths = [[],[]]  # [[left path], [right path]]
-
-# def functionalPaths(trap):
-#     """
-#     Assess when traps are working.
-#     This will likely be run on random traps
-#     ...
-#     Returns list of two lists: Lpath and Rpath
-#     If a list is empty that path doesnt work
-#     """
-#     arrowCells, wireCells, arrowThickTypes, wireThickTypes, doorCell, leftDoor, rightDoor = organizeTrap(trap)
-
-#     if len(arrowCells) == 0: # no arrows? can't zap.
-#         return trapPaths
-#     elif workingSingleArrows(trap): # no wire trap
-#         return trapPaths
-#     #else:
-#     # for all other types of traps
-#         # check door
-#         # check others
-     
-#     # elif isDoorSetUp(doorCell): # to begin with, does the door have proper wires attached?
-#     #     if workingSingleArrows(trap):
-#     #         return 0
-#     #     for i in range(len(arrowCells)):
-#     #         i += -1  ## oof I'll google prettier python for loops in a sec
-#     #         if not assessPath(arrowCells[i]):
-#     #             return False
-#     #     return True
-    
-
-
-# def workingSingleArrows(trap):
-#     """
-#     updates trapPaths if correct connection
-#     ...
-#     does not classify single right angles as functional traps
-#     """
-#     arrowCells, wireCells, arrowThickTypes, wireThickTypes, doorCell, leftDoor, rightDoor = organizeTrap(trap)
-
-#     if len(wireCells) == 0 and len(arrowCells) != 0: # no wire cells only arrows
-#         if leftDoor.angleType == 1 and leftDoor.rotationType == 6: #racute, left
-#             trapPaths[0].append(leftDoor)
-#         if rightDoor.angleType == 0 and rightDoor.rotationType == 2: #lacute, right
-#             trapPaths[1].append(rightDoor)
-
-
-# def doorConnected(doorCell):
-#     """ 
-#     Input: Door Cell
-#     adds to global lists if there are wires/arrows are connected properly
-#     ...
-#     only runs on traps with wires AND arrows
-#     Runs on the condition that it is not a single arrow trap
-#     """
-#     leftOfDoor = doorCell.getNeighboringCell(6)
-#     rightOfDoor = doorCell.getNeighboringCell(2)
-
-#     if (leftOfDoor.angleType == 3) and (leftOfDoor.rotationType == 6): #if rright3,left6 I_
-#         trapPaths[0].append(leftOfDoor)
-#     if (rightOfDoor.angleType == 2) and (rightOfDoor.rotationType == 2): #lright2, right2 _I
-#         trapPaths[1].append(leftOfDoor)
-
-
-
-# def assessPath(currCell):
-#     """
-#     Follows the current from L or R of door to check if wire-arrow paths are valid
-#     ---
-#     returns false when cells or thicktype doesnt align.
-#     updates list when cells/thicktypes align
-#     If a path is false, it sets the list to empty
-#     Input: an door cell to begin with
-#     Output: boolean, activePath
-#     """
-#     leftOfDoor = currCell.getNeighboringCell(6)
-#     rightOfDoor = doorCell.getNeighboringCell(2)
-
-#     if len(trapPaths[0]) and len(trapPaths[1]) == 1:
-#         doorConnected(currCell)
-#         assessPath(currCell.getNeighbors(6)) #leftDoor
-#         assessPath(currCell.getNeighbors(2)) #rightDoor
-
-#     # if the cell is a door the arrow-wire path is valid
-#     if currCell.cellType == 3: #if arrow cell 
-#         # if -- check endpoints
-#         # check 
-#         return trapPaths
-
-#################################################################
-########## The worst and longest function ever  END ###########
-#################################################################
 
 
 
@@ -567,38 +375,6 @@ def gopherEatTimer(probEnter):
 
 
 
-##### lowly function --------------------------------------------------------->
-
-####### Cindy TODO: (if she ever figures out how to refer to endpts correctly)
-## Steps: (for wire and arrow)
-    # 1. find the arrowType/rotationType match
-    # 2. check the neighboring cells matches one of these options
-    # 3. check that the neighboring cell also matches the same WIRE THICCCNESSS
-    # 4. append currCell to activePath = []
-    # 5. if the neighboring cell DOES match, make a recursive call with
-    # with the cell neighboring the endpoint
-    # 6. If it's the correct path, it will eventually reach the door and return true. yay
-
-    # 7. BONUS: Write a helper to save and return the value of activePath, so that we can
-    # use it to determine danger and prob of trap
-
-    # now unleash massive combinations
-    
-    # elif currCell.cellType == 3: #arrow
-    #     if currCell.rotationtype == 0: #lacute
-    #         if currCell.rotationType == 0:
-    #             activePath.append(currCell)
-            
-
-    #elif currCell.cellType == 2: #wire
-    # if 
-    #     elif currCell.rotationType == 0 or 4:
-    #         c.getNeighboringCell(0,)
-    #thickness
-    #     activePath.append(currCell)
-    # return activePath
-
-##### end lowly function --------------------------------------------------------->
 
 
 

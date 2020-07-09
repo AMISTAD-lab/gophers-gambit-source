@@ -1,6 +1,5 @@
 import enum
 
-
 class AngleType(enum.Enum):
     lacute = 0
     racute = 1

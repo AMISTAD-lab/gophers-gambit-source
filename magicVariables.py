@@ -1,13 +1,12 @@
 
-
 #DEFAULTS#
 WIDE_PROJECTILE_STRENGTH = 0.45 #thick wire
 NORMAL_PROJECTILE_STRENGTH = WIDE_PROJECTILE_STRENGTH * (2/3) #.3, normal wire
 SKINNY_PROJECTILE_STRENGTH = WIDE_PROJECTILE_STRENGTH * (1/3) #.15, thin wire
 
-DEFAULT_PROB_ENTER = 1 #probability of gopher entering trap (not intention)
+DEFAULT_PROB_ENTER = 0.8 #probability of gopher entering trap (not intention)
 
-HUNGER_WEIGHT = 0
+HUNGER_WEIGHT = 0.2
 
 def initializeVariables(pref):
     

@@ -51,7 +51,7 @@ class Gopher:
                     enterGivenTrap = 0
                     foundTrap = True
                 else:
-                    enterGivenTrap = 1 #i'm thinking lets keep it simple and revolving around intention. if our new measure rejects well, we should be fine.
+                    enterGivenTrap = 1
             else:
                 enterGivenTrap = mv.DEFAULT_PROB_ENTER
             if foundTrap == False and enterGivenTrap < self.hunger:

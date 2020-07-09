@@ -10,30 +10,7 @@ from classArrow import *
 #RAD - Right Arrow Doesn't Hit Due to Frame Timing (functional) 
 
 ##build random trap:
-"""
-random traps for debugging
 
-rtrap0 = [
-    [Wire(0,0, None, angleType=AngleType.lright, rotationType=RotationType.left, thickType=ThickType.skinny), Wire(1,0, None, angleType=AngleType.straight, rotationType=RotationType.up, thickType=ThickType.skinny), Arrow(2,0, None, angleType=AngleType.robtuse, rotationType=RotationType.left, thickType=ThickType.skinny)],
-    [Arrow(0,1, None, angleType=AngleType.lright, rotationType=RotationType.up, thickType=ThickType.wide), Food(1,1,None), Arrow(2,1, None, angleType=AngleType.robtuse, rotationType=RotationType.down, thickType=ThickType.normal)],
-    [Floor(0,2, None), Floor(1,2,None), Floor(2,2, None)],
-    [Wire(0,0, None, angleType=AngleType.lright, rotationType=RotationType.up, thickType=ThickType.skinny), Door(1,3, None), Wire(2,3, None, angleType=AngleType.lright, rotationType=RotationType.down, thickType=ThickType.normal)]
-]
-
-rtrap1 = [
-    [Wire(0,0, None, angleType=AngleType.lright, rotationType=RotationType.left, thickType=ThickType.skinny), Floor(1,0, None), Arrow(2,0, None, angleType=AngleType.robtuse, rotationType=RotationType.left, thickType=ThickType.skinny)],
-    [Arrow(0,1, None, angleType=AngleType.lright, rotationType=RotationType.up, thickType=ThickType.wide), Food(1,1,None), Arrow(2,1, None, angleType=AngleType.robtuse, rotationType=RotationType.down, thickType=ThickType.normal)],
-    [Floor(0,2, None), Floor(1,2,None), Floor(2,2, None)],
-    [Wire(0,0, None, angleType=AngleType.lright, rotationType=RotationType.up, thickType=ThickType.skinny), Door(1,3, None), Wire(2,3, None, angleType=AngleType.lright, rotationType=RotationType.down, thickType=ThickType.normal)]
-]
-
-rtrap2 = [
-    [Floor(0,0,None), Wire(1,0, None, angleType=AngleType.straight, rotationType=RotationType.up, thickType=ThickType.skinny), Floor(2,0,None)],
-    [Floor(0,1,None), Food(1,1, None), Floor(2,1,None)],
-    [Floor(0,2,None), Floor(1,2,None), Floor(2,2,None)],
-    [Floor(0,3,None), Door(1,3,None), Floor(2,3,None)]
-]
-"""
 trap0 = [
     # 8 connections
     # acute arrows up the sides
@@ -519,5 +496,4 @@ trap63 = [
     [Floor(0,3, None), Door(1,3, None), Wire(2,3, None,angleType=AngleType.lright, rotationType=RotationType.right, thickType=ThickType.wide)]
 ]
 
-#traps = [trap0, trap1, trap2, trap3, trap4, trap5, trap6, trap7, trap8, trap9, trap10, trap11, trap12, trap13, trap14, trap15]
 traps = [eval("trap" + str(i)) for i in range(63)]

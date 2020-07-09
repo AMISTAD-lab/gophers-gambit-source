@@ -108,7 +108,7 @@ class Board(metaclass = ABCMeta):
                 else:
                     piece = np.random.choice(trapPieces, size=1)[0]
                     angle = np.random.choice(angleOptions[piece], size=1)[0]
-                    #not sure what I'm doing here Amani, I apologize in advance...
+                    
                     if piece == Wire and angle == AngleType.straight:
                         rotation = np.random.choice([RotationType.up, RotationType.right], size=1)[0]
                     else:
@@ -120,5 +120,7 @@ class Board(metaclass = ABCMeta):
         board[bottom_y][center_x] = Door(center_x, bottom_y, self)
         board[center_y][center_x] = Food(center_x, center_y, self)
         return board
+
+
 
     

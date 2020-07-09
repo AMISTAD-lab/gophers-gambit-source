@@ -34,7 +34,6 @@ def updateSimulation(trap, step):
     gopherInfo = [gopher.x, gopher.y, gopher.rotationType.value, gopher.state()]
     return gopherInfo, state
 
-
 def viewRun(initialboard, activeCells, gopherCells):
     rowLength = len(initialboard[0])
     colLength = len(initialboard)
