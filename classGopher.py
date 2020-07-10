@@ -44,7 +44,7 @@ class Gopher:
             self.eat()
         else:
             if self.intention:
-                enterGivenTrap = 1 - alg.isTrap(self.ownerBoard) #confirmed handmade
+                enterGivenTrap = 1 - alg.isTrap(self.ownerBoard)
                 if self.hunger == 1:
                     probEnter = 1
                 else:
@@ -73,14 +73,12 @@ class Gopher:
         self.y += 1
         self.eatingTimer = 0
         if self.ownerBoard.board[self.y-1][self.x].cellType == CellType.door:
-            #if just passed door (exited trap)
             self.entering = False
             self.leaving = False
             self.left = True
 
     def eat(self):
         self.eatingTimer -= 1
-        #increase food/hunger measure (if we care about that)
         if self.eatingTimer <= 0:
             self.hasEaten = True
             self.leaving = True

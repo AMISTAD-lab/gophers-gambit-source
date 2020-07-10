@@ -8,7 +8,7 @@ import math as m
 paramLabels = {
         "defaultProbEnter":r"Default Probability of Entering Trap",
         "probReal":r"Probability of Selecting a Designed Trap",
-        "nTrapsWithoutFood":r"Number of Traps without Eating",
+        "nTrapsWithoutFood":r"Maximum Fasting Interval",
         "maxProjectileStrength":r"Maximum Projectile Strength",
     }
 

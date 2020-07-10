@@ -21,23 +21,7 @@ import algorithms as alg
 import designedTraps as dt
 
 
-functionalTraps = dt.traps #list of handmade traps
-trapPieces = [Wire, Arrow, Floor]
-rotationOptions = {
-    Wire : [RotationType.up, RotationType.left, RotationType.right, RotationType.down],
-    Arrow : [RotationType.up, RotationType.left, RotationType.right, RotationType.down],
-    Floor : [RotationType.na],
-}
-thickOptions = {
-    Wire : [ThickType.skinny, ThickType.normal, ThickType.wide],
-    Arrow : [ThickType.skinny, ThickType.normal, ThickType.wide],
-    Floor : [ThickType.na],
-}
-angleOptions = {
-    Wire : [AngleType.straight, AngleType.lright], #excluding rright bc they're same for wires
-    Arrow : [AngleType.lacute, AngleType.racute, AngleType.lright, AngleType.rright, AngleType.lobtuse, AngleType.robtuse],
-    Floor : [AngleType.na],
-}
+functionalTraps = dt.traps
 
 class Board(metaclass = ABCMeta):
 
