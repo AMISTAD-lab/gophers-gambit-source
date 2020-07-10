@@ -52,7 +52,7 @@ class Projectile:
         elif(thicktype == ThickType.wide):
             return mv.WIDE_PROJECTILE_STRENGTH
         else:
-            raise Exception("No bueno")
+            raise Exception("Invalid thicktype")
 
 
 
