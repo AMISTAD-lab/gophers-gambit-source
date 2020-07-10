@@ -7,7 +7,7 @@ import math as m
 
 paramLabels = {
         "defaultProbEnter":r"Default Probability of Entering Trap",
-        "probReal":r"Probability of Selecting a Designed Trap",
+        "probReal":r"Probability of Encountering a Designed Trap",
         "nTrapsWithoutFood":r"Maximum Fasting Interval",
         "maxProjectileStrength":r"Maximum Projectile Strength",
     }
@@ -49,24 +49,39 @@ def filterDataFrame(data, filterlist):
         data = data[booleans]
     return data
 
+def percentThoughtReal(filename, param):
+    data = pd.read_csv(filename)
+    data = filterDataFrame(data, [["intention", True]])
+    for val, group in data.groupby(param):
+        print(val)
+        groupThoughtReal = 0
+        groupTrapsPresentedWith = 0
+        for index, gopher in group.iterrows():
+            groupThoughtReal += gopher["numThoughtReal"]
+            groupTrapsPresentedWith += gopher["numTraps"] + (gopher["status"] == 2) #if zapped, it saw one more trap than it survived
+        print(groupThoughtReal / groupTrapsPresentedWith)
+        print()
+
+
 def linearRunGraph(filename, param):
     data = pd.read_csv(filename)
     plt.style.use('ggplot')
     plt.rc('font', family='serif')
         
-    df0 = filterDataFrame(data, [["intention", True]])
+    df0 = filterDataFrame(data, [["intention", True], ["cautious", False]])
     df1 = filterDataFrame(data, [["intention", False]])
+    df3 = filterDataFrame(data, [["intention", True], ["cautious", True]])
 
-    dfs = [df0, df1]
-    modes = [r"With Intention", r"Without Intention"]
+    dfs = [df0, df1, df3]
+    modes = [r"With Intention", r"Without Intention", r"Cautious"]
 
     colorIter = iter(['#4FADAC', '#5386A6', '#2F5373'])
     
     fig, axes = plt.subplots(1,3)
     life_ax, food_ax, n_food_ax = axes.flat
-    plt.tight_layout(rect=[0.025,0.025,0.95, 0.95], h_pad=1)
+    plt.tight_layout(rect=[0.05,0.05,0.90, 0.90], h_pad=1)
 
-    for i in range(2):
+    for i in range(3):
         df = dfs[i]
         paramValues = []
 
@@ -150,21 +165,21 @@ def linearRunGraph(filename, param):
     life_ax.set_ylabel(r"Gopher Lifespan (number of traps)")
     life_ax.set_xlabel(paramLabels[param], fontsize=10)
     life_ax.tick_params(axis='both', which='major', labelsize=10, direction='in')
-    life_ax.set_title(r"Lifespan vs " + paramLabels[param], fontsize=11)
+    life_ax.set_title(r"Gopher Lifespan" + "\n" + r"vs" + "\n" + paramLabels[param], fontsize=11)
     life_ax.legend()
 
     food_ax.set(ylim=(0, 50))
     food_ax.set_ylabel(r"Number of Food Consumed", fontsize=10)
     food_ax.set_xlabel(paramLabels[param], fontsize=10)
     food_ax.tick_params(axis='both', which='major', labelsize=10, direction='in')
-    food_ax.set_title(r"Food Consumption vs " + paramLabels[param], fontsize=11)
+    food_ax.set_title(r"Food Consumption" + "\n" + r"vs" + "\n" + paramLabels[param], fontsize=11)
     food_ax.legend()
 
     n_food_ax.set(ylim=(0, 1))
     n_food_ax.set_ylabel(r"Food Consumed Per Trap Survived", fontsize=10)
     n_food_ax.set_xlabel(paramLabels[param], fontsize=10)
     n_food_ax.tick_params(axis='both', which='major', labelsize=10, direction='in')
-    n_food_ax.set_title(r"Normalized Food Consumption vs " + paramLabels[param], fontsize=11)
+    n_food_ax.set_title(r"Normalized Food Consumption" + "\n" + r"vs" + "\n" + paramLabels[param], fontsize=11)
     n_food_ax.legend()
 
     # for ax in status_axs:
@@ -194,7 +209,7 @@ def statusOverTime(filename):
     df1 = filterDataFrame(data, [["intention", False]])
 
     dfs = [df0, df1]
-    modes = [r"With Intention", r"Without Intention"]
+    modes = [r"With Intention Perception", r"Without Intention Perception"]
 
     fig, axes = plt.subplots(1,2)
     status_axs = axes.flat
@@ -206,14 +221,16 @@ def statusOverTime(filename):
         zapped = [0]*50
 
         for index, gopher in dfs[i].iterrows():
-            for j in range(int(gopher["numTraps"])):
+            numTraps = int(gopher["numTraps"])
+            status = int(gopher["status"])
+            for j in range(numTraps):
                 alive[j] += 1
-            if gopher["status"] != 0:
-                if gopher["status"] == 1:
+            if status != 0:
+                if status == 1:
                     dead_list = starved
                 else:
                     dead_list = zapped
-                for j in range(int(gopher["numTraps"]), 50):
+                for j in range(numTraps, 50):
                     dead_list[j] += 1
 
         total = alive[0] + starved[0] + zapped[0]

@@ -8,11 +8,11 @@ import data as d
 
 pref = {
     "intention" : True, #if gopher has intention
+    "cautious" : False, # only used if intention, fakes a FSC test to confirm intention > cautiousness
     "defaultProbEnter" : 0.8, #probability of gopher entering trap (not intention)
     "probReal" : 0.2, #percentage of traps that are designed as opposed to random
     "nTrapsWithoutFood" : 4, #the amount of traps a gopher can survive without entering (due to starvation)
     "maxProjectileStrength" : 0.45, #thickWire strength
-    "hungerWeight" : 0.2,
 }
 
 def runExperiment(filename, inputToVary, numSimulations):
@@ -58,6 +58,37 @@ def createExpInputFile(inputToVary):
     return filename
 
 
+def runCautious(filename, numSimulations):
+    inputfile = createCautious()
+    seedList = createSeedListFromFile(inputfile)
+    allData = simulateManySetups(numSimulations, seedList)
+    d.allDataToCSV(allData, filename)
+
+def createCautious():
+    """Inputs:
+        inputToVary: String, the input to vary. 
+            eg. "predSightDistance"
+        startValue: the starting value of input, inclusive
+        endingValue: the ending value of input, inclusive
+        stepValue: the stepValue for input
+    """
+    filename = "experimentInput.txt"
+    file = open(filename, "w")
+    for intention in [True, "cautious", False]:
+        cautious = False
+        if intention == "cautious":
+            intention = True
+            cautious = True
+        toWrite = "intention " + str(intention) + "\n"
+        toWrite += "cautious " + str(cautious) + "\n"
+        for percent in range(0, 100+1, 5):
+            percent /= 100
+            file.write(toWrite)
+            file.write("probReal " + str(percent) + "\n\n")
+    file.close() 
+    return filename
+
+
 def createSeedListFromFile(filename):
     seedFile = open(filename, "r")
     lineList = seedFile.readlines()
@@ -67,6 +98,7 @@ def createSeedListFromFile(filename):
 
     standardSeed = {
         "intention" : True,
+        "cautious" : False,
         "defaultProbEnter" : 0.8,
         "probReal" : 0.2,
         "nTrapsWithoutFood" : 4,
@@ -127,13 +159,15 @@ def simulate(pref):
     killedByHunger = False
     trapInfo = []
     numFood = 0
+    numThoughtReal = 0
     while stillAlive and numTraps < 50:
         rowLength = 3
         colLength = 4
         functional = np.random.binomial(1, probReal)
         trap = t.Trap(rowLength, colLength, functional)
         hunger = (trapsWithoutFood + 1)/nTrapsWithoutFood
-        ib, ac, gc, alive, eaten = s.simulateTrap(trap, intention, hunger)
+        ib, ac, gc, alive, eaten, thoughtReal = s.simulateTrap(trap, intention, hunger)
+        numThoughtReal += thoughtReal
         trapInfo.append([ib, ac, gc])
         stillAlive = alive
         if alive:
@@ -156,6 +190,7 @@ def simulate(pref):
     else:
         data["status"] = 2 #zapped
     data["numFood"] = numFood
+    data["numThoughtReal"] = numThoughtReal
     return data, trapInfo
 
 def expectedLethality(n, r):
@@ -200,3 +235,4 @@ def printProgressBar (iteration, total, prefix = 'Progress:', suffix = 'Complete
     if iteration == total: 
         print()
 
+#runCautious("cautious.csv", 1000)

@@ -21,6 +21,7 @@ class Gopher:
         self.eatingTimer = 0
         self.initialTimer = 0
         self.hunger = 0
+        self.thoughtReal = False
 
     def state(self):
         if not self.alive:
@@ -44,7 +45,8 @@ class Gopher:
             self.eat()
         else:
             if self.intention:
-                enterGivenTrap = 1 - alg.isTrap(self.ownerBoard)
+                self.thoughtReal = mv.DECISION_ALG(self.ownerBoard)
+                enterGivenTrap = 1 - self.thoughtReal
                 if self.hunger == 1:
                     probEnter = 1
                 else:

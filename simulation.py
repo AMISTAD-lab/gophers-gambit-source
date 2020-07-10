@@ -16,13 +16,15 @@ def simulateTrap(trap, intention, hunger=0, maxSteps=20):
     initialboard.append(["4xxx"]*trap.rowLength) #add dirt beneath trap
     activeCells = []
     gopherStuff = []
+    thoughtReal = False
     while gopher.alive and not gopher.left and step < maxSteps:
         gopherInfo, state = updateSimulation(trap, step)
+        if gopher.thoughtReal:
+            thoughtReal = True
         activeCells.append(state)
         gopherStuff.append(gopherInfo)
         step += 1
-    inSimulation = False
-    return [initialboard, activeCells, gopherStuff, gopher.alive, gopher.hasEaten]
+    return [initialboard, activeCells, gopherStuff, gopher.alive, gopher.hasEaten, thoughtReal]
 
 def updateSimulation(trap, step):
     global gopher
