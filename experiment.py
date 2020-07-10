@@ -10,7 +10,7 @@ pref = {
     "intention" : True, #if gopher has intention
     "defaultProbEnter" : 0.8, #probability of gopher entering trap (not intention)
     "probReal" : 0.2, #percentage of traps that are designed as opposed to random
-    "nTrapsWithoutFood" : 3, #the amount of traps a gopher can survive without entering (due to starvation)
+    "nTrapsWithoutFood" : 4, #the amount of traps a gopher can survive without entering (due to starvation)
     "maxProjectileStrength" : 0.45, #thickWire strength
     "hungerWeight" : 0.2,
 }
@@ -52,11 +52,6 @@ def createExpInputFile(inputToVary):
                 probEnter /= 100
                 file.write(toWrite)
                 file.write("defaultProbEnter " + str(probEnter) + "\n\n")
-        elif inputToVary == "hungerWeight":
-            for hungerWeight in range(0, 100, 5):
-                hungerWeight /= 100
-                file.write(toWrite)
-                file.write("hungerWeight " + str(hungerWeight) + "\n\n")
         else:
             raise Exception("Something went wrong")
     file.close() 
@@ -74,9 +69,8 @@ def createSeedListFromFile(filename):
         "intention" : True,
         "defaultProbEnter" : 0.8,
         "probReal" : 0.2,
-        "nTrapsWithoutFood" : 3,
+        "nTrapsWithoutFood" : 4,
         "maxProjectileStrength" : 0.45,
-        "hungerWeight" : 0.2,
     }
 
     seedList = []
@@ -132,7 +126,8 @@ def simulate(pref):
     numTraps = 0
     killedByHunger = False
     trapInfo = []
-    while stillAlive:
+    numFood = 0
+    while stillAlive and numTraps < 50:
         rowLength = 3
         colLength = 4
         functional = np.random.binomial(1, probReal)
@@ -144,6 +139,7 @@ def simulate(pref):
         if alive:
             numTraps += 1
             if eaten:
+                numFood += 1
                 trapsWithoutFood = 0
             else:
                 trapsWithoutFood += 1
@@ -153,7 +149,13 @@ def simulate(pref):
     
     data = copy.deepcopy(pref)
     data["numTraps"] = numTraps
-    data["killedByHunger"] = killedByHunger
+    if stillAlive:
+        data["status"] = 0 #alive
+    elif killedByHunger:
+        data["status"] = 1 #starved
+    else:
+        data["status"] = 2 #zapped
+    data["numFood"] = numFood
     return data, trapInfo
 
 def expectedLethality(n, r):

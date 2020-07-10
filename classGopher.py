@@ -43,22 +43,17 @@ class Gopher:
         elif self.eatingTimer > 0:
             self.eat()
         else:
-            #at beginning of trap, so figure out whether to enter or not (done in algs)
-            foundTrap = False
             if self.intention:
-                confirmedTrap = alg.isTrap(self.ownerBoard) #confirmed handmade
-                if confirmedTrap:
-                    enterGivenTrap = 0
-                    foundTrap = True
+                enterGivenTrap = 1 - alg.isTrap(self.ownerBoard) #confirmed handmade
+                if self.hunger == 1:
+                    probEnter = 1
                 else:
-                    enterGivenTrap = 1
+                    probEnter = enterGivenTrap
             else:
                 enterGivenTrap = mv.DEFAULT_PROB_ENTER
-            if foundTrap == False and enterGivenTrap < self.hunger:
-                    probEnter = (enterGivenTrap * (1-mv.HUNGER_WEIGHT)) + (self.hunger * (mv.HUNGER_WEIGHT))
-            else:
-                probEnter = enterGivenTrap
-            if np.random.binomial(n=1, p=probEnter) == 1:
+                hungerWeight = self.hunger**10
+                probEnter = enterGivenTrap * (1 - hungerWeight) + hungerWeight
+            if np.random.binomial(n=1, p=probEnter):
                 self.initialTimer = alg.gopherEatTimer(enterGivenTrap)
                 self.entering = True
                 self.leaving = False
