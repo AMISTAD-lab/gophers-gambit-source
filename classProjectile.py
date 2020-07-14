@@ -7,10 +7,8 @@ import magicVariables as mv
 class Projectile:
 
     def __init__(self, start_x, start_y, direction, thickType, ownerBoard, timeStep):
-# later once we figure out the attributes of projectile
         self.direction = direction
         self.strength = self.assignStrength(thickType) 
-        #self.speed = 0 #what are units,    i think we may do one time step universally
         self.x = start_x
         self.y = start_y  
         self.ownerBoard = ownerBoard
@@ -32,7 +30,6 @@ class Projectile:
                 self.y -= 1
             if self.direction in [DirectionType.down, DirectionType.lowerleft, DirectionType.lowerright]:
                 self.y += 1
-        #if we want to do some explosion where it lands even if it misses, use self.x and self.y here
     
 
     def checkHitGopher(self, timeStep):
@@ -44,7 +41,6 @@ class Projectile:
 
     def assignStrength(self, thicktype):
         """assigns strength based on thick type"""
-        #assigning random strength values, definitely subject to change
         if(thicktype == ThickType.skinny):
             return mv.SKINNY_PROJECTILE_STRENGTH
         elif(thicktype == ThickType.normal):

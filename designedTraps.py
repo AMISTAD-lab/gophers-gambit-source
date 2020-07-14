@@ -5,7 +5,6 @@ from classDirt import *
 from classWire import *
 from classArrow import *
 
-#fixed (FOR CINDY) - note: Current design is different than your discord drawing!
 #LAD - Left Arrow Doesn't Hit Due to Frame Timing (functional)
 #RAD - Right Arrow Doesn't Hit Due to Frame Timing (functional) 
 
@@ -91,7 +90,6 @@ trap9 = [
     [Wire(0,3,None, angleType=AngleType.rright, rotationType=RotationType.left, thickType=ThickType.skinny), Door(1,3, None), Wire(2,3, None, angleType=AngleType.lright, rotationType=RotationType.right, thickType=ThickType.normal)]
 ]
 
-#fixed
 #LAD
 trap10 = [
     [Floor(0,0, None), Floor(1,0, None), Floor(2,0, None)],
@@ -100,7 +98,6 @@ trap10 = [
     [Wire(0,3,None, angleType=AngleType.rright, rotationType=RotationType.left, thickType=ThickType.wide), Door(1,3, None), Arrow(2,3, None, angleType=AngleType.lacute, rotationType=RotationType.right, thickType=ThickType.wide)]
 ]
 
-#fixed
 trap11 = [
     [Floor(0,0, None), Floor(1,0, None), Floor(2,0, None)],
     [Floor(0,1, None), Food(1,1, None), Floor(2,1, None)],
@@ -123,7 +120,6 @@ trap13 = [
     [Arrow(0,3, None, angleType=AngleType.racute, rotationType=RotationType.left, thickType=ThickType.wide), Door(1,3,None), Arrow(2,3, None, angleType=AngleType.lacute, rotationType=RotationType.right, thickType=ThickType.wide)]
 ]
 
-#fixed
 #RAD
 trap14 = [
     [Floor(0,0,None), Floor(1,0,None), Arrow(2,0, None, angleType=AngleType.lacute, rotationType=RotationType.up, thickType=ThickType.skinny)],
@@ -132,7 +128,6 @@ trap14 = [
     [Wire(0,3,None, angleType=AngleType.rright, rotationType=RotationType.left, thickType=ThickType.skinny), Door(1,3, None), Wire(2,3, None, angleType=AngleType.lright, rotationType=RotationType.right, thickType=ThickType.skinny)]
 ]
 
-#fixed
 trap15 = [
     [Floor(0,0,None), Floor(1,0,None), Floor(2,0,None)],
     [Floor(0,1,None), Food(1,1, None), Floor(2,1,None)],
@@ -140,7 +135,6 @@ trap15 = [
     [Wire(0,3, None, angleType=AngleType.rright, rotationType=RotationType.left, thickType=ThickType.normal), Door(1,3,None), Arrow(2,3, None, angleType=AngleType.lacute, rotationType=RotationType.right, thickType=ThickType.wide)]
 ]
 
-# !! mor trapz !!
 trap16 = [
     [Floor(0,0,None), Floor(1,0,None), Floor(2,0,None)],
     [Floor(0,1,None), Food(1,1, None), Floor(2,1,None)],
@@ -170,7 +164,6 @@ trap19 = [
     [Wire(0,3,None, angleType=AngleType.rright, rotationType=RotationType.left, thickType=ThickType.wide), Door(1,3, None), Wire(2,3, None, angleType=AngleType.lright, rotationType=RotationType.right, thickType=ThickType.skinny)]
 ]
 
-#fixed
 #LAD
 trap20 = [
     [Wire(0,0, None, angleType=AngleType.rright, rotationType=RotationType.up, thickType=ThickType.skinny), Wire(1,0, None, angleType=AngleType.straight, rotationType=RotationType.right, thickType=ThickType.skinny),  Arrow(2,0, None, angleType=AngleType.racute, rotationType=RotationType.right, thickType=ThickType.skinny)],
@@ -195,7 +188,6 @@ trap22 = [
     [Wire(0,3,None, angleType=AngleType.rright, rotationType=RotationType.left, thickType=ThickType.normal), Door(1,3, None), Arrow(2,3, None, angleType=AngleType.lacute, rotationType=RotationType.right, thickType=ThickType.normal)]
 ]
 
-#fixed
 #RAD
 trap23 = [
     [Floor(0,0, None), Floor(1,0, None), Floor(2,0, None)],
@@ -249,7 +241,6 @@ trap29 = [
     [Wire(0,3, None, angleType=AngleType.rright, rotationType=RotationType.left, thickType=ThickType.wide), Door(1,3, None), Wire(2,3, None, angleType=AngleType.lright, rotationType=RotationType.right, thickType=ThickType.wide)]
 ]
 
-#fixed
 trap30 = [
     [Floor(0,0, None), Floor(1,0, None), Floor(2,0, None)],
     [Arrow(0,1, None, angleType=AngleType.rright, rotationType=RotationType.up, thickType=ThickType.skinny), Food(1,1,None), Arrow(2,1,None,angleType=AngleType.lright, rotationType=RotationType.up, thickType=ThickType.skinny)],
@@ -257,7 +248,6 @@ trap30 = [
     [Wire(0,3, None, angleType=AngleType.rright, rotationType=RotationType.left, thickType=ThickType.skinny), Door(1,3, None), Wire(2,3, None, angleType=AngleType.lright, rotationType=RotationType.right, thickType=ThickType.skinny)]
 ]
 
-#fixed
 trap31 = [
     [Floor(0,0, None), Floor(1,0, None), Floor(2,0, None)],
     [Arrow(0,1, None, angleType=AngleType.rright, rotationType=RotationType.up, thickType=ThickType.normal), Food(1,1,None), Arrow(2,1,None,angleType=AngleType.lright, rotationType=RotationType.up, thickType=ThickType.normal)],
@@ -265,7 +255,6 @@ trap31 = [
     [Wire(0,3, None, angleType=AngleType.rright, rotationType=RotationType.left, thickType=ThickType.normal), Door(1,3, None), Wire(2,3, None, angleType=AngleType.lright, rotationType=RotationType.right, thickType=ThickType.normal)]
 ]
 
-#fixed
 trap32 = [
    [Floor(0,0, None), Floor(1,0, None), Floor(2,0, None)],
     [Arrow(0,1, None, angleType=AngleType.rright, rotationType=RotationType.up, thickType=ThickType.wide), Food(1,1,None), Arrow(2,1,None,angleType=AngleType.lright, rotationType=RotationType.up, thickType=ThickType.wide)],
@@ -273,7 +262,6 @@ trap32 = [
     [Wire(0,3, None, angleType=AngleType.rright, rotationType=RotationType.left, thickType=ThickType.wide), Door(1,3, None), Wire(2,3, None, angleType=AngleType.lright, rotationType=RotationType.right, thickType=ThickType.wide)]
 ]
 
-#fixed
 trap33 = [
     [Floor(0,0, None), Floor(1,0, None), Floor(2,0, None)],
     [Floor(0,1, None), Food(1,1,None), Floor(2,1, None)],
@@ -281,7 +269,6 @@ trap33 = [
     [Wire(0,3, None, angleType=AngleType.rright, rotationType=RotationType.left, thickType=ThickType.normal), Door(1,3, None), Wire(2,3, None, angleType=AngleType.lright, rotationType=RotationType.right, thickType=ThickType.skinny)]
 ]
 
-#fixed
 trap34 = [
     [Floor(0,0, None), Floor(1,0, None), Floor(2,0, None)],
     [Arrow(0,1, None, angleType=AngleType.rright, rotationType=RotationType.up, thickType=ThickType.normal), Food(1,1,None), Arrow(2,1,None,angleType=AngleType.lright, rotationType=RotationType.up, thickType=ThickType.wide)],
@@ -289,14 +276,12 @@ trap34 = [
     [Wire(0,3, None, angleType=AngleType.rright, rotationType=RotationType.left, thickType=ThickType.normal), Door(1,3, None), Wire(2,3, None, angleType=AngleType.lright, rotationType=RotationType.right, thickType=ThickType.wide)]
 ]
 
-#fixed
 trap35 = [
     [Arrow(0,0, None, angleType=AngleType.racute, rotationType=RotationType.up, thickType=ThickType.wide), Floor(1,0, None), Arrow(2,0, None, angleType=AngleType.lacute, rotationType=RotationType.up, thickType=ThickType.wide)],
     [Wire(0,1, None, angleType=AngleType.straight, rotationType=RotationType.up, thickType=ThickType.wide), Food(1,1,None), Wire(2,1, None, angleType=AngleType.straight, rotationType=RotationType.up, thickType=ThickType.wide)],
     [Wire(0,2, None, angleType=AngleType.straight, rotationType=RotationType.up, thickType=ThickType.wide), Floor(1,2,None), Wire(2,2,None,angleType=AngleType.straight, rotationType=RotationType.up, thickType=ThickType.wide)],
     [Wire(0,3, None, angleType=AngleType.lright, rotationType=RotationType.down, thickType=ThickType.wide), Door(1,3, None), Wire(2,3, None, angleType=AngleType.lright, rotationType=RotationType.right, thickType=ThickType.wide)],
 ]
-#added traps 36-39 :)
 
 trap36 = [
     [Arrow(0,0, None, angleType=AngleType.racute, rotationType=RotationType.up, thickType=ThickType.normal), Floor(1,0, None), Arrow(2,0, None, angleType=AngleType.lacute, rotationType=RotationType.up, thickType=ThickType.normal)],
@@ -325,7 +310,6 @@ trap39 = [
     [Wire(0,2, None, angleType=AngleType.straight, rotationType=RotationType.up, thickType=ThickType.wide), Floor(1,2,None), Wire(2,2,None,angleType=AngleType.straight, rotationType=RotationType.up, thickType=ThickType.normal)],
     [Wire(0,3, None, angleType=AngleType.lright, rotationType=RotationType.down, thickType=ThickType.wide), Door(1,3, None), Wire(2,3, None, angleType=AngleType.lright, rotationType=RotationType.right, thickType=ThickType.normal)],
 ]
-## Many permutations in tinnyyy increments each time of working one arrow traps:
 
 trap40 = [
     [Floor(0,0,None), Floor(1,0,None), Floor(2,0,None)],
@@ -411,7 +395,6 @@ trap51 = [
     [Floor(0,3, None), Door(1,3, None), Wire(2,3, None,angleType=AngleType.lright, rotationType=RotationType.right, thickType=ThickType.wide)]
 ]
 
-## see #notes channel for ideas on one arrow traps 52 - 63
 trap52 = [
     [Floor(0,0, None), Floor(1,0, None), Floor(2,0, None)],
     [Arrow(0,1, None,angleType=AngleType.rright, rotationType=RotationType.up, thickType=ThickType.skinny), Food(1,1, None), Floor(2,1, None)],

@@ -28,9 +28,6 @@ class Cell(metaclass = ABCMeta):
         cellStr += str(self.thickType.value)
         cellStr += str(self.rotationType.value)
         return cellStr
-
-    def updateCell(self, step):
-        ...
     
     def activateCell(self, timeStep, inputEndpointIn):
         self.activatedTimeStep = timeStep
