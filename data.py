@@ -215,22 +215,22 @@ def statusOverTime(filename):
     status_axs = axes.flat
 
     for i in range(2):
-        x = [t for t in range(1, 51)]
-        alive = [0]*50
-        starved = [0]*50
-        zapped = [0]*50
+        x = [t for t in range(0, 50+1)]
+        alive = [0]*51
+        starved = [0]*51
+        zapped = [0]*51
 
         for index, gopher in dfs[i].iterrows():
             numTraps = int(gopher["numTraps"])
             status = int(gopher["status"])
-            for j in range(numTraps):
+            for j in range(numTraps+1):
                 alive[j] += 1
             if status != 0:
                 if status == 1:
                     dead_list = starved
                 else:
                     dead_list = zapped
-                for j in range(numTraps, 50):
+                for j in range(numTraps+1, 50 + 1):
                     dead_list[j] += 1
 
         total = alive[0] + starved[0] + zapped[0]
@@ -242,8 +242,8 @@ def statusOverTime(filename):
 
     for ax in status_axs:
         ax.set(ylim=(0,100))
-        ax.set(xlim=(1, 50))
-        ax.set_ylabel(r"Gophers Status (%)", fontsize=10)
+        ax.set(xlim=(0, 50))
+        ax.set_ylabel(r"Gopher Status (%)", fontsize=10)
         ax.set_xlabel(r"Time (# of Traps Seen)", fontsize=10)
         ax.tick_params(axis='both', which='major', labelsize=10, direction='in')
         ax.legend()
