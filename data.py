@@ -237,7 +237,9 @@ def statusOverTime(filename):
         alive = [a / total * 100 for a in alive]
         starved = [s / total * 100 for s in starved]
         zapped = [z / total * 100 for z in zapped]
-
+        print(alive[-1])
+        print(starved[-1])
+        print(zapped[-1])
         status_axs[i].stackplot(x, alive, starved, zapped, colors=["#267347", "#F27405", "#D92B04"], labels=[r"Alive", r"Starved", r"Zapped"])
 
     for ax in status_axs:
