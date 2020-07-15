@@ -28,7 +28,7 @@ def findDir(rotationType, angleType):
         elif(angleType == AngleType.straight):
             return DirectionType.left
         else:
-            raise Exception("uh oh, either angleType is NA or arrow is somehow going in a straight line :O")
+            raise Exception("Error: angleType doesn't exist")
     
     elif(rotationType == RotationType.right): 
         if(angleType == AngleType.lacute):
@@ -46,7 +46,7 @@ def findDir(rotationType, angleType):
         elif(angleType == AngleType.straight):
             return DirectionType.right
         else:
-            raise Exception("uh oh, either angleType is NA or arrow is somehow going in a straight line :O")
+            raise Exception("Error: angleType doesn't exist")
 
     elif(rotationType == RotationType.up): 
         if(angleType == AngleType.lacute):
@@ -64,7 +64,7 @@ def findDir(rotationType, angleType):
         elif(angleType == AngleType.straight):
             return DirectionType.up
         else:
-            raise Exception("uh oh, either angleType is NA or arrow is somehow going in a straight line :O")
+            raise Exception("Error: angleType doesn't exist")
 
     elif(rotationType == RotationType.down):
         if(angleType == AngleType.lacute):
@@ -82,7 +82,7 @@ def findDir(rotationType, angleType):
         elif(angleType == AngleType.straight):
             return DirectionType.down
         else:
-            raise Exception("uh oh, either angleType is NA or arrow is somehow going in a straight line :O")
+            raise Exception("Error: angleType doesn't exist")
 
 def formatMatrix(matrix):  
     string = ""

@@ -17,7 +17,6 @@ from classArrow import *
 import numpy as np
 import math as m
 import algorithms as alg
-
 import designedTraps as dt
 
 
