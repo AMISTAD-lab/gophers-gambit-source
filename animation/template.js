@@ -1,44 +1,42 @@
 /**  template.js 
 Created on June 23, 2020 by Cynthia Hom
-js file for the third experiment's animation
+js file for the third experiment's animation.
 
-Todo: 
-Test throuroughly. Make the ending screens work */
+This file is ultimately used as a template. The "writeTojs()" function in visualize.py will make a copy of this file,
+call it animation.js, and add run-specific data by writing a getInput() method to animation.js.
+animation.js is then used by animation.html to run the animation.*/
 
 
-// get elements from the html
+// select/create HTML elements
 var gridContainer = document.getElementById("gridContainer");
 var gopher = document.createElement("img");
 gopher.id = "gopher";
 
-// inputs that will be set using getInput()
-var trapList = [] 
+var trapList = [] // Contains all the info for the steps of the animation and the traps to show.
 
-// other vars
 var fps = 2; // show two frames per second
 
-var trapNum = 1;	// current trap animation to play
-var trapFrameNum = 0; // current step of the current animation (either trap or movement)
-var frameNum = 0; // frame for the overall animation
+var trapNum = 0;	// the number of the trap to start the animation at
+var trapFrameNum = 0; // current step of the trap 
+var frameNum = 0; // frame count for the overall animation
 
-// call init once document has loaded.
+// Calls init only once document has loaded.
 $(document).ready(function () {
 	init();
 });
 
-/** Called when file is run */
+/** Called when file is run. */
 function init() 
 {
 	getInput(); // get input that is written to the file.
 	animate();
 }
 
-
-/** The animation. Calls draw.*/
+/** The animation. Calls draw. */
 function animate(){
 	timer = setTimeout(function(){
 		requestAnimationFrame(animate);  
-	}, 1000/fps);// repaint fps frames per second
+	}, 1000/fps); // repaint fps frames per second
 
 	// animation ends after last trap has been run 
 	if (trapNum >= trapList.length) 
@@ -88,7 +86,7 @@ function updateVars(){
 		(trapNum == trapList.length - 1 && trapFrameNum >= getCurrentGopherList().length + getTrapWidth()))
 	{
 		console.log("FINISHED TRAP #" + trapNum);
-		trapNum++;	// if done with a trap, move on to next trap.
+		trapNum++;	// move on to next trap.
 
 		// reset trapFrameNum
 		trapFrameNum = 0;
@@ -105,16 +103,16 @@ function updateActiveStates()
 		for (let col = 0; col < activeStateList[0].length; col++){
 			cell = [row + 1, col + 1];
 			if (!isValidGridPos(cell)){
-				console.log("ERROR: Not a valid grid position");
+				throw new Error("ERROR: Not a valid grid position");
 				return;
 			}
 
 			// get image. Must use gridContainer, because otherwise we can't change the src attribute.
 			let image = gridContainer.children[getNth(cell) - 1].children[0]; // subtract 1 because .children returns an array.
-			
+			image = undefined;
 			// make sure image exists first
 			if (image == undefined){
-				console.log("ERROR: image is undefined!");
+				throw new Error("ERROR: Image is undefined");
 				return;
 			}
 			isActiveNum = activeStateList[row][col]; 
@@ -123,7 +121,7 @@ function updateActiveStates()
 	}
 }
 
-/** Moves the gopher and updates its image */
+/** Moves the gopher and updates its image. */
 function updateGopher(){
 	// don't update the gopher on the very first frame of the simulation.
 	if (frameNum <= 0)
@@ -148,7 +146,10 @@ function updateGopher(){
 	moveGopher(gopherTuple);
 }
 
-/** move the gopher to a given cell */
+/** 
+ * Moves the gopher to a given cell.
+ *	@param Array gopherTuple: array of the form [x, y, rotation, state] that determines location and state of gopher.
+ */
 function moveGopher(gopherTuple){
 	let cell = [gopherTuple[1] + 1, gopherTuple[0] + 1]; // row first then col
 	// check if the grid position is valid first!
@@ -157,13 +158,14 @@ function moveGopher(gopherTuple){
 		$("div.gridDiv:nth-of-type(" + String(getNth(cell)) +")").append(gopher); // prepend so gopher is on top
 	}
 	else{
-		console.log("ERROR: NOT A VALID GRID POSITION");
+		throw new Error("ERROR: Not a vailid grid position.");
 	}
 }
 
-/** Removes any existing grid and sets up a new one. 
-Inputs:
-	gridListIn: the new 2-d array to display */
+/** 
+ * Removes any existing grid and sets up a new one. 
+ * @param Array gridListIn: the new 2-d array to display 
+ */
 function updateGrid(gridListIn)
 {	
 	// remove existing grid by deleting all gridElements.
@@ -201,7 +203,7 @@ function updateGrid(gridListIn)
 }
 
 
-// show the proper ending screen 
+/** Shows the proper ending screen. */
 function showEndingImage()
 {
 	// simply make a grid with only one element, just like before.
@@ -225,7 +227,10 @@ function showEndingImage()
 	gridContainer.appendChild(div);
 }
 
-/** returns a 2d list corresponding to the currently displayed grid. */
+/** 
+ * Returns a 2d array corresponding to the currently displayed grid. 
+ * @return Array gridArr: The currently displayed grid.
+ */
 function getCurrentlyDisplayedGrid(){
 	// if we are not in the middle of changing traps, just return the grid. Otherwise, calc the grid.
 	if (!areChangingTraps()){
@@ -260,22 +265,34 @@ function getCurrentlyDisplayedGrid(){
 
 
 /** --------------- Helper methods ----------*/
+/** 
+ * Returns the number of steps that it takes for the gopher to "walk" to the trap. 
+ * @return int the number of steps 
+*/
 function getNumStartSteps(){
 	// number of steps to the door is Math.floor((getTrapWidth() + 1)/2).
 	// add one more step so we have one step at beginning with just the trap itself.
 	return Math.floor((getTrapWidth() + 1)/2) + 1; 
 }
 
-/** Returns the gopher Image name depending on its tuple. */
+/** 
+ * Returns the gopher Image name depending on its tuple. 
+ * @param  Array  gopherTuple: the array of the form [x, y, rotation, state] that determines location and state of gopher.
+ * @return String the image name to display for the gopher. 
+ */
 function getGopherImageName(gopherTuple){
 	let stateNum = gopherTuple[3];
 	let states = ["dead", "alive", "hit"];
 	return "gopher/gopher" + states[stateNum] + ".png";
 }
 
-/** Returns a cell name given a cell code.
-Cell code is the contents of the array that is passed in , eg. 41xx
-Note: This is NOT used for gophers! 
+/** 
+ * Returns a cell name given a cell code.
+ * Cell code is the contents of the array that is passed in, eg. 41xx.
+ * Note: This is NOT used for gopher images! 
+ * @param  String cellCode: 	the string of characters used to determine which cell image to display
+ * @param  int    isActiveNum: 	1 if cell is active, 1 if inactive 
+ * @return String imgName: 		the string name corresponding to the image to display.
 */
 function getImageName(cellCode, isActiveNum){
 	let cellType = getCellType(cellCode.charAt(0));
@@ -285,13 +302,21 @@ function getImageName(cellCode, isActiveNum){
 	return imgName;
 }
 
-/** Interpret the char corresponding to cell type */
+/** 
+ * Interprets the char corresponding to cell type.
+ * @param  char   cellTypeIn: the character corresponding to a cell type
+ * @return String  		      the type of cell to display
+ */
 function getCellType(cellTypeIn){
 	let cellTypes = ["gopher", "door", "wire", "arrow", "dirt", "food", "floor"];
 	return cellTypes[parseInt(cellTypeIn)];
 }
 
-/** Interpret the char corresponding to angle type */
+/** 
+ * Interprets the char corresponding to angle type.
+ * @param  char angleTypeIn: the character corresponding to an angle type
+ * @return String  		   	 the type of angle to display
+ */
 function getAngleType(angleTypeIn){
 	if (angleTypeIn == 'x'){
 		return "";
@@ -300,7 +325,11 @@ function getAngleType(angleTypeIn){
 	return angleTypes [parseInt(angleTypeIn)];
 }
 
-/** Interpret the char corresponding to thick type */
+/** 
+ * Interprets the char corresponding to thick type.
+ * @param  char thickTypeIn: the character corresponding to an angle type
+ * @return String  		   	 the thick type to display
+ */
 function getThickType(thickTypeIn){
 	if (thickTypeIn == 'x'){
 		return "";
@@ -309,14 +338,22 @@ function getThickType(thickTypeIn){
 	return thickTypes[parseInt(thickTypeIn)];
 }
 
-/** Interpret the rotation char. Return the rotation from top in degrees */
+/** 
+ * Interpret the rotation char. Return the rotation from top in degrees
+ * @param  char rotTypeIn: the character corresponding to an angle type
+ * @return String  		   the rotation type to display
+ */
 function getRotInDegrees(rotTypeIn){
 	if (rotTypeIn == 'x')
 		return 0;
 	return 45 * parseInt(rotTypeIn);
 }
 
-/** Return "active" if input is 1, "inactive" otherwise */
+/** 
+ * Return "active" if input is 1, "inactive" otherwise 
+ * @param  int isActiveNumIn: the integer corresponding to the active state.
+ * @return String 			  "active" if the cell should be active, "inactive" otherwise.
+ */
 function getIsActive(isActiveNumIn){
 	if(isActiveNumIn == 1){
 		return "active";
@@ -324,14 +361,20 @@ function getIsActive(isActiveNumIn){
 	else if (isActiveNumIn == 0){
 		return "inactive";
 	}
-	console.log("ERROR: isActiveNumIn is neither 1 nor 0");
+	throw new Error("ERROR: isActiveNumIn is neither 1 nor 0.");
 	return;
 }
 
 
 
-/** Replaces the gridCol column in gridArr with the trapCol column in the trap array. 
-Assumes that gridArr and trap array have the same number of rows. */
+/** 
+ * Replaces the gridCol column in gridArr with the trapCol column in the trap array. 
+ * Assumes that gridArr and trap array have the same number of rows. 
+ * @param Array gridArr: the grid to change
+ * @param int   gridCol: the number of the column to change
+ * @param int   trapCol: the number of the column in the trap to replace the gridCol with
+ * @return Array         the new grid array
+ */
 function replaceCol(gridArr, gridCol, trapCol){
 	// loop through all rows, change that column.
 	for (let row = 0; row < gridArr.length; row++){
@@ -340,7 +383,10 @@ function replaceCol(gridArr, gridCol, trapCol){
 	return gridArr
 }
 
-/** Returns a 2-d array of all dirt, with same size as the current trap board. */
+/** 
+ * Returns a 2-d array of all dirt, with same size as the current trap board.
+ * @return Array the 2-d array
+ */
 function makeDirtArray(){
 	// create an array initialized to all dirt
 	let gridArr = []
@@ -353,26 +399,37 @@ function makeDirtArray(){
 	return gridArr;
 }
 
-
+/**
+ * Returns the width of the current trap.
+ * @return int the width, in units of grid cells.
+ */
 function getTrapWidth(){
 	let grid = trapList[trapNum][0]; // first element is the grid
 	return grid[0].length;
 }
 
+/**
+ * Returns the height of the current trap.
+ * @return int the height, in units of grid cells.
+ */
 function getTrapHeight(){
 	let grid = trapList[trapNum][0]; // first element is the grid
 	return grid.length;
 }
 
-/** returns a 2d list consisting of gopher tuples for 
-	this given part of the animation. */
+/** 
+ * Returns a 2d array consisting of all the gopher tuples for this part of the animation. 
+ * @return Array 	the current gopher tuples
+*/
 function getCurrentGopherList(){
 	return trapList[trapNum][2]; // third element in each tuple is gopherList
 }
 
-/** determines if the inputted list is a valid grid position. 
-Inputs:
-	gridPos: [row, col] */
+/** 
+ * Determines if the inputted position is a valid grid position. 
+ * @param  Array   gridPos: array of the form [row, col] that represents a grid position
+ * @return boolean        	true if valid, false otherwise
+ */
 function isValidGridPos(gridPos){
 	currentlyDisplayedGrid = getCurrentlyDisplayedGrid();
 	if (gridPos[0] <= 0 || gridPos[0] <= 0){ // row/column lines start at 1
@@ -383,15 +440,18 @@ function isValidGridPos(gridPos){
 	return true;
 }
 
-/** returns true if we are currently in the middle of switching from one trap to the next, false otherwise */
+/** Determines if we are currently in the middle of switching from one trap to the next
+ * @return boolean 		true if switching traps, false otherwise
+ */
 function areChangingTraps(){
 	return (trapFrameNum < getTrapWidth()) || (trapFrameNum >= getCurrentGopherList().length + getTrapWidth());
 }
 
-/** Calculates the cell number. Upper leftmost cell is #1. Read across rows and move down columns.
-Inputs:
-	gridPos: [row, col]. row, col both start at 1 */
+/** 
+ * Calculates the cell number. Upper leftmost cell is #1. Read across rows and move down columns.
+ * @param  Array gridPos: array of the form [row, col]. Note that row and col both start at 1, NOT 0. 
+ * @return int 			  the cell number of the grid position.
+ */
 function getNth(gridPos){
  	return (gridPos[0] - 1) * getCurrentlyDisplayedGrid()[0].length + gridPos[1]; // row * total num columns + col
 }
-
