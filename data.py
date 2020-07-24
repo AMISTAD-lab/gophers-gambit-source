@@ -79,7 +79,9 @@ def linearRunGraph(filename, param):
     
     fig, axes = plt.subplots(1,3)
     life_ax, food_ax, n_food_ax = axes.flat
-    plt.tight_layout(rect=[0.05,0.05,0.90, 0.90], h_pad=1)
+    #plt.tight_layout(rect=[0.05,0.05,0.90, 0.90], h_pad=1)
+    fig.subplots_adjust(left=0.1, bottom=0.1, right=0.9, top=0.85, wspace=0.2, hspace=0)
+
 
     for i in range(3):
         df = dfs[i]
@@ -169,7 +171,7 @@ def linearRunGraph(filename, param):
     life_ax.legend()
 
     food_ax.set(ylim=(0, 50))
-    food_ax.set_ylabel(r"Number of Food Consumed", fontsize=10)
+    food_ax.set_ylabel(r"Amount of Food Consumed", fontsize=10)
     food_ax.set_xlabel(paramLabels[param], fontsize=10)
     food_ax.tick_params(axis='both', which='major', labelsize=10, direction='in')
     food_ax.set_title(r"Food Consumption" + "\n" + r"vs" + "\n" + paramLabels[param], fontsize=11)
@@ -240,7 +242,7 @@ def statusOverTime(filename):
         print(alive[-1])
         print(starved[-1])
         print(zapped[-1])
-        status_axs[i].stackplot(x, alive, starved, zapped, colors=["#267347", "#F27405", "#D92B04"], labels=[r"Alive", r"Starved", r"Zapped"])
+        status_axs[i].stackplot(x, alive, starved, zapped, colors=['#4FADAC', '#5386A6', '#2F5373'], labels=[r"Alive", r"Starved", r"Zapped"])
 
     for ax in status_axs:
         ax.set(ylim=(0,100))
@@ -254,3 +256,8 @@ def statusOverTime(filename):
 
     plt.rc('text', usetex=True)
     plt.show()
+
+#statusOverTime("standard.csv")
+
+linearRunGraph("c.csv", "probReal")
+
