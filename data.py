@@ -64,8 +64,16 @@ def percentThoughtReal(filename, param):
 
 
 def linearRunGraph(filename, param):
+    
+    labelsize = 18
+    legendsize = 16
+    titlesize = 19
+    ticksize = 16
+    linewidth = 3
+
     data = pd.read_csv(filename)
     plt.style.use('ggplot')
+    plt.rc('text', usetex=True)
     plt.rc('font', family='serif')
         
     df0 = filterDataFrame(data, [["intention", True], ["cautious", False]])
@@ -75,15 +83,14 @@ def linearRunGraph(filename, param):
     dfs = [df0, df1, df3]
     modes = [r"With Intention", r"Without Intention", r"Cautious"]
 
-    colorIter = iter(['#4FADAC', '#5386A6', '#2F5373'])
+    colorIter = iter(['#4FADAC', '#2F5373', '#C59CE6'])
     
-    fig, axes = plt.subplots(1,3)
+    fig, axes = plt.subplots(1,3, figsize=(18,6.5))
     life_ax, food_ax, n_food_ax = axes.flat
     #plt.tight_layout(rect=[0.05,0.05,0.90, 0.90], h_pad=1)
-    fig.subplots_adjust(left=0.1, bottom=0.1, right=0.9, top=0.85, wspace=0.2, hspace=0)
+    #fig.subplots_adjust(left=0.1, bottom=0.1, right=0.9, top=0.85, wspace=0.2, hspace=0)
 
-
-    for i in range(3):
+    for i in range(2):
         df = dfs[i]
         paramValues = []
 
@@ -98,10 +105,6 @@ def linearRunGraph(filename, param):
         n_food_vals = []
         n_f_up_ci = []
         n_f_low_ci = []
-
-        # alive_vals = []
-        # starved_vals = []
-        # zapped_vals = []
 
         for val, group in df.groupby(param):
             paramValues.append(val)
@@ -131,70 +134,41 @@ def linearRunGraph(filename, param):
             n_food_vals.append(avg)
             n_f_low_ci.append(ci[0])
             n_f_up_ci.append(ci[1])
-
-            # group_vals = group["status"]
-            # alive = 0
-            # starved = 0
-            # zapped = 0
-            # for status in group_vals:
-            #     if status == 0:
-            #         alive += 1
-            #     elif status == 1:
-            #         starved += 1
-            #     else:
-            #         zapped += 1
-            # total = alive + starved + zapped
-            # p_a, ci = proportionStats(alive, total)
-            # p_s, ci = proportionStats(starved, total)
-            # p_z, ci = proportionStats(zapped, total)
-            # alive_vals.append(p_a)
-            # starved_vals.append(p_s)
-            # zapped_vals.append(p_z)
            
         color = next(colorIter)
-        life_ax.plot(paramValues, trap_vals, label=modes[i], color=color, linewidth=2)
+        life_ax.plot(paramValues, trap_vals, label=modes[i], color=color, linewidth=linewidth)
         life_ax.fill_between(paramValues, t_low_ci, t_up_ci, color=color, alpha=.15)
 
-        food_ax.plot(paramValues, food_vals, label=modes[i], color=color, linewidth=2)
+        food_ax.plot(paramValues, food_vals, label=modes[i], color=color, linewidth=linewidth)
         food_ax.fill_between(paramValues, f_low_ci, f_up_ci, color=color, alpha=.15)
 
-        n_food_ax.plot(paramValues, n_food_vals, label=modes[i], color=color, linewidth=2)
+        n_food_ax.plot(paramValues, n_food_vals, label=modes[i], color=color, linewidth=linewidth)
         n_food_ax.fill_between(paramValues, n_f_low_ci, n_f_up_ci, color=color, alpha=.15) 
-
-        #status_axs[i].stackplot(paramValues, alive_vals, starved_vals, zapped_vals, colors=["#267347", "#F27405", "#D92B04"], labels=[r"Alive", r"Starved", r"Zapped"])
     
     life_ax.set(ylim=(0, 50))
-    life_ax.set_ylabel(r"Gopher Lifespan (number of traps)")
-    life_ax.set_xlabel(paramLabels[param], fontsize=10)
-    life_ax.tick_params(axis='both', which='major', labelsize=10, direction='in')
-    life_ax.set_title(r"Gopher Lifespan" + "\n" + r"vs" + "\n" + paramLabels[param], fontsize=11)
-    life_ax.legend()
+    life_ax.set_ylabel(r"Gopher Lifespan (number of traps)", fontsize=labelsize, fontweight='bold')
+    life_ax.set_xlabel(paramLabels[param], fontsize=labelsize, fontweight='bold')
+    life_ax.tick_params(axis='both', which='major', labelsize=ticksize, direction='in')
+    life_ax.set_title(r"Gopher Lifespan" + "\n" + r"vs" + "\n" + paramLabels[param], fontsize=titlesize, fontweight='bold')
+    life_ax.legend(prop={"size":legendsize})
 
     food_ax.set(ylim=(0, 50))
-    food_ax.set_ylabel(r"Amount of Food Consumed", fontsize=10)
-    food_ax.set_xlabel(paramLabels[param], fontsize=10)
-    food_ax.tick_params(axis='both', which='major', labelsize=10, direction='in')
-    food_ax.set_title(r"Food Consumption" + "\n" + r"vs" + "\n" + paramLabels[param], fontsize=11)
-    food_ax.legend()
+    food_ax.set_ylabel(r"Amount of Food Consumed", fontsize=labelsize, fontweight='bold')
+    food_ax.set_xlabel(paramLabels[param], fontsize=labelsize, fontweight='bold')
+    food_ax.tick_params(axis='both', which='major', labelsize=ticksize, direction='in')
+    food_ax.set_title(r"Food Consumption" + "\n" + r"vs" + "\n" + paramLabels[param], fontsize=titlesize, fontweight='bold')
+    food_ax.legend(prop={"size":legendsize})
 
     n_food_ax.set(ylim=(0, 1))
-    n_food_ax.set_ylabel(r"Food Consumed Per Trap Survived", fontsize=10)
-    n_food_ax.set_xlabel(paramLabels[param], fontsize=10)
-    n_food_ax.tick_params(axis='both', which='major', labelsize=10, direction='in')
-    n_food_ax.set_title(r"Normalized Food Consumption" + "\n" + r"vs" + "\n" + paramLabels[param], fontsize=11)
-    n_food_ax.legend()
+    n_food_ax.set_ylabel(r"Food Consumed Per Trap Survived", fontsize=labelsize, fontweight='bold')
+    n_food_ax.set_xlabel(paramLabels[param], fontsize=labelsize, fontweight='bold')
+    n_food_ax.tick_params(axis='both', which='major', labelsize=ticksize, direction='in')
+    n_food_ax.set_title(r"Normalized Food Consumption" + "\n" + r"vs" + "\n" + paramLabels[param], fontsize=titlesize, fontweight='bold')
+    n_food_ax.legend(prop={"size":legendsize})
 
-    # for ax in status_axs:
-    #     ax.set(ylim=(0,100))
-    #     ax.set(xlim=(min(paramValues), max(paramValues)))
-    #     ax.set_ylabel(r"Gophers Status After 50 Traps (%)", fontsize=10)
-    #     ax.set_xlabel(paramLabels[param], fontsize=10)
-    #     ax.tick_params(axis='both', which='major', labelsize=10, direction='in')
-    #     ax.legend()
-    # status_ax1.set_title(r"Status vs " + paramLabels[param] + "\n" + r"With Intention", fontsize=11)
-    # status_ax2.set_title(r"Status vs " + paramLabels[param] + "\n" + r"Without Intention", fontsize=11)
-    plt.rc('text', usetex=True)
-    plt.show()
+    fig.tight_layout()
+    fig.savefig(param, bbox_inches='tight', pad_inches=0)
+    plt.close('all')
 
 
 
@@ -259,5 +233,5 @@ def statusOverTime(filename):
 
 #statusOverTime("standard.csv")
 
-linearRunGraph("c.csv", "probReal")
+linearRunGraph("ntwf2.csv", "nTrapsWithoutFood")
 
