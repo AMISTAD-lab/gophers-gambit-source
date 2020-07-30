@@ -109,7 +109,6 @@ function updateActiveStates()
 
 			// get image. Must use gridContainer, because otherwise we can't change the src attribute.
 			let image = gridContainer.children[getNth(cell) - 1].children[0]; // subtract 1 because .children returns an array.
-			image = undefined;
 			// make sure image exists first
 			if (image == undefined){
 				throw new Error("ERROR: Image is undefined");
