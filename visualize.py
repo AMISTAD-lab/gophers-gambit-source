@@ -1,5 +1,6 @@
 import numpy as np
 import shutil as sh 
+import experiment as exp
 
 newjsFileName = "animation/animation.js" # will write and read files in the animation folder.
 jsTemplateName = "animation/template.js"
@@ -23,3 +24,8 @@ def writeTojs(trapList):
     jsFile.write("trapList = " + str(trapList) + ";\n")
     jsFile.write("}")
     jsFile.close()
+
+
+# runs the animation.
+animationData = exp.simulate(exp.pref)[1] # returns list of initial board, active cells, gopher cells
+writeTojs(animationData) # write to the js file.
