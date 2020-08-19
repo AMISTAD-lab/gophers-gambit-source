@@ -29,7 +29,7 @@ def sampleRandomBoards(n):
     trapboards = []
     num_left = n
     while num_left > 0:
-        trap_stack = generateTrapStack(int(num_left / 0.21)) #just over 21% of traps are kept in general
+        trap_stack = generateTrapStack(int(num_left / 0.21)) #generally, just over 21% of traps remain after filtering
         new_boards = trapStackToTrapBoards(trap_stack)
         num_left -= len(new_boards)
         trapboards += new_boards
@@ -52,7 +52,7 @@ def generateTrapStack(n):
 def trapStackToTrapBoards(trap_stack):
     trapboard_list = []
     for trap_layer in trap_stack:
-        prob_keep = probKeep(trap_layer) # reduce prob over counting
+        prob_keep = probKeep(trap_layer) # correct probability distribution of traps, because generation method is simplified
         if np.random.binomial(n=1, p=prob_keep) == 1:
             cell_list = []
             for cell_info in trap_layer:

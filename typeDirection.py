@@ -1,7 +1,7 @@
 import enum
 
 class DirectionType(enum.Enum):
-    #based on pointing direction, which varies a little based on angle
+    #based on pointing direction, which depends on angle and rotation
     up = 0
     upperright = 1
     right = 2

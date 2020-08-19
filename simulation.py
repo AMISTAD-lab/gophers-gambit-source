@@ -37,6 +37,7 @@ def updateSimulation(trap, step):
     return gopherInfo, state
 
 def viewRun(initialboard, activeCells, gopherCells):
+    """view a simulation run step by step in terminal instead of with animation"""
     rowLength = len(initialboard[0])
     colLength = len(initialboard)
     active = lambda x,y,step: "A" if activeCells[step][y][x] == 1 else "I"

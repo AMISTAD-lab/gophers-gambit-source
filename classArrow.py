@@ -5,7 +5,6 @@ from typeRotation import *
 from classProjectile import *
 import algorithms as alg
 
-## this class constructs arrow like cells
 class Arrow(Cell):
     def __init__(self, x, y, ownerBoard, angleType, rotationType, thickType, active=False):
         endpoints = [(rotationType.value + 4) % 8]
@@ -20,7 +19,6 @@ class Arrow(Cell):
             self.active = False
 
     def launchProjectile(self, timeStep):
-        #figure out direction
         direction = alg.findDir(self.rotationType, self.angleType)
         #launch projectile
         Projectile(self.x, self.y, direction, self.thickType, self.ownerBoard, timeStep)

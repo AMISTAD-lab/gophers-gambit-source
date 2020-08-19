@@ -87,10 +87,8 @@ def linearRunGraph(filename, param):
     
     fig, axes = plt.subplots(1,3, figsize=(18,6.5))
     life_ax, food_ax, n_food_ax = axes.flat
-    #plt.tight_layout(rect=[0.05,0.05,0.90, 0.90], h_pad=1)
-    #fig.subplots_adjust(left=0.1, bottom=0.1, right=0.9, top=0.85, wspace=0.2, hspace=0)
 
-    for i in range(2):
+    for i in range(2): # change to 3 if including cautious (for pr graph)
         df = dfs[i]
         paramValues = []
 
@@ -230,8 +228,4 @@ def statusOverTime(filename):
 
     plt.rc('text', usetex=True)
     plt.show()
-
-#statusOverTime("standard.csv")
-
-linearRunGraph("ntwf2.csv", "nTrapsWithoutFood")
 

@@ -14,6 +14,5 @@ class Wire(c.Cell):
         """will be called once every time step from simulation"""
         if self.active and timeStep > self.activatedTimeStep:
             #do its thing if its active (and not same turn that it was activated) -- important so that this works independent of order of cells updating
-            #causes signal to not spread in some cells if continuous activation (i.e. gopher keeps standing on door), but this should never happen because we make the gopher move
             self.attemptTransfer(timeStep)
             self.active = False

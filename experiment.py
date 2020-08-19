@@ -9,7 +9,7 @@ import data as d
 pref = {
     "intention" : True, #if gopher has intention
     "cautious" : False, # only used if intention, fakes a FSC test to confirm intention > cautiousness
-    "defaultProbEnter" : 0.8, #probability of gopher entering trap (not intention)
+    "defaultProbEnter" : 0.8, #probability of gopher entering trap (not for intention)
     "probReal" : 0.2, #percentage of traps that are designed as opposed to random
     "nTrapsWithoutFood" : 4, #the amount of traps a gopher can survive without entering (due to starvation)
     "maxProjectileStrength" : 0.45, #thickWire strength
@@ -94,7 +94,7 @@ def createSeedListFromFile(filename):
     lineList = seedFile.readlines()
     seedFile.close()
     lineList = [x.strip("\n") for x in lineList]
-    lineList = lineList[:-1] # crop out extra line in file (hacky ik)
+    lineList = lineList[:-1]
 
     standardSeed = {
         "intention" : True,
@@ -234,5 +234,3 @@ def printProgressBar (iteration, total, prefix = 'Progress:', suffix = 'Complete
     # Print New Line on Complete
     if iteration == total: 
         print()
-
-#runCautious("cautious.csv", 1000)
