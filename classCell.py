@@ -23,6 +23,7 @@ class Cell(metaclass = ABCMeta):
         return str(self.cellType.name) + " " +str(self.active)
 
     def getBaseInfo(self):
+        """returns the string representation of a cell"""
         cellStr = str(self.cellType.value)
         cellStr += str(self.angleType.value)
         cellStr += str(self.thickType.value)
@@ -30,6 +31,9 @@ class Cell(metaclass = ABCMeta):
         return cellStr
     
     def activateCell(self, timeStep, inputEndpointIn):
+        """activates a cell
+        timestep: the current time step of the simulation
+        inputEndpointIn: the direction the signal came from"""
         self.activatedTimeStep = timeStep
         self.active = True
         self.inputEndpoint = inputEndpointIn
@@ -68,6 +72,7 @@ def getOppositeEndpoint(endpoint):
     return (endpoint + 4) % 8
 
 def getEndpoints(directionType, rotationType):
+    """returns the two endpoints of the cell (where connections are possible)"""
     startPoint = (rotationType.value + 4) % 8 #gets opposite direction
     endPoint = directionType.value
     return [startPoint, endPoint]

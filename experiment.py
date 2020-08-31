@@ -16,6 +16,7 @@ pref = {
 }
 
 def runExperiment(filename, inputToVary, numSimulations):
+    """runs the experiment on the indicated parameter input and saves the data to a csv"""
     inputfile = createExpInputFile(inputToVary)
     seedList = createSeedListFromFile(inputfile)
     allData = simulateManySetups(numSimulations, seedList)
@@ -59,6 +60,7 @@ def createExpInputFile(inputToVary):
 
 
 def runCautious(filename, numSimulations):
+    """runs the experiment but for cautious gophers"""
     inputfile = createCautious()
     seedList = createSeedListFromFile(inputfile)
     allData = simulateManySetups(numSimulations, seedList)
@@ -194,6 +196,7 @@ def simulate(pref):
     return data, trapInfo
 
 def expectedLethality(n, r):
+    """randomly samples n boards, runs each r times, and then returns the expected lethality calculated from the gopher entering"""
     lethal = 0.0
     traps = [t.Trap(3,4,False,trapboard) for trapboard in t.sampleRandomBoards(n)]
     total = len(traps)

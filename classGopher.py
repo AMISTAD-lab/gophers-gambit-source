@@ -24,6 +24,7 @@ class Gopher:
         self.thoughtReal = False
 
     def state(self):
+        """returns the state of the gopher as an integer"""
         if not self.alive:
             state = 0
         elif self.hit:
@@ -33,6 +34,7 @@ class Gopher:
         return state
 
     def updateCell(self):
+        """decides what the gopher should do and does it (named updateCell for ease in calling)"""
         if self.hit:
             self.hit = False
         if self.entering:
@@ -65,6 +67,7 @@ class Gopher:
                 self.left = True
 
     def enter(self):
+        """moves the gopher towards the center of the trap"""
         self.y -= 1
         if self.ownerBoard.board[self.y][self.x].cellType == CellType.food:
             self.eatingTimer = self.initialTimer
@@ -72,6 +75,7 @@ class Gopher:
             self.leaving = False
     
     def leave(self):
+        "moves the gopher to the exit of the trap"
         self.y += 1
         self.eatingTimer = 0
         if self.ownerBoard.board[self.y-1][self.x].cellType == CellType.door:
@@ -80,6 +84,7 @@ class Gopher:
             self.left = True
 
     def eat(self):
+        """has the gopher consume food, or leave if done eating"""
         self.eatingTimer -= 1
         if self.eatingTimer <= 0:
             self.hasEaten = True
@@ -87,12 +92,13 @@ class Gopher:
             self.entering = False
 
     def trapTriggered(self):
-        """called after a projectile lands"""
+        """tells gopher to leave once a projectile is fired"""
         self.leaving = True
         self.entering = False
 
     def hitByProjectile(self, projectile, timeStep):
-        """called when hit by a projectile"""
+        """determines if gopher is killed when hit by a projectile, 
+        and tells gopher to leave if still alive"""
         if np.random.binomial(1, projectile.strength) == 1:
             self.alive = False
         else:

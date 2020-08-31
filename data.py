@@ -37,12 +37,15 @@ def listStats(numList):
     return [avg, std, ci]
 
 def proportionStats(portion, total):
+    """returns the percentage and confidence interval of the portion"""
     p = portion / total
     ci = 196 * m.sqrt((p * (1-p))/total)
     p *= 100
     return p, (p-ci, p+ci)
 
 def filterDataFrame(data, filterlist):
+    """filters a data frame according to a filterlist
+    filterlist: [[param1, value], [param2, value] ...]"""
     data = copy.deepcopy(data)
     for param, value in filterlist:
         booleans = data[param] == value
@@ -50,6 +53,9 @@ def filterDataFrame(data, filterlist):
     return data
 
 def percentThoughtReal(filename, param):
+    """given the filename of a run including intention gophers, 
+    prints out the frequency that intention gophers thought traps 
+    were real (varying with the indicated parameter)"""
     data = pd.read_csv(filename)
     data = filterDataFrame(data, [["intention", True]])
     for val, group in data.groupby(param):
@@ -64,7 +70,8 @@ def percentThoughtReal(filename, param):
 
 
 def linearRunGraph(filename, param):
-    
+    """Saves a graph displaying information about the given parameter from the data in the given file"""
+
     labelsize = 18
     legendsize = 16
     titlesize = 19
@@ -174,6 +181,7 @@ def linearRunGraph(filename, param):
 
 
 def statusOverTime(filename):
+    """displays a graph with information about the lifes of intention and normal gophers"""
 
     data = pd.read_csv(filename)
     plt.style.use('ggplot')

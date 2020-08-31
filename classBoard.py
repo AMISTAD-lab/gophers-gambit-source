@@ -19,7 +19,7 @@ import math as m
 import algorithms as alg
 import designedTraps as dt
 
-
+#loads in the functional traps from the designedTraps file
 functionalTraps = dt.traps
 
 class Board(metaclass = ABCMeta):
@@ -34,6 +34,7 @@ class Board(metaclass = ABCMeta):
         return alg.formatMatrix(self.board)
 
     def saveState(self):
+        """returns a matrix of 1's and 0's representing whether each cell in the board is active"""
         activecells = self.emptyBoard(self.rowLength, self.colLength)
         for y in range(self.colLength):
             for x in range(self.rowLength):
@@ -41,6 +42,7 @@ class Board(metaclass = ABCMeta):
         return activecells
 
     def saveCells(self):
+        """returns a matrix of string representations for each cell in the board"""
         allcells = self.emptyBoard(self.rowLength, self.colLength)
         for y in range(self.colLength):
             for x in range(self.rowLength):
@@ -48,7 +50,8 @@ class Board(metaclass = ABCMeta):
         return allcells
 
     def emptyBoard(self, rowLength, colLength):  
-        """generates a board full of dirt for a default terrain"""
+        """generates a board full of dirt for a default terrain
+        note: terrains are no longer in use, and this serves as a default board"""
         board = []
         for y in range(colLength):
             row = []

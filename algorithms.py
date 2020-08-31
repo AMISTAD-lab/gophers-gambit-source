@@ -10,7 +10,7 @@ import csv
 import math as m
 
 def findDir(rotationType, angleType):
-    """returns the direction from our perspective (primarily for the arrow)"""
+    """returns the direction of a trap piece from our bottom-up perspective (primarily for the arrow)"""
 
     if(rotationType == RotationType.left):
         if(angleType == AngleType.lacute):
@@ -84,7 +84,8 @@ def findDir(rotationType, angleType):
         else:
             raise Exception("Error: angleType doesn't exist")
 
-def formatMatrix(matrix):  
+def formatMatrix(matrix):
+    """returns a string representation of the matrix that can then be printed"""  
     string = ""
     colLength = len(matrix)
     rowLength = len(matrix[0])
@@ -95,12 +96,14 @@ def formatMatrix(matrix):
     return string
 
 def flatten(l):
+    """turns a matrix (list of lists) into a single list"""
     return [item for sublist in l for item in sublist]
 
-
+#Defining pieces necessary for fsc
 TOTAL = 427929800129788411
 r = TOTAL * (1 + m.log(TOTAL))
 p = 1 / TOTAL
+#These are the frequencies of varying levels of coherence
 f_g = {
     (0.0, 1.0) : 427929800129788411 / TOTAL,
     (1.0, 9.0) : 354394707075243198 / TOTAL,
@@ -135,6 +138,8 @@ f_g = {
 }
 
 def functional_specified_complexity(connectionTuple):
+    """returns the fsc (surprisal) of a given traps' connection tuple
+    connection tuple: (numerator, denominator) of the simplified fraction for valid connections / wire and arrow pieces"""
     global r
     global p
     v = 1 / f_g[connectionTuple]
@@ -143,12 +148,15 @@ def functional_specified_complexity(connectionTuple):
     return fsc
 
 def isTrap(trap, sigVal=13.29):
+    """given a trap and a significant value, determines whether the trap is coherent enough to be considered designed"""
     connectionTuple = connectionsPerPiece(trap)
     if functional_specified_complexity(connectionTuple) >= sigVal:
         return True
     else:
         return False
 
+#the historical frequencies of intention gophers entering traps
+#to be used for the cautious gopher
 intentionEnter = {
     "0.0" : 0.0,
     "0.05" : 0.04988481269964185,
@@ -174,10 +182,13 @@ intentionEnter = {
 }
 
 def cautious(trap, probReal):
+    """randomly determines whether the trap is real given a probability
+    for the cautious gopher's entering algorithm"""
     realTrap = np.random.binomial(n=1, p=intentionEnter[str(probReal)])
     return realTrap
 
 def connectionsPerPiece(trap):
+    """given a trap, returns its connection tuple (the simplified fraction for valid connections / wire and arrow pieces)"""
     connections = totalConnections(trap)
     if connections == 0:
         return (0, 1.0)
@@ -203,8 +214,7 @@ def simplifyRatioTuple(num, denom):
 	return (num, denom) 
 
 
-usedCells = []
-
+usedCells = [] #initializing usedCells as a global variable for use in several following methods
 def totalConnections(trap):
     """
     returns how many connections a trap has
@@ -244,7 +254,7 @@ def checkConnection(cell, endpoint):
     
 def gopherEatTimer(probEnter):
     """
-    assigns probs for timer based on gopher's detection of threat.
+    decides how long the gopher should eat based on the gopher's detection of threat.
     """
     idealTimer = probEnter * 5
     initialProbs = [0.05, 0.05, 0.05, 0.05, 0.05]

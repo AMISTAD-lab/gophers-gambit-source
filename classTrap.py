@@ -10,6 +10,8 @@ import algorithms as alg
 
 class Trap(Board):
     def __init__(self, rowLength, colLength, functional, chosenBoard=None):
+        """initializes a trap with a real or random trap (based on functional) or with a given board
+        dimensions are always row=3 col=4 for our experiment, and the random generation methods are all for 3x4"""
         self.func = functional
         super().__init__(rowLength, colLength)
         if chosenBoard:
@@ -20,12 +22,14 @@ class Trap(Board):
             self.board = self.randomBoard()
 
     def randomBoard(self):
+        """sets own board to a random trap"""
         trapboard = sampleRandomBoards(1)[0]
         for cell in alg.flatten(trapboard):
             cell.ownerBoard = self
         return trapboard
 
 def sampleRandomBoards(n):
+    """returns a list of randomly generated traps"""
     trapboards = []
     num_left = n
     while num_left > 0:
@@ -37,6 +41,7 @@ def sampleRandomBoards(n):
     return trapboards
 
 def generateTrapStack(n):
+    """randomly generates traps in numpy stack form"""
     num_cells = 9
     num_component_types = 9
     num_wire_thicknesses = 3
@@ -50,6 +55,7 @@ def generateTrapStack(n):
     return trap_stack
 
 def trapStackToTrapBoards(trap_stack):
+    """converts a given trap stack into a list of trap boards"""
     trapboard_list = []
     for trap_layer in trap_stack:
         prob_keep = probKeep(trap_layer) # correct probability distribution of traps, because generation method is simplified
@@ -63,6 +69,7 @@ def trapStackToTrapBoards(trap_stack):
     return trapboard_list
 
 def cellInfoToCell(cell_info):
+    """takes the representation of a cell (in a trap stacK) and returns the actual cell"""
     thickTypes = [ThickType.skinny, ThickType.normal, ThickType.wide]
     rotationTypes = [RotationType.up, RotationType.right, RotationType.down, RotationType.left]
     angleTypes = [AngleType.na, AngleType.lacute, AngleType.racute, AngleType.lright, AngleType.rright, AngleType.lobtuse, AngleType.robtuse, AngleType.lright, AngleType.straight]
@@ -80,6 +87,7 @@ def cellInfoToCell(cell_info):
             return Wire(0,0,None,angleType=angleType,rotationType=rotationType,thickType=thickType)
 
 def cellListToTrapBoard(cell_list):
+    """takes a list of cell objects and creates a trapboard"""
     trapboard = [
         [0, 0, 0],
         [0, Food(1,1,None), 0],
@@ -96,6 +104,7 @@ def cellListToTrapBoard(cell_list):
     return trapboard
 
 def probKeep(trap_layer):
+    """returns the probability that a trap should be kept, in order to fix the distribution of random trap generation"""
     num_floor = 0
     num_straight = 0
     for cell_info in trap_layer:

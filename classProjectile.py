@@ -17,7 +17,7 @@ class Projectile:
   
     def landProjectile(self, timeStep):
         """this method figures out where the projectile lands when moving in the given direction"""
-        s.gopher.trapTriggered()
+        s.gopher.trapTriggered() #tells gopher that trap has been triggered
         while self.x >= 0 and self.x < self.ownerBoard.rowLength and self.y >= 0 and self.y < self.ownerBoard.colLength:
             #while in bounds of trap
             if self.checkHitGopher(timeStep):
@@ -33,7 +33,7 @@ class Projectile:
     
 
     def checkHitGopher(self, timeStep):
-        """determines if the gopher has been hit""" 
+        """determines if the gopher has been hit and tells the gopher it has been hit if so""" 
         if self.x == s.gopher.x and self.y == s.gopher.y:
             s.gopher.hitByProjectile(self, timeStep)
             return True
