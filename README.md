@@ -1,3 +1,3 @@
-# AMISTAD-exp3
+# Source Code for "The Gopher's Gambit" by Hom et al.
 
-The code and data for our third experiment investigating the survival advantages of intention perception: The Gopher's Gambit
+The code for investigating the survival advantages of intention perception in the paper "The Gopher's Gambit" by Hom et al.
