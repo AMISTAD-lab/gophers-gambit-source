@@ -13,6 +13,7 @@ Created on June 23, 2020 by Cynthia Hom
 
 #gridContainer{
 	display: grid;
+	background-color: rgb(180, 180, 180); /* Reduces flickering effect */
 }
 
 #gopher{
@@ -28,6 +29,7 @@ Created on June 23, 2020 by Cynthia Hom
 	align-items: center;
 	/*border: 2px solid black;*/ /* Uncomment for grid lines */
 	position: relative;
+	/*background-color: rgb(180, 180, 180);*/ /* Reduces flickering effect */
 }
 
 .gridImage{
