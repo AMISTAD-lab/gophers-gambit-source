@@ -172,7 +172,7 @@ def linearRunGraph(filename, param):
     n_food_ax.legend(prop={"size":legendsize})
 
     fig.tight_layout()
-    fig.savefig(param, bbox_inches='tight', pad_inches=0)
+    fig.savefig(param + '.pdf', bbox_inches='tight', pad_inches=0)
     plt.close('all')
 
 
@@ -185,6 +185,7 @@ def statusOverTime(filename):
 
     data = pd.read_csv(filename)
     plt.style.use('ggplot')
+    # plt.rc('text', usetex=True)
     plt.rc('font', family='serif')
         
     df0 = filterDataFrame(data, [["intention", True]])
@@ -193,16 +194,18 @@ def statusOverTime(filename):
     dfs = [df0, df1]
     modes = [r"With Intention Perception", r"Without Intention Perception"]
 
-    fig, axes = plt.subplots(1,2)
-    status_axs = axes.flat
-
+    figs = []
+    axes = []
     for i in range(2):
+        figs.append(plt.figure(i + 1))
+        axes.append(plt.gca())
+
         x = [t for t in range(0, 50+1)]
         alive = [0]*51
         starved = [0]*51
         zapped = [0]*51
 
-        for index, gopher in dfs[i].iterrows():
+        for _, gopher in dfs[i].iterrows():
             numTraps = int(gopher["numTraps"])
             status = int(gopher["status"])
             for j in range(numTraps+1):
@@ -222,18 +225,21 @@ def statusOverTime(filename):
         print(alive[-1])
         print(starved[-1])
         print(zapped[-1])
-        status_axs[i].stackplot(x, alive, starved, zapped, colors=['#4FADAC', '#5386A6', '#2F5373'], labels=[r"Alive", r"Starved", r"Zapped"])
+        plt.stackplot(x, alive, starved, zapped, colors=['#4FADAC', '#5386A6', '#2F5373'], labels=[r"Alive", r"Starved", r"Zapped"])
 
-    for ax in status_axs:
+    for i, ax in enumerate(axes):
         ax.set(ylim=(0,100))
         ax.set(xlim=(0, 50))
         ax.set_ylabel(r"Gopher Status (%)", fontsize=10)
         ax.set_xlabel(r"Time (# of Traps Seen)", fontsize=10)
         ax.tick_params(axis='both', which='major', labelsize=10, direction='in')
+        ax.set_aspect(1.0/ax.get_data_ratio(), adjustable='box')
         ax.legend()
-    status_axs[0].set_title(r"Status Over Time" + "\n" + r"With Intention Perception", fontsize=11)
-    status_axs[1].set_title(r"Status Over Time" + "\n" + r"Without Intention Perception", fontsize=11)
+        ax.set_title(r"Status Over Time" + "\n" + modes[i], fontsize=11)
 
-    plt.rc('text', usetex=True)
-    plt.show()
+    for i, fig in enumerate(figs):
+        fig.tight_layout()
+        fig.savefig('stackplot{}.pdf'.format(i+1), bbox_inches='tight', pad_inches=0)
+    
+    plt.close('all')
 
